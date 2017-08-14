@@ -1,12 +1,25 @@
 language: rust
 rust:
-  - nightly
+  - nightly-2017-08-13
 
-script:
-  - ci/run-all.sh
+services:
+  - postgresql
 
-# speeds up travis build (I guess)
-git:
-  depth: 1
+before_install:
+  - npm install -g less
+  # install diesel_cli if it's not cached
+  - hash diesel 2>/dev/null || cargo install -f diesel_cli
+
+before_script:
+  - cp ci/.env.travis .env
+  - diesel setup
+
+env:
+  - RUSTFLAGS="--deny warnings"
+
+script: |
+  ci/check-basic-style.sh && \
+  cargo build --verbose && \
+  cargo test --verbose
 
 cache: cargo
