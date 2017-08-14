@@ -3,4 +3,10 @@ name = "luten"
 version = "0.1.0"
 authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>"]
 
+[profile.dev]
+codegen-units = 4
+
 [dependencies]
+rocket = "0.3.1"
+rocket_codegen = "0.3.1"
+rocket_contrib = { version = "0.3.1", features = ["tera_templates"] }
