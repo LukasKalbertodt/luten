@@ -71,6 +71,7 @@ fn main() {
 
             login::routes::login_form,
             login::routes::validate_data,
+            login::routes::logout,
         ])
         .catch(errors![
             special_routes::unauthorized,

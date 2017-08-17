@@ -122,4 +122,25 @@ impl Session {
                     .map(|user| AuthUser::new(user, session))
             })
     }
+
+    /// Ends a login session, removing the entry from the database and removing
+    /// the cookie.
+    ///
+    /// This function assumes the user was authenticated via session cookie.
+    pub fn destroy(self, mut cookies: Cookies, db: &Db) {
+        // Since we assume the user was authenticated via session id, we know
+        // the cookie jar contains such a cookie and the cookie is a valid
+        // hex string.
+        let session_id = hex::decode(
+            cookies.get(config::SESSION_COOKIE_NAME).unwrap().value()
+        ).unwrap();
+
+        // Remove from database.
+        diesel::delete(sessions::table.find(session_id))
+            .execute(&*db.conn())
+            .expect("failed to delete session entry from database");
+
+        // Remove from cookie jar.
+        cookies.remove(Cookie::named(config::SESSION_COOKIE_NAME));
+    }
 }

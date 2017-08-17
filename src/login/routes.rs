@@ -54,14 +54,14 @@ fn validate_data(
     }
 }
 
-// /// Handler to logout the user. If there is no login present, nothing happens.
-// #[get("/logout")]
-// fn logout(cookies: &Cookies, user: Option<AuthUser>, db: State<Db>) -> Redirect {
-//     if let Some(user) = user {
-//         user.end_session(&cookies, &db);
-//     }
-//     Redirect::to("/")
-// }
+/// Handler to logout the user. If there is no login present, nothing happens.
+#[get("/logout")]
+fn logout(auth_user: Option<AuthUser>, cookies: Cookies, db: State<Db>) -> Redirect {
+    if let Some(auth_user) = auth_user {
+        auth_user.destroy_session(cookies, &db);
+    }
+    Redirect::to("/")
+}
 
 #[derive(FromForm)]
 struct LoginForm {

@@ -1,6 +1,6 @@
 use diesel::prelude::*;
 use rocket::{Outcome, State};
-use rocket::http::Status;
+use rocket::http::{Cookies, Status};
 use rocket::request::{self, FromRequest, Request};
 use std::ops::Deref;
 
@@ -59,6 +59,10 @@ pub struct AuthUser {
 impl AuthUser {
     pub fn new(user: User, session: Session) -> Self {
         Self { user, session }
+    }
+
+    pub fn destroy_session(self, cookies: Cookies, db: &Db) {
+        self.session.destroy(cookies, db);
     }
 
     // /// Ends a login session, removing the entry from the database and removing
