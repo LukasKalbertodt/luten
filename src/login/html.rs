@@ -6,8 +6,8 @@ pub fn content() -> Markup {
             h2 "Einloggen"
             hr;
             form method="post" action="/login" class="basgit-form" {
-                input type="text" name="id" placeholder="Username or email address";
-                input type="password" name="password" placeholder="Password";
+                input type="text" name="id" placeholder="Nutzerkennung";
+                input type="password" name="secret" placeholder="Password";
                 input type="submit" value="Login";
             }
 

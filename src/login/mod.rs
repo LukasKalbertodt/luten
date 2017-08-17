@@ -1,68 +1,125 @@
-// use model::AuthUser;
-// use context::Context;
-// use db::Db;
+use chrono::DateTime;
+use chrono::offset::Utc;
+use diesel::prelude::*;
+use diesel;
+use hex;
+use rand::{self, Rng};
+use rocket::http::{Cookie, Cookies};
 
-
+use user::{AuthUser, User};
+use db::Db;
+use db::schema::{sessions, users};
+use config;
 
 pub mod routes;
 mod html;
+mod provider;
+
+use self::provider::Provider;
+
+
+
+pub fn login(
+    username: &str,
+    secret: &[u8],
+    provider: &Provider,
+    cookies: Cookies,
+    db: &Db,
+) -> Result<AuthUser, LoginError> {
+    // Find the user with the given username.
+    let user = match User::from_username(username, db) {
+        Some(u) => u,
+        None => return Err(LoginError::UserNotFound),
+    };
+
+    // Try to authenticate with the given provider. If it fails, we return an
+    // error.
+    provider.auth(username, secret, db)?;
+
+    // Create a session in the database and set it as cookie.
+    let session = Session::create_for(&user, cookies, db);
+
+    Ok(AuthUser::new(user, session))
+}
+
+
+pub enum LoginError {
+    /// There is not user with the given username.
+    UserNotFound,
+
+    /// A user was found, but the given password/secret is not correct.
+    SecretIncorrect,
+
+    /// A user was found, but cannot be authenticated with this provider.
+    ProviderNotValid,
+}
 
 
 
 
-// /// The main login page showing a login form.
-// ///
-// /// We might want to embed a smaller form into another route (the index page
-// /// for example), but this route will still be available.
-// #[get("/login", rank = 3)]
-// fn without_login(flash: Option<FlashMessage>) -> Template {
-//     let context = Context {
-//         flash: flash.map(|f| f.into()),
-//         .. Context::empty()
-//     };
-//     Template::render("login", &context)
-// }
+#[derive(Debug, Clone, Eq, PartialEq, Identifiable, Queryable, Associations)]
+// #[belongs_to(User)]
+pub struct Session {
+    pub id: Vec<u8>,
+    pub user_id: i64,
+    pub birth: DateTime<Utc>,
+}
 
-// /// Handler in case the `/login` page is access although the user is already
-// /// logged in. We just redirect to the index page.
-// #[get("/login")]
-// fn with_login(_user: AuthUser) -> Redirect {
-//     // TODO: GitHub uses the 302 status code to redirect, but the `to()` method
-//     // uses the code 303. The rocket docs say 303 is preferred over 302, but
-//     // we should look for more information on this.
-//     Redirect::to("/")
-// }
+impl Session {
+    pub fn create_for(user: &User, mut cookies: Cookies, db: &Db) -> Self {
+        // Generate a random session id.
+        let mut id = [0u8; config::SESSION_ID_LEN];
+        let mut rng = rand::os::OsRng::new()
+            .expect("could not use system rng");
+        rng.fill_bytes(&mut id);
 
-// /// Handles post data from a login action.
-// #[post("/login", data = "<form>")]
-// fn validate_data(
-//     cookies: &Cookies,
-//     form: Form<LoginForm>,
-//     db: State<Db>,
-// ) -> Result<Redirect, Flash<Redirect>> {
-//     let form = form.into_inner();
-//     match AuthUser::login(&form.id, &form.password, &db) {
-//         Ok(mut user) => {
-//             user.create_session(&cookies, &db);
-//             Ok(Redirect::to("/"))
-//         }
-//         Err(e) => {
-//             Err(Flash::error(Redirect::to("/login"), e.description()))
-//         }
-//     }
-// }
+        // Insert session id linked with the user id into the database.
+        #[derive(Debug, Clone, Eq, PartialEq, Insertable)]
+        #[table_name = "sessions"]
+        pub struct NewSession {
+            pub id: Vec<u8>,
+            pub user_id: i64,
+        }
 
-// /// Handler to logout the user. If there is no login present, nothing happens.
-// #[get("/logout")]
-// fn logout(cookies: &Cookies, user: Option<AuthUser>, db: State<Db>) -> Redirect {
-//     if let Some(user) = user {
-//         user.end_session(&cookies, &db);
-//     }
-//     Redirect::to("/")
-// }
+        let new_session = NewSession {
+            id: id.to_vec(),
+            user_id: user.id(),
+        };
+        let inserted_session = diesel::insert(&new_session)
+            .into(sessions::table)
+            .get_result::<Session>(&*db.conn())
+            .unwrap();
 
-// #[derive(FromForm)]
-// struct LoginForm {
-//     id: String,
-//     password: String,
-// }
+        // Encode session id as hex and set it as cookie.
+        let encoded = hex::encode(&id);
+        cookies.add(Cookie::new(config::SESSION_COOKIE_NAME, encoded));
+
+        inserted_session
+    }
+
+    pub fn verify(cookies: Cookies, db: &Db) -> Option<AuthUser> {
+        cookies.get(config::SESSION_COOKIE_NAME)
+            .and_then(|cookie| hex::decode(cookie.value()).ok())
+            .and_then(|session_id| {
+
+                if session_id.len() != config::SESSION_ID_LEN {
+                    return None;
+                }
+
+                // Try to find session id and the associated user.
+                sessions::table
+                    .find(session_id)
+                    .first::<Session>(&*db.conn())
+                    .optional()
+                    .unwrap()
+            })
+            .and_then(|session| {
+                users::table
+                    .find(session.user_id)
+                    .first::<User>(&*db.conn())
+                    .optional()
+                    .unwrap()
+                    .map(|user| AuthUser::new(user, session))
+            })
+    }
+}
