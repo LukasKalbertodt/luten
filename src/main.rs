@@ -7,6 +7,7 @@ extern crate chrono;
 extern crate dotenv;
 extern crate hex;
 extern crate maud;
+extern crate pwhash;
 extern crate r2d2;
 extern crate r2d2_diesel;
 extern crate rand;

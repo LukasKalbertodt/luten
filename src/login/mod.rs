@@ -21,7 +21,7 @@ use self::provider::Provider;
 
 pub fn login(
     username: &str,
-    secret: &[u8],
+    secret: &str,
     provider: &Provider,
     cookies: Cookies,
     db: &Db,
@@ -43,6 +43,7 @@ pub fn login(
 }
 
 
+#[derive(Debug)]
 pub enum LoginError {
     /// There is not user with the given username.
     UserNotFound,
@@ -51,7 +52,7 @@ pub enum LoginError {
     SecretIncorrect,
 
     /// A user was found, but cannot be authenticated with this provider.
-    ProviderNotValid,
+    ProviderNotUsable,
 }
 
 
@@ -98,6 +99,9 @@ impl Session {
     }
 
     pub fn verify(cookies: Cookies, db: &Db) -> Option<AuthUser> {
+        // TODO: once associations work again, use a join here instead of two
+        // queries.
+
         cookies.get(config::SESSION_COOKIE_NAME)
             .and_then(|cookie| hex::decode(cookie.value()).ok())
             .and_then(|session_id| {

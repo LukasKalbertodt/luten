@@ -41,15 +41,15 @@ fn validate_data(
     let form = form.into_inner();
     let login_provider = provider::Internal;
 
-    let res = login(&form.id, form.secret.as_bytes(), &login_provider, cookies, &db);
+    let res = login(&form.id, &form.secret, &login_provider, cookies, &db);
     match res {
         Ok(_) => {
             // TODO: redirect to the original request path
             Ok(Redirect::to("/"))
         }
-        Err(_) => {
+        Err(e) => {
             // TODO: proper error message
-            Err(Flash::error(Redirect::to("/login"), "kaputt"))
+            Err(Flash::error(Redirect::to("/login"), format!("{:?}", e)))
         }
     }
 }
