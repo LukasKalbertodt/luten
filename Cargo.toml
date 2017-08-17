@@ -7,6 +7,7 @@ authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>"]
 codegen-units = 4
 
 [dependencies]
+maud = { version = "0.17", features = ["rocket"] }
 rocket = "0.3.1"
 rocket_codegen = "0.3.1"
-rocket_contrib = { version = "0.3.1", features = ["tera_templates"] }
+rocket_contrib = "0.3.1"
