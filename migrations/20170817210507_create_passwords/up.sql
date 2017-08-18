@@ -6,6 +6,6 @@ create table passwords (
             on update cascade,
 
     -- bcrypt hash string
-    password char(60)
+    hash char(60)
         not null
 );

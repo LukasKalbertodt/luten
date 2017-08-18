@@ -6,9 +6,9 @@ use rocket::State;
 
 use db::Db;
 use super::{html, login};
-use login::provider;
 use template::Page;
 use user::AuthUser;
+use password;
 
 
 #[get("/login")]
@@ -39,7 +39,7 @@ fn validate_data(
     db: State<Db>,
 ) -> Result<Redirect, Flash<Redirect>> {
     let form = form.into_inner();
-    let login_provider = provider::Internal;
+    let login_provider = password::InternalProvider;
 
     let res = login(&form.id, &form.secret, &login_provider, cookies, &db);
     match res {

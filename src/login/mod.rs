@@ -13,9 +13,12 @@ use config;
 
 pub mod routes;
 mod html;
-mod provider;
 
-use self::provider::Provider;
+
+/// A login-provider. Is able to authenticate a user.
+pub trait Provider {
+    fn auth(&self, username: &str, secret: &str, db: &Db) -> Result<User, LoginError>;
+}
 
 
 

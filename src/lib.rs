@@ -18,6 +18,7 @@ extern crate rocket_contrib;
 pub mod config;
 pub mod db;
 pub mod login;
+pub mod password;
 pub mod special_routes;
 pub mod template;
 pub mod user;
@@ -43,6 +44,8 @@ pub mod dummy {
                 (format!("{:?}", user))
                 br;
                 a href="/dummy" "Dummy page"
+                br;
+                a href="/logout" "Logout"
             })
             .render()
     }

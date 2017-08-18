@@ -35,6 +35,24 @@ impl User {
             .unwrap()
     }
 
+    pub fn create(username: String, name: Option<String>, db: &Db) -> Self {
+        use diesel;
+
+        #[derive(Debug, Clone, Eq, PartialEq, Insertable)]
+        #[table_name = "users"]
+        struct NewUser {
+            pub username: String,
+            pub name: Option<String>,
+        }
+
+        let new_user = NewUser { username, name };
+
+        diesel::insert(&new_user)
+            .into(users::table)
+            .get_result::<User>(&*db.conn())
+            .unwrap()
+    }
+
     pub fn id(&self) -> i64 {
         self.id
     }
