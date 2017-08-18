@@ -15,14 +15,15 @@ extern crate rocket;
 extern crate rocket_contrib;
 
 
-mod config;
-mod db;
-mod login;
-mod special_routes;
-mod template;
-mod user;
+pub mod config;
+pub mod db;
+pub mod login;
+pub mod special_routes;
+pub mod template;
+pub mod user;
 
-mod dummy {
+
+pub mod dummy {
     use rocket::State;
     use maud::{html, Markup};
 
@@ -59,7 +60,7 @@ mod dummy {
     }
 }
 
-fn main() {
+pub fn start_server() {
     use db::Db;
 
     rocket::ignite()
