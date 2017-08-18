@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="https://unpkg.com/blaze">
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <title>Login - Testatverwaltung</title>
+</head>
+<body class="c-text">
+
+<header>
+  <nav class="c-nav c-nav--inline">
+    <span class="c-nav__content nav-brand">Testatverwaltung</span>
+    <span class="c-nav__item c-nav__item--active">Terminfindung</span>
+    <span class="c-nav__item">Hilfe</span>
+    <span class="c-nav__item c-nav__item--right c-nav__item--info">Account</span>
+  </nav>
+</header>
+<main class="o-container o-container--large u-pillar-box--small">
+  <div class="o-container o-container--small u-small u-letter-box--medium">
+    <div class="c-card">
+      <header class="c-card__header">
+        <h2 class="c-heading">Status: Terminfindung</h2>
+      </header>
+      <div class="c-card__body">
+        <ul class="c-list c-list--unstyled">
+          <li class="c-list__item">Terminfindung endet am <strong>So, 29.10.</strong></li>
+          <li>Dein Status: <strong>Noch keinen Termin ausgewählt!</strong></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="c-tabs">
+    <div class="c-tabs__headings tab-heading">
+      <div class="c-tab-heading c-tab-heading--active">Übersicht</div>
+      <div class="c-tab-heading">Terminwahl</div>
+    </div>
+    <div class="c-tabs__tab c-tabs__tab--active tab-content">
+      <section>
+        <h3 class="c-heading">Partner</h3>
+        <div class="o-grid o-grid--xsmall-full o-grid--small-full o-grid--medium-full">
+          <div class="o-grid__cell o-grid__cell--width-fixed flex-right c-card u-window-box--small">
+            <h3 class="c-heading">Hinweise:</h4>
+            Du kannst dir entweder einen Zufallspartner zuweisen lassen oder einen Kommilitonen angeben, den du gerne als Partner hättest.
+          </div>
+          <div class="o-grid__cell o-grid__cell--width-60">
+            <fieldset class="o-fieldset">
+              <label class="c-field c-field--choice">
+                <input type="radio" name="optionsRadios">
+                Zufallspartner
+              </label>
+              <label class="c-field c-field--choice">
+                <input type="radio" name="optionsRadios">
+                Partner auswählen
+              </label>
+            </fieldset>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h3 class="c-heading">Bevorzugte Sprache</h3>
+        <div class="o-grid o-grid--xsmall-full o-grid--small-full o-grid--medium-full">
+          <div class="o-grid__cell o-grid__cell--width-fixed flex-right c-card u-window-box--small">
+            <h3 class="c-heading">Hinweise:</h4>
+            Wenn du der Deutschen Sprache nicht mächtig bist, kannst du hier festlegen, dass du lieber ein Testat auf Englisch möchtest.
+          </div>
+          <div class="o-grid__cell o-grid__cell--width-60">
+            <fieldset class="o-fieldset">
+              <label class="c-field c-field--choice">
+                <input type="radio" name="optionsRadios" checked>
+                Deutsch
+              </label>
+              <label class="c-field c-field--choice">
+                <input type="radio" name="optionsRadios">
+                Englisch
+              </label>
+            </fieldset>
+          </div>
+        </div>
+      </section>
+    </div>
+    <div class="c-tabs__tab">This is tab two</div>
+  </div>
+
+  <div class="foot-spacer"></div>
+
+</main>
+
+</body>
+</html>

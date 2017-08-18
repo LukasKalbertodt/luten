@@ -1,0 +1,26 @@
+.nav-brand {
+    font-weight: bold;
+}
+
+.tab-content {
+    // border: 1px solid hsla(0,0%,7%,.6);
+    box-shadow: 0 0 1px hsla(0,0%,7%,.6);
+}
+
+.foot-spacer {
+    height: 15px;
+}
+
+.tab-heading {
+    width: 50%;
+}
+
+.flex-right {
+    order: 0;
+}
+
+@media (min-width: 48em) {
+    .flex-right {
+        order: 2;
+    }
+}
