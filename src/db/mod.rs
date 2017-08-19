@@ -5,6 +5,8 @@ use r2d2_diesel::ConnectionManager;
 
 use std::env;
 
+use errors::*;
+
 pub mod schema;
 
 
@@ -30,7 +32,10 @@ impl Db {
     }
 
     /// Returns a DB connection.
-    pub fn conn(&self) -> PooledConnection<ConnectionManager<PgConnection>> {
-        self.pool.get().unwrap()
+    pub fn conn(&self) -> Result<PooledConnection<ConnectionManager<PgConnection>>> {
+        Ok(
+            self.pool.get()
+                .chain_err(|| "Timeout while obtaining a connection to the database")?
+        )
     }
 }

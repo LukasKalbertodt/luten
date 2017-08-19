@@ -5,6 +5,7 @@ use rocket::request::Form;
 use rocket::State;
 
 use db::Db;
+use errors::*;
 use super::{html, login};
 use template::Page;
 use user::AuthUser;
@@ -12,7 +13,7 @@ use password;
 
 
 #[get("/login")]
-fn login_form(auth_user: Option<AuthUser>) -> Result<Markup, Redirect> {
+fn login_form(auth_user: Option<AuthUser>) -> StdResult<Markup, Redirect> {
     match auth_user {
         // If the user is already logged in, we just forward them to the index
         // page. They shouldn't be able to see the login form. It's confusing.
@@ -37,7 +38,7 @@ fn validate_data(
     cookies: Cookies,
     form: Form<LoginForm>,
     db: State<Db>,
-) -> Result<Redirect, Flash<Redirect>> {
+) -> Result<StdResult<Redirect, Flash<Redirect>>> {
     let form = form.into_inner();
     let login_provider = password::InternalProvider;
 
@@ -45,22 +46,23 @@ fn validate_data(
     match res {
         Ok(_) => {
             // TODO: redirect to the original request path
-            Ok(Redirect::to("/"))
+            Ok(Ok(Redirect::to("/")))
         }
-        Err(e) => {
+        Err(Error(ErrorKind::LoginError(e), _)) => {
             // TODO: proper error message
-            Err(Flash::error(Redirect::to("/login"), format!("{:?}", e)))
+            Ok(Err(Flash::error(Redirect::to("/login"), format!("{:?}", e))))
         }
+        Err(other) => bail!(other),
     }
 }
 
 /// Handler to logout the user. If there is no login present, nothing happens.
 #[get("/logout")]
-fn logout(auth_user: Option<AuthUser>, cookies: Cookies, db: State<Db>) -> Redirect {
+fn logout(auth_user: Option<AuthUser>, cookies: Cookies, db: State<Db>) -> Result<Redirect> {
     if let Some(auth_user) = auth_user {
-        auth_user.destroy_session(cookies, &db);
+        auth_user.destroy_session(cookies, &db)?;
     }
-    Redirect::to("/")
+    Ok(Redirect::to("/"))
 }
 
 #[derive(FromForm)]

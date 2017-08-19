@@ -4,6 +4,7 @@ use pwhash::bcrypt;
 
 use db::schema::passwords;
 use db::Db;
+use errors::*;
 use login::{self, LoginError};
 use user::User;
 
@@ -16,22 +17,26 @@ pub struct Password {
 }
 
 impl Password {
-    pub fn create_for(user: &User, plain_pw: &str, db: &Db) -> Self {
-        let password = bcrypt::hash(plain_pw).unwrap();
-        let new = Self { user_id: user.id, hash: password };
+    pub fn create_for(user: &User, plain_pw: &str, db: &Db) -> Result<Self> {
+        let password = bcrypt::hash(plain_pw)?;
+        let new = Self {
+            user_id: user.id,
+            hash: password
+        };
 
         diesel::insert(&new)
             .into(passwords::table)
-            .get_result::<Self>(&*db.conn())
-            .unwrap()
+            .get_result::<Self>(&*db.conn()?)
+            .chain_err(|| "Error inserting a new password")?
+            .make_ok()
     }
 
-    pub fn load_of(user: &User, db: &Db) -> Option<Self> {
+    pub fn load(user: &User, db: &Db) -> Result<Option<Self>> {
         passwords::table
             .find(user.id)
-            .first::<Self>(&*db.conn())
-            .optional()
-            .unwrap()
+            .first::<Self>(&*db.conn()?)
+            .optional()?
+            .make_ok()
     }
 
     pub fn verify(&self, password: &str) -> bool {
@@ -43,18 +48,17 @@ impl Password {
 pub struct InternalProvider;
 
 impl login::Provider for InternalProvider {
-    fn auth(&self, username: &str, secret: &str, db: &Db) -> Result<User, LoginError> {
-        let user = User::from_username(username, db)
+    fn auth(&self, username: &str, secret: &str, db: &Db) -> Result<User> {
+        let user = User::from_username(username, db)?
             .ok_or(LoginError::UserNotFound)?;
 
-        let pw = Password::load_of(&user, db)
+        let pw = Password::load(&user, db)?
             .ok_or(LoginError::ProviderNotUsable)?;
 
         if pw.verify(secret) {
             Ok(user)
         } else {
-            Err(LoginError::SecretIncorrect)
+            bail!(LoginError::SecretIncorrect)
         }
-
     }
 }

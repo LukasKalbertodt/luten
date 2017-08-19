@@ -11,10 +11,12 @@ chrono = { version = "0.4", features = ["serde"] }
 clap = "2.26.0"
 diesel = { version = "0.15.0", features = ["postgres", "chrono"] }
 diesel_codegen = { version = "0.15.0", features = ["postgres"] }
-dotenv = "0.9.0"
+dotenv = "0.10.1"
+error-chain = "0.10"
 # Replace this with crates.io version once merged
 hex = { git = "https://github.com/LukasKalbertodt/rust-hex", branch = "bump-030" }
 maud = { version = "0.17", features = ["rocket"] }
+option-filter = "1.0"
 pwhash = "0.1.2"
 r2d2 = "0.7.3"
 r2d2-diesel = "0.15.0"
@@ -23,5 +25,6 @@ rocket = "0.3.1"
 rocket_codegen = "0.3.1"
 rocket_contrib = "0.3.1"
 rpassword = "1.0.2"
+term-painter = "0.2"
 # serde = "1.0.11"
 # serde_derive = "1.0.11"

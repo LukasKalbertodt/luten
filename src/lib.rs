@@ -5,8 +5,10 @@ extern crate chrono;
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_codegen;
 extern crate dotenv;
+#[macro_use] extern crate error_chain;
 extern crate hex;
 extern crate maud;
+extern crate option_filter;
 extern crate pwhash;
 extern crate r2d2;
 extern crate r2d2_diesel;
@@ -14,9 +16,12 @@ extern crate rand;
 extern crate rocket;
 extern crate rocket_contrib;
 
+#[macro_use]
+pub mod util;
 
 pub mod config;
 pub mod db;
+pub mod errors;
 pub mod login;
 pub mod password;
 pub mod special_routes;

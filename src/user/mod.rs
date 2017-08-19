@@ -1,3 +1,4 @@
+use diesel;
 use diesel::prelude::*;
 use rocket::{Outcome, State};
 use rocket::http::{Cookies, Status};
@@ -6,6 +7,7 @@ use std::ops::Deref;
 
 use db::Db;
 use db::schema::users;
+use errors::*;
 use login::Session;
 
 
@@ -25,19 +27,16 @@ pub struct User {
 }
 
 impl User {
-    pub fn from_username(username: &str, db: &Db) -> Option<Self> {
+    pub fn from_username(username: &str, db: &Db) -> Result<Option<Self>> {
         // Find the user with the given username.
         users::table
             .filter(users::username.eq(username))
-            .limit(1)
-            .first(&*db.conn())
-            .optional()
-            .unwrap()
+            .first(&*db.conn()?)
+            .optional()?
+            .make_ok()
     }
 
-    pub fn create(username: String, name: Option<String>, db: &Db) -> Self {
-        use diesel;
-
+    pub fn create(username: String, name: Option<String>, db: &Db) -> Result<Self> {
         #[derive(Debug, Clone, Eq, PartialEq, Insertable)]
         #[table_name = "users"]
         struct NewUser {
@@ -49,8 +48,8 @@ impl User {
 
         diesel::insert(&new_user)
             .into(users::table)
-            .get_result::<User>(&*db.conn())
-            .unwrap()
+            .get_result::<User>(&*db.conn()?)?
+            .make_ok()
     }
 
     pub fn id(&self) -> i64 {
@@ -79,30 +78,9 @@ impl AuthUser {
         Self { user, session }
     }
 
-    pub fn destroy_session(self, cookies: Cookies, db: &Db) {
-        self.session.destroy(cookies, db);
+    pub fn destroy_session(self, cookies: Cookies, db: &Db) -> Result<()> {
+        self.session.destroy(cookies, db)
     }
-
-    // /// Ends a login session, removing the entry from the database and removing
-    // /// the cookie.
-    // ///
-    // /// This function assumes the user was authenticated via session cookie.
-    // pub fn end_session(&self, cookies: &Cookies, db: &Db) {
-    //     // Since we assume the user was authenticated via session id, we know
-    //     // the cookie jar contains such a cookie and the cookie is a valid
-    //     // hex string.
-    //     let session_id = hex::decode(
-    //         cookies.find(SESSION_COOKIE_NAME).unwrap().value()
-    //     ).unwrap();
-
-    //     // Remove from database.
-    //     diesel::delete(sessions::table.find(session_id))
-    //         .execute(&*db.conn())
-    //         .expect("failed to delete session entry from database");
-
-    //     // Remove from cookie jar.
-    //     cookies.remove(SESSION_COOKIE_NAME);
-    // }
 }
 
 impl Deref for AuthUser {
@@ -114,18 +92,16 @@ impl Deref for AuthUser {
 
 
 impl<'a, 'r> FromRequest<'a, 'r> for AuthUser {
-    type Error = ();
+    type Error = Option<Error>;
 
     fn from_request(req: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
         // Obtain a DB pool.
         let db = req.guard::<State<Db>>().expect("cannot retrieve DB connection from request");
 
-        Session::verify(req.cookies(), &db)
-            .map(|auth_user| Outcome::Success(auth_user))
-            .unwrap_or(
-                Outcome::Failure(
-                    (Status::Unauthorized, ())
-                )
-            )
+        match Session::verify(req.cookies(), &db) {
+            Err(e) => Outcome::Failure((Status::InternalServerError, Some(e))),
+            Ok(Some(auth_user)) => Outcome::Success(auth_user),
+            Ok(None) => Outcome::Failure((Status::Unauthorized, None)),
+        }
     }
 }
