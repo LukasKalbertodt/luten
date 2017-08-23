@@ -9,9 +9,13 @@ use errors::*;
 use super::{html, login};
 use template::Page;
 use user::AuthUser;
-use password;
+use login::password;
 
 
+/// Shows a login form.
+///
+/// If this page is visited while logged in, the user is redirected to `/` to
+/// avoid potential confusion.
 #[get("/login")]
 fn login_form(auth_user: Option<AuthUser>) -> StdResult<Markup, Redirect> {
     match auth_user {
@@ -33,6 +37,9 @@ fn login_form(auth_user: Option<AuthUser>) -> StdResult<Markup, Redirect> {
 
 
 /// Handles post data from a login action.
+///
+/// Tries to login with the given data. Creates a login-session if the login-
+/// attempt was successful.
 #[post("/login", data = "<form>")]
 fn validate_data(
     cookies: Cookies,
@@ -40,6 +47,8 @@ fn validate_data(
     db: State<Db>,
 ) -> Result<StdResult<Redirect, Flash<Redirect>>> {
     let form = form.into_inner();
+
+    // TODO: this is temporary of course
     let login_provider = password::InternalProvider;
 
     let res = login(&form.id, &form.secret, &login_provider, cookies, &db);

@@ -1,3 +1,9 @@
+//! Module about webapp internal passwords.
+//!
+//! This web app can store passwords for users as well. This is usually only
+//! used for users in development or for dummy-users. Real users should
+//! probably be authenticated via LDAP or something like that.
+
 use diesel;
 use diesel::prelude::*;
 use pwhash::bcrypt;
@@ -8,6 +14,10 @@ use errors::*;
 use login::{self, LoginError};
 use user::User;
 
+
+/// A bcrypt-hashed password.
+///
+/// Passwords live in their own table and *not* in the `users` table.
 #[derive(Debug, Clone, Eq, PartialEq, Identifiable, Queryable, Associations, Insertable)]
 #[table_name = "passwords"]
 #[primary_key(user_id)]
@@ -17,6 +27,10 @@ pub struct Password {
 }
 
 impl Password {
+    /// Creates a password from the given plain password string for the given
+    /// user and inserts it into the database.
+    ///
+    /// Errors if the user already has a password.
     pub fn create_for(user: &User, plain_pw: &str, db: &Db) -> Result<Self> {
         let password = bcrypt::hash(plain_pw)?;
         let new = Self {
@@ -31,6 +45,8 @@ impl Password {
             .make_ok()
     }
 
+    /// Loads the password of the given user from the database. Returns `None`
+    /// if there is no password associated with this user.
     pub fn load(user: &User, db: &Db) -> Result<Option<Self>> {
         passwords::table
             .find(user.id)
@@ -39,6 +55,7 @@ impl Password {
             .make_ok()
     }
 
+    /// Check if the given plain password matches this hashed password.
     pub fn verify(&self, password: &str) -> bool {
         bcrypt::verify(password, &self.hash)
     }

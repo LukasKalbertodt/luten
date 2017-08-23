@@ -1,3 +1,13 @@
+//! Command line utility to interact with the database used by the web app.
+//!
+//! We don't have anything as fancy as `$ rails c`, but we can write our own
+//! little utility for managing entities in our database.
+//!
+//! For more information on how to use this, execute:
+//!
+//! ```none
+//! $ cargo run --bin manage_db -- -h
+//! ```
 #[macro_use] extern crate clap;
 extern crate diesel;
 extern crate luten;
@@ -20,7 +30,7 @@ use luten::user::User;
 
 
 fn main() {
-    // Define CLI and parse arguments
+    // Define CLI and parse arguments.
     let matches = App::new("manage_db")
         .about("Manage entities in the luten database")
         .setting(AppSettings::SubcommandRequired)
@@ -125,7 +135,7 @@ fn list(util: &Util, matches: &ArgMatches, db: &Db) -> Result<()> {
     match matches.subcommand_name().unwrap() {
         "users" => do_list!(users::table, luten::user::User),
         "sessions" => do_list!(sessions::table, luten::login::Session),
-        "passwords" => do_list!(passwords::table, luten::password::Password),
+        "passwords" => do_list!(passwords::table, luten::login::password::Password),
         _ => unreachable!(),
     }
 
@@ -138,15 +148,15 @@ fn create(util: &Util, matches: &ArgMatches, db: &Db) -> Result<()> {
         "user" => {
             println!("+-- Data for new user:");
             let result = User::create(
-                read("username"),
-                read("name"),
+                read("username")?,
+                read("name")?,
                 db
             );
             println!("+-- Inserted:");
             util.debug_output(result);
         }
         "password" => {
-            use luten::password::Password;
+            use luten::login::password::Password;
 
             println!("### First, choose the user you want to create a password for!");
             let user = find_user(db)?;
@@ -172,13 +182,14 @@ fn create(util: &Util, matches: &ArgMatches, db: &Db) -> Result<()> {
     Ok(())
 }
 
+/// Lets the user interactively specify a user.
 fn find_user(db: &Db) -> Result<User> {
     loop {
         println!("Specify a user by providing:");
         println!(" - the user id in '#id' syntax (e.g. '#13'), or");
         println!(" - the username in '@username' syntax (e.g. '@xmuster')");
 
-        let line = read_trimmed_line();
+        let line = read_trimmed_line()?;
         match line.chars().next() {
             Some('#') => {
                 let user_id = match line[1..].parse::<i64>() {
@@ -202,7 +213,9 @@ fn find_user(db: &Db) -> Result<User> {
                 }
 
             }
-            Some('@') => {}
+            Some('@') => {
+                // TODO
+            }
             _ => {
                 println!("Invalid input! Use the syntax as described above!");
             }
@@ -215,10 +228,11 @@ fn find_user(db: &Db) -> Result<User> {
 // Helper types and functions
 // ==========================================================================
 
-fn read_trimmed_line() -> String {
+/// Reads one line from stdin and trims leading and trailing whitespace.
+fn read_trimmed_line() -> Result<String> {
     let mut out = String::new();
-    io::stdin().read_line(&mut out).unwrap();
-    out.trim().to_owned()
+    io::stdin().read_line(&mut out)?;
+    Ok(out.trim().to_owned())
 }
 
 /// A helper struct which holds the global config. Actions influenced by the
@@ -238,15 +252,14 @@ impl Util {
 }
 
 /// Reads a type from stdin with a proper message.
-fn read<T: FromStdin>(field_name: &str) -> T {
+fn read<T: FromStdin>(field_name: &str) -> Result<T> {
     loop {
         print!("| {} ({}): ", field_name, <T as FromStdin>::desc());
-        io::stdout().flush().unwrap();
+        io::stdout().flush()?;
 
-        let mut line = String::new();
-        io::stdin().read_line(&mut line).unwrap();
-        match T::from_input(line.trim()) {
-            Ok(v) => return v,
+        let line = read_trimmed_line()?;
+        match T::from_input(&line) {
+            Ok(v) => return Ok(v),
             Err(e) => println!("Input error: {}", e),
         }
     }

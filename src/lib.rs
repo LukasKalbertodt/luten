@@ -23,7 +23,6 @@ pub mod config;
 pub mod db;
 pub mod errors;
 pub mod login;
-pub mod password;
 pub mod special_routes;
 pub mod template;
 pub mod user;

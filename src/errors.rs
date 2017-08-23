@@ -1,5 +1,5 @@
 #![allow(unused_doc_comment)]
-/// ^ Otherwise, `error_chain!()` generates a warning :/
+// ^ Otherwise, `error_chain!()` generates a warning :/
 
 use diesel;
 use pwhash;

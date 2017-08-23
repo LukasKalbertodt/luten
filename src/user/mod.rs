@@ -98,7 +98,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for AuthUser {
         // Obtain a DB pool.
         let db = req.guard::<State<Db>>().expect("cannot retrieve DB connection from request");
 
-        match Session::verify(req.cookies(), &db) {
+        match Session::from_cookies(req.cookies(), &db) {
             Err(e) => Outcome::Failure((Status::InternalServerError, Some(e))),
             Ok(Some(auth_user)) => Outcome::Success(auth_user),
             Ok(None) => Outcome::Failure((Status::Unauthorized, None)),

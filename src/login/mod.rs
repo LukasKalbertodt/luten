@@ -1,3 +1,18 @@
+//! Everything related to the login- and session-system.
+//!
+//! Users need to be logged in for almost all routes in this web app. The user
+//! can choose between different *login providers* to login. There is one
+//! built-in login-provider: the simple password provider. See the module
+//! `password` for more information. Another good example is the LDAP-provider.
+//!
+//! In addition to the main functionality around login providers and the
+//! session-system, this module also provides routes for:
+//!
+//! - get `/login`
+//! - post `/login`
+//! - get `/logout`
+//!
+
 use chrono::DateTime;
 use chrono::offset::Utc;
 use diesel::prelude::*;
@@ -14,8 +29,9 @@ use db::schema::{sessions, users};
 use errors::*;
 use user::{AuthUser, User};
 
-pub mod routes;
 mod html;
+pub mod password;
+pub mod routes;
 
 
 /// A login-provider. Is able to authenticate a user.
@@ -24,7 +40,8 @@ pub trait Provider {
 }
 
 
-
+/// Tries to login a user with the given login provider. On success, creates a
+/// session and returns the authenticated user.
 pub fn login(
     username: &str,
     secret: &str,
@@ -45,7 +62,7 @@ pub fn login(
 
 #[derive(Debug)]
 pub enum LoginError {
-    /// There is not user with the given username.
+    /// There is no user with the given username.
     UserNotFound,
 
     /// A user was found, but the given password/secret is not correct.
@@ -77,14 +94,18 @@ impl StdError for LoginError {
 
 
 #[derive(Debug, Clone, Eq, PartialEq, Identifiable, Queryable, Associations)]
-// #[belongs_to(User)]
+// #[belongs_to(User)]  <-- TODO: the feature `proc_macros` clashes with the
+// "Association feature" of diesel. We can't use joins for now :/
 pub struct Session {
+    /// A binary string, `config::SESSION_ID_LEN` bytes long.
     pub id: Vec<u8>,
     pub user_id: i64,
     pub birth: DateTime<Utc>,
 }
 
 impl Session {
+    /// Creates a new session for the given user, inserts it into the database
+    /// and sets a session cookie.
     pub fn create_for(user: &User, mut cookies: Cookies, db: &Db) -> Result<Self> {
         // Generate a random session id.
         let mut id = [0u8; config::SESSION_ID_LEN];
@@ -92,7 +113,7 @@ impl Session {
             .chain_err(|| "Unable to use system RNG")?;
         rng.fill_bytes(&mut id);
 
-        // Insert session id linked with the user id into the database.
+        // Insert new session into the database.
         #[derive(Debug, Clone, Eq, PartialEq, Insertable)]
         #[table_name = "sessions"]
         pub struct NewSession {
@@ -115,7 +136,10 @@ impl Session {
         Ok(inserted_session)
     }
 
-    pub fn verify(cookies: Cookies, db: &Db) -> Result<Option<AuthUser>> {
+    /// Tries to retrieve a valid session from cookies. If no session cookie
+    /// exists, or if it has an invalid value, or if the session wasn't found
+    /// in the database, `None` is returned.
+    pub fn from_cookies(cookies: Cookies, db: &Db) -> Result<Option<AuthUser>> {
         // TODO: once associations work again, use a join here instead of two
         // queries.
 
