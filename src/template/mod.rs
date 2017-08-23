@@ -1,5 +1,5 @@
 use std::borrow::Cow;
-use maud::{html, Markup, Render};
+use maud::{html, DOCTYPE, Markup, Render};
 
 use config;
 use user::AuthUser;
@@ -90,7 +90,7 @@ impl Page {
 
     /// Finalize the page by rendering it into a `Markup` (basically a string).
     pub fn render(&self) -> Markup {
-        html! { html {
+        html! { (DOCTYPE) html {
             // ===============================================================
             // Start <head>
             // ===============================================================
