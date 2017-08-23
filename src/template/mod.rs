@@ -16,7 +16,7 @@ use user::AuthUser;
 /// All routes which return a standard HTML result, will look roughly like
 /// this:
 ///
-/// ```
+/// ```ignore
 /// use maud::{html, Markup};
 ///
 /// fn handler() -> Markup {

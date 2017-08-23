@@ -34,7 +34,7 @@ error_chain! {
 /// The problem is, that wrapping stuff into `Ok()` is sometimes really
 /// annoying if this stuff has multiple lines. Example:
 ///
-/// ```
+/// ```ignore
 /// Ok(
 ///     users::table
 ///         .filter(users::username.eq(username))
@@ -49,7 +49,7 @@ error_chain! {
 ///
 /// So instead, we can write this:
 ///
-/// ```
+/// ```ignore
 /// users::table
 ///     .filter(users::username.eq(username))
 ///     .first(&*db.conn()?)
