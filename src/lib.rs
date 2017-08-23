@@ -1,5 +1,7 @@
 #![feature(plugin, custom_derive, proc_macro)]
 #![plugin(rocket_codegen)]
+#![allow(unused_doc_comment)]
+// ^ Otherwise, `error_chain!` and `quick_error!` generate a warning :/
 
 extern crate chrono;
 #[macro_use] extern crate diesel;
@@ -10,6 +12,7 @@ extern crate hex;
 extern crate maud;
 extern crate option_filter;
 extern crate pwhash;
+#[macro_use] extern crate quick_error;
 extern crate r2d2;
 extern crate r2d2_diesel;
 extern crate rand;

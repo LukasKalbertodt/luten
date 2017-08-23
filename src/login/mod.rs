@@ -21,7 +21,6 @@ use hex;
 use option_filter::OptionFilterExt;
 use rand::{self, Rng};
 use rocket::http::{Cookie, Cookies};
-use std::fmt;
 
 use config;
 use db::Db;
@@ -60,36 +59,25 @@ pub fn login(
 }
 
 
-#[derive(Debug)]
-pub enum LoginError {
-    /// There is no user with the given username.
-    UserNotFound,
+quick_error! {
+    #[derive(Debug)]
+    pub enum LoginError {
+        /// There is no user with the given username.
+        UserNotFound {
+            description("the given user was not found")
+        }
 
-    /// A user was found, but the given password/secret is not correct.
-    SecretIncorrect,
+        /// A user was found, but the given password/secret is not correct.
+        SecretIncorrect {
+            description("the given secret is not correct")
+        }
 
-    /// A user was found, but cannot be authenticated with this provider.
-    ProviderNotUsable,
-}
-
-impl fmt::Display for LoginError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.description().fmt(f)
-    }
-}
-
-impl StdError for LoginError {
-    fn description(&self) -> &'static str {
-        use self::LoginError::*;
-
-        match *self {
-            UserNotFound => "the given user was not found",
-            SecretIncorrect => "the given secret is not correct",
-            ProviderNotUsable => "the given user cannot be authenticated with this provider",
+        /// A user was found, but cannot be authenticated with this provider.
+        ProviderNotUsable {
+            description("the given user cannot be authenticated with this provider")
         }
     }
 }
-
 
 
 
