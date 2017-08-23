@@ -6,7 +6,9 @@ services:
   - postgresql
 
 before_install:
-  - npm install -g less
+  # SCSS compiler
+  - gem install sass
+
   # install diesel_cli if it's not cached
   - hash diesel 2>/dev/null || cargo install -f diesel_cli
 
