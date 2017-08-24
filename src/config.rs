@@ -2,7 +2,7 @@
 ///
 /// This title is used in the HTML `<title>` tag, in the nav bar and
 /// potentially in a few other places.
-pub const WEBSITE_TITLE: &str = "Testatverwaltung";
+pub const WEBSITE_TITLE: &str = "Info-A Testate";
 
 /// The name for the cookie containing the session id.
 pub const SESSION_COOKIE_NAME: &str = "session";

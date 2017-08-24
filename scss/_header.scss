@@ -1,0 +1,10 @@
+.nav-title-box {
+    font-family: Courgette;
+    font-size: 22px;
+
+    // In the original nav classes, the height is given in "em". Since we want
+    // to increase the font size without enlarging the whole nav bar, we need
+    // to fix the size here.
+    height: 56px;
+    line-height: 56px;
+}

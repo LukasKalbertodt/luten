@@ -17,6 +17,7 @@ error-chain = "0.10"
 hex = { git = "https://github.com/LukasKalbertodt/rust-hex", branch = "bump-030" }
 maud = { version = "0.17", features = ["rocket"] }
 option-filter = "1.0"
+palette = "0.2"
 pwhash = "0.1.2"
 quick-error = "1"
 r2d2 = "0.7.3"

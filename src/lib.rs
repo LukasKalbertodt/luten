@@ -11,6 +11,7 @@ extern crate dotenv;
 extern crate hex;
 extern crate maud;
 extern crate option_filter;
+extern crate palette;
 extern crate pwhash;
 #[macro_use] extern crate quick_error;
 extern crate r2d2;
