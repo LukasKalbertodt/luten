@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 use maud::{html, DOCTYPE, Markup, Render};
+use rocket::request::FlashMessage;
 
 use config;
 use user::AuthUser;
@@ -35,6 +36,7 @@ use user::AuthUser;
 pub struct Page {
     title: Cow<'static, str>,
     nav_items: Vec<Cow<'static, str>>,
+    flashes: Vec<Flash>,
     auth_user: Option<AuthUser>,
     content: Markup,
 }
@@ -45,6 +47,7 @@ impl Page {
         Self {
             title: "".into(),
             nav_items: vec![],
+            flashes: vec![],
             auth_user: None,
             content: html!{},
         }
@@ -77,6 +80,24 @@ impl Page {
     /// generates the "Account" item in the nav bar, which is hidden otherwise.
     pub fn with_auth_user(&mut self, auth_user: &AuthUser) -> &mut Self {
         self.auth_user = Some(auth_user.clone());
+        self
+    }
+
+    /// Adds flashes to the page.
+    ///
+    /// A flash is a small box at the top of the page usually showing the
+    /// outcome of a recent action. There are "error", "warning", "success" and
+    /// "info" flashes, each with their individual color. For example, the
+    /// message on a failed login attempt is a flash.
+    ///
+    /// This method accepts anything that can be turned into an iterator which
+    /// yields elements that can be turned into a `Flash`. This conveniently
+    /// allows to pass `Option<rocket::FlashMessage>`!
+    pub fn add_flashes<I, T>(&mut self, flashes: I) -> &mut Self
+        where I: IntoIterator<Item=T>,
+              T: Into<Flash>,
+    {
+        self.flashes.extend(flashes.into_iter().map(|t| t.into()));
         self
     }
 
@@ -143,10 +164,95 @@ impl Page {
                     }
                 }
                 main class="o-container o-container--large u-pillar-box--small" {
+                    // Show all flashes
+                    div class="u-letter-box--small" {
+                        @for flash in &self.flashes {
+                            div class={"c-alert " (flash.kind.css_class())} {
+                                button class="c-button c-button--close" "×"
+                                (flash.content)
+                            }
+                        }
+                    }
+
+                    // The main content
                     (self.content)
                 }
             }
         } }
+    }
+}
+
+/// A small box at the top of the website.
+#[derive(Debug)]
+pub struct Flash {
+    content: Markup,
+    kind: FlashKind,
+}
+
+impl Flash {
+    pub fn info(content: Markup) -> Self {
+        Self {
+            kind: FlashKind::Info,
+            content,
+        }
+    }
+
+    pub fn success(content: Markup) -> Self {
+        Self {
+            kind: FlashKind::Success,
+            content,
+        }
+    }
+
+    pub fn warning(content: Markup) -> Self {
+        Self {
+            kind: FlashKind::Warning,
+            content,
+        }
+    }
+
+    pub fn error(content: Markup) -> Self {
+        Self {
+            kind: FlashKind::Error,
+            content,
+        }
+    }
+}
+
+impl From<FlashMessage> for Flash {
+    fn from(msg: FlashMessage) -> Self {
+        let kind = match msg.name() {
+            "success" => FlashKind::Success,
+            "warning" => FlashKind::Warning,
+            "error" => FlashKind::Error,
+            _ => FlashKind::Info,
+        };
+
+        Self {
+            kind,
+            content: html! { (msg.msg()) },
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum FlashKind {
+    Info,
+    Success,
+    Warning,
+    Error,
+}
+
+impl FlashKind {
+    fn css_class(&self) -> &'static str {
+        use self::FlashKind::*;
+
+        match *self {
+            Info => "c-alert--info",
+            Success => "c-alert--success",
+            Warning => "c-alert--warning",
+            Error => "c-alert--error",
+        }
     }
 }
 

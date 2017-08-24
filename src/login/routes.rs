@@ -1,7 +1,7 @@
 use maud::{Markup};
 use rocket::response::{Flash, Redirect};
 use rocket::http::Cookies;
-use rocket::request::Form;
+use rocket::request::{FlashMessage, Form};
 use rocket::State;
 
 use db::Db;
@@ -17,7 +17,10 @@ use login::password;
 /// If this page is visited while logged in, the user is redirected to `/` to
 /// avoid potential confusion.
 #[get("/login")]
-fn login_form(auth_user: Option<AuthUser>) -> StdResult<Markup, Redirect> {
+fn login_form(
+    auth_user: Option<AuthUser>,
+    flash: Option<FlashMessage>,
+) -> StdResult<Markup, Redirect> {
     match auth_user {
         // If the user is already logged in, we just forward them to the index
         // page. They shouldn't be able to see the login form. It's confusing.
@@ -28,6 +31,7 @@ fn login_form(auth_user: Option<AuthUser>) -> StdResult<Markup, Redirect> {
             let page = Page::empty()
                 .with_title("Login")
                 .with_content(html::content())
+                .add_flashes(flash)
                 .render();
 
             Ok(page)
