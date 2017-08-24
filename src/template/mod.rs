@@ -111,6 +111,8 @@ impl Page {
 
     /// Finalize the page by rendering it into a `Markup` (basically a string).
     pub fn render(&self) -> Markup {
+        let (title_fg, title_border) = title_colors();
+
         html! { (DOCTYPE) html {
             // ===============================================================
             // Start <head>
@@ -142,9 +144,16 @@ impl Page {
                 header {
                     nav class="c-nav c-nav--inline" {
                         // The title of the page in the nav bar (branding)
-                        span
+                        a
+                            href="/"
                             class="c-nav__content nav-title-box"
-                            style={"color: " (title_color())}
+                            style={
+                                "color: "
+                                (title_fg)
+                                ";"
+                                "border-right: 1px dashed "
+                                (title_border)
+                            }
                             (config::WEBSITE_TITLE)
 
                         // All given nav items
@@ -257,7 +266,7 @@ impl FlashKind {
 }
 
 /// Generates the color for the title in the nav bar.
-fn title_color() -> String {
+fn title_colors() -> (String, String) {
     use chrono::{self, Timelike};
     use palette::{Hsl, IntoColor};
 
@@ -265,22 +274,28 @@ fn title_color() -> String {
     let day_progress = {
         let now = chrono::offset::Local::now();
         let minutes_of_day = now.hour() * 60 + now.minute();
-        (minutes_of_day as f64) / (60.0 * 24.0)
+        (minutes_of_day as f32) / (60.0 * 24.0)
     };
 
-    let rgb_color = {
-        // Throughout the day we go from red to green to blue to red.
-        let hue = day_progress * 360.0;
+    fn hue_to_hex_rgb(hsl: Hsl) -> String {
+        let rgb = hsl.into_rgb();
 
-        // We want a completely saturated, rather bright color.
-        Hsl::new(hue.into(), 1.0, 0.9).into_rgb()
-    };
+        format!(
+            "#{:02x}{:02x}{:02x}",
+            (rgb.red * 255.0) as u8,
+            (rgb.green * 255.0) as u8,
+            (rgb.blue * 255.0) as u8,
+        )
+    }
 
+    // Throughout the day we go from red to green to blue to red.
+    let hue = day_progress * 360.0;
 
-    format!(
-        "#{:2x}{:2x}{:2x}",
-        (rgb_color.red * 255.0) as u8,
-        (rgb_color.green * 255.0) as u8,
-        (rgb_color.blue * 255.0) as u8,
-    )
+    // We want a completely saturated, rather bright color.
+    let text_color = Hsl::new(hue.into(), 1.0, 0.9);
+
+    // The border is less saturated and less bright.
+    let border_color = Hsl::new(hue.into(), 0.2, 0.5);
+
+    (hue_to_hex_rgb(text_color), hue_to_hex_rgb(border_color))
 }
