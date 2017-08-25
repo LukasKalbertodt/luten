@@ -1,8 +1,37 @@
+use login;
+
+
+// ===========================================================================
+// User facing options
+// ===========================================================================
+
 /// The main title of the website.
 ///
 /// This title is used in the HTML `<title>` tag, in the nav bar and
 /// potentially in a few other places.
 pub const WEBSITE_TITLE: &str = "Info-A Testate";
+
+/// A list of usable login providers.
+lazy_static! {
+    pub static ref LOGIN_PROVIDERS: Vec<login::ProviderEntry> = vec![
+        login::ProviderEntry {
+            id: "internal_password",
+            dev_only: true,
+            imp: Box::new(login::password::InternalProvider),
+        },
+        login::ProviderEntry {
+            id: "ldap",
+            dev_only: false,
+            imp: Box::new(login::ldap::Provider),
+        },
+    ];
+}
+
+
+
+// ===========================================================================
+// Internal options
+// ===========================================================================
 
 /// The name for the cookie containing the session id.
 pub const SESSION_COOKIE_NAME: &str = "session";

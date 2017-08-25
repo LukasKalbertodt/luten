@@ -29,13 +29,26 @@ use errors::*;
 use user::{AuthUser, User};
 
 mod html;
+pub mod ldap;
 pub mod password;
 pub mod routes;
 
 
 /// A login-provider. Is able to authenticate a user.
-pub trait Provider {
-    fn auth(&self, username: &str, secret: &str, db: &Db) -> Result<User>;
+pub trait Provider: 'static + Sync {
+    /// Returns a user facing name of the login provider.
+    // TODO: Pass in `Locale` to make it localized
+    fn name(&self) -> String;
+
+    /// Tries to authenticate with this provider.
+    fn auth(&self, id: &str, secret: &str, db: &Db) -> Result<User>;
+}
+
+
+pub struct ProviderEntry {
+    pub id: &'static str,
+    pub dev_only: bool,
+    pub imp: Box<Provider>,
 }
 
 

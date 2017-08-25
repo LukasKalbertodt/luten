@@ -9,6 +9,7 @@ extern crate chrono;
 extern crate dotenv;
 #[macro_use] extern crate error_chain;
 extern crate hex;
+#[macro_use] extern crate lazy_static;
 extern crate maud;
 extern crate option_filter;
 extern crate palette;
@@ -73,9 +74,16 @@ pub mod dummy {
 
 pub fn start_server() {
     use db::Db;
+    use rocket::fairing::AdHoc;
 
     rocket::ignite()
         .manage(Db::open_connection())
+        .attach(AdHoc::on_attach(|rocket| {
+            // Here we insert the Rocket environment as managed state to
+            // retrieve it later.
+            let env = rocket.config().environment;
+            Ok(rocket.manage(env))
+        }))
         .mount("/", routes![
             dummy::index,
             dummy::dummy,

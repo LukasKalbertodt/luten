@@ -65,8 +65,12 @@ impl Password {
 pub struct InternalProvider;
 
 impl login::Provider for InternalProvider {
-    fn auth(&self, username: &str, secret: &str, db: &Db) -> Result<User> {
-        let user = User::from_username(username, db)?
+    fn name(&self) -> String {
+        "Password (internal)".into()
+    }
+
+    fn auth(&self, id: &str, secret: &str, db: &Db) -> Result<User> {
+        let user = User::from_username(id, db)?
             .ok_or(LoginError::UserNotFound)?;
 
         let pw = Password::load(&user, db)?

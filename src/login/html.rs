@@ -1,6 +1,8 @@
 use maud::{html, Markup};
 
-pub fn content() -> Markup {
+use login::ProviderEntry;
+
+pub fn login_page(providers: &[&ProviderEntry]) -> Markup {
     html! {
         div class="o-grid o-grid--small-full u-letter-box--small" {
             // Empty grid cell to have a blank buffer on the side
@@ -42,6 +44,20 @@ pub fn content() -> Markup {
                                         name="secret"
                                         placeholder="Password";
                                     div class="c-hint" "Dein globales Uni-Password"
+                                }
+                            }
+
+                            // Login provider drop-down menu. It is hidden if
+                            // there is only one provider.
+                            div
+                                class="o-form-element"
+                                style=(if providers.len() == 1 { "display:none " } else { "" })
+                            {
+                                label class="c-label" for="login_provider" "Anmelden durch:"
+                                select class="c-field" name="login_provider" {
+                                    @for provider in providers {
+                                        option value=(provider.id) (provider.imp.name())
+                                    }
                                 }
                             }
 
