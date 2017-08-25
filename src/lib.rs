@@ -85,6 +85,8 @@ pub fn start_server() {
             login::routes::login_form,
             login::routes::validate_data,
             login::routes::logout,
+
+            user::routes::settings,
         ])
         .catch(errors![
             special_routes::unauthorized,

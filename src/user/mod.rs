@@ -11,6 +11,8 @@ use errors::*;
 use login::Session;
 
 
+pub mod routes;
+
 
 
 #[derive(Debug, Clone, Eq, PartialEq, Identifiable, Queryable, Associations)]
