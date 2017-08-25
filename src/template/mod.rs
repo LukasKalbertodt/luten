@@ -111,8 +111,6 @@ impl Page {
 
     /// Finalize the page by rendering it into a `Markup` (basically a string).
     pub fn render(&self) -> Markup {
-        let (title_fg, title_border) = title_colors();
-
         html! { (DOCTYPE) html {
             // ===============================================================
             // Start <head>
@@ -141,37 +139,7 @@ impl Page {
             // Start <body>
             // ===============================================================
             body class="c-text" {
-                header {
-                    nav class="c-nav c-nav--inline" {
-                        // The title of the page in the nav bar (branding)
-                        a
-                            href="/"
-                            class="c-nav__content nav-title-box"
-                            style={
-                                "color: "
-                                (title_fg)
-                                ";"
-                                "border-right: 1px dashed "
-                                (title_border)
-                            }
-                            (config::WEBSITE_TITLE)
-
-                        // All given nav items
-                        @for item in &self.nav_items {
-                            span class="c-nav__item" (item)
-                        }
-
-                        // TODO: hide help?
-                        span class="c-nav__item" "Hilfe"
-
-                        // Show account entry if the user has been logged in
-                        @if let Some(ref auth_user) = self.auth_user {
-                            span class="c-nav__item c-nav__item--right c-nav__item--info" {
-                                "Account (" (auth_user.username()) ")"
-                            }
-                        }
-                    }
-                }
+                header (self.render_nav())
                 main class="o-container o-container--large u-pillar-box--small" {
                     // Show all flashes
                     div class="u-letter-box--small" {
@@ -188,6 +156,60 @@ impl Page {
                 }
             }
         } }
+    }
+
+    fn render_nav(&self) -> Markup {
+        let (title_fg, title_border) = title_colors();
+
+        html! {
+            nav class="c-nav c-nav--inline" {
+                // The title of the page in the nav bar (branding)
+                a
+                    href="/"
+                    class="c-nav__content nav-title-box"
+                    style={
+                        "color: "
+                        (title_fg)
+                        ";"
+                        "border-right: 1px dashed "
+                        (title_border)
+                    }
+                    (config::WEBSITE_TITLE)
+
+                // All given nav items
+                @for item in &self.nav_items {
+                    span class="c-nav__item" (item)
+                }
+
+                // // TODO: unhide help?
+                // span class="c-nav__item" "Hilfe"
+
+                // Show account entry if the user has been logged in
+                @if let Some(ref auth_user) = self.auth_user {
+                    div class="c-nav__item c-nav__item--right c-nav__item--info nav-account-box" {
+                        i class="fa fa-user" {}
+                        " Account (" (auth_user.username()) ")"
+                        ul class="nav-account-children c-nav" {
+                            @if let Some(name) = auth_user.name() {
+                                li class="c-nav__content u-centered c-text--loud" (name)
+                            }
+                            li class="c-nav__item" {
+                                a href="/settings" {
+                                    i class="fa fa-sliders" {}
+                                    " Einstellungen"
+                                }
+                            }
+                            li class="c-nav__item" {
+                                a href="/logout" {
+                                    i class="fa fa-sign-out" {}
+                                    " Logout"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

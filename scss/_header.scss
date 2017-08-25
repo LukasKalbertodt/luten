@@ -13,3 +13,38 @@
         text-decoration: underline dashed;
     }
 }
+
+.nav-account-box {
+    position: relative;
+
+    .nav-account-children {
+        min-width: 100%;
+        position: absolute;
+        top: auto;
+        right: 0;
+        display: none;
+
+        .c-nav__content {
+            font-variant: small-caps;
+        }
+
+        li {
+            list-style: none;
+            width: 100%;
+            padding: 0;
+
+            a {
+                padding: 0 1em;
+                color: white;
+                height: 100%;
+                width: 100%;
+                text-decoration: none;
+                display: inline-block;
+            }
+        }
+    }
+
+    &:hover>.nav-account-children {
+        display: block;
+    }
+}
