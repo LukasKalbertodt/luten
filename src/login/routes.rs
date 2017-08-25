@@ -71,11 +71,14 @@ fn validate_data(
 
 /// Handler to logout the user. If there is no login present, nothing happens.
 #[get("/logout")]
-fn logout(auth_user: Option<AuthUser>, cookies: Cookies, db: State<Db>) -> Result<Redirect> {
+fn logout(auth_user: Option<AuthUser>, cookies: Cookies, db: State<Db>) -> Result<Flash<Redirect>> {
     if let Some(auth_user) = auth_user {
         auth_user.destroy_session(cookies, &db)?;
     }
-    Ok(Redirect::to("/"))
+    Ok(Flash::success(
+        Redirect::to("/login"),
+        "Du wurdest erfolgreich ausgeloggt",
+    ))
 }
 
 #[derive(FromForm)]
