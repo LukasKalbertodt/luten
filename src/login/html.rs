@@ -1,8 +1,10 @@
 use maud::{html, Markup};
 
+use dict::{self, Locale};
 use login::ProviderEntry;
 
-pub fn login_page(providers: &[&ProviderEntry]) -> Markup {
+pub fn login_page(providers: &[&ProviderEntry], locale: Locale) -> Markup {
+    let dict = dict::new(locale).login;
     html! {
         div class="o-grid o-grid--small-full u-letter-box--small" {
             // Empty grid cell to have a blank buffer on the side
@@ -14,7 +16,7 @@ pub fn login_page(providers: &[&ProviderEntry]) -> Markup {
                 style="width: 25em"
             {
                 div class="c-card" {
-                    div class="c-card__item c-card__item--brand c-card__item--divider" "Einloggen"
+                    div class="c-card__item c-card__item--brand c-card__item--divider" (dict.box_title())
                     div class="c-card__item" {
                         form method="post" action="/login" class="u-pillar-box--small" {
                             // Field: "username"
@@ -25,12 +27,8 @@ pub fn login_page(providers: &[&ProviderEntry]) -> Markup {
                                         type="text"
                                         class="c-field"
                                         name="id"
-                                        placeholder="Nutzerkennung";
-                                    div class="c-hint" {
-                                        "Deine RZ-Kennung (z.B. "
-                                        i "xmuster"
-                                        ")"
-                                    }
+                                        placeholder=(dict.username_placeholder());
+                                    div class="c-hint" (dict.username_hint())
                                 }
                             }
 
@@ -42,8 +40,8 @@ pub fn login_page(providers: &[&ProviderEntry]) -> Markup {
                                         type="password"
                                         class="c-field"
                                         name="secret"
-                                        placeholder="Password";
-                                    div class="c-hint" "Dein globales Uni-Password"
+                                        placeholder=(dict.password_placeholder());
+                                    div class="c-hint" (dict.password_hint())
                                 }
                             }
 
@@ -53,9 +51,10 @@ pub fn login_page(providers: &[&ProviderEntry]) -> Markup {
                                 class="o-form-element"
                                 style=(if providers.len() == 1 { "display:none " } else { "" })
                             {
-                                label class="c-label" for="login_provider" "Anmelden durch:"
+                                label class="c-label" for="login_provider" (dict.login_provider_label())
                                 select class="c-field" name="login_provider" {
                                     @for provider in providers {
+                                        // TODO: l10n
                                         option value=(provider.id) (provider.imp.name())
                                     }
                                 }
@@ -65,7 +64,7 @@ pub fn login_page(providers: &[&ProviderEntry]) -> Markup {
                             div class="u-letter-box--small" {
                                 input
                                     type="submit"
-                                    value="Login"
+                                    value=(dict.login_button_label())
                                     class="c-button c-button--success"
                                     style="width: 100%";
                             }
@@ -80,8 +79,9 @@ pub fn login_page(providers: &[&ProviderEntry]) -> Markup {
                 style="width: 30em"
             {
                 div class="c-card" {
-                    div class="c-card__item c-card__item--divider" "Hinweise"
+                    div class="c-card__item c-card__item--divider" (dict.notice_box_title())
                     div class="c-card__item" {
+                        // TODO: i10n
                         ul class="login-notice-list" {
                             li "Nutze zum Einloggen deine normalen Uni-Login-Daten"
                             li "Die Authentifizierung erfolgt über das Uni-LDAP"

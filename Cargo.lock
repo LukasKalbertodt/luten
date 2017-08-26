@@ -2,6 +2,7 @@
 name = "luten"
 version = "0.1.0"
 dependencies = [
+ "accept-language 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "chrono 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "clap 2.26.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "diesel 0.15.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -11,6 +12,7 @@ dependencies = [
  "hex 0.3.0 (git+https://github.com/LukasKalbertodt/rust-hex?branch=bump-030)",
  "lazy_static 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "maud 0.17.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "mauzi 0.0.1",
  "option-filter 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "palette 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "pwhash 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -24,6 +26,11 @@ dependencies = [
  "rpassword 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "term-painter 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
+
+[[package]]
+name = "accept-language"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "aho-corasick"
@@ -396,6 +403,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "literalext 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "maud_htmlescape 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "mauzi"
+version = "0.0.1"
+dependencies = [
+ "mauzi_macros 0.0.1",
+]
+
+[[package]]
+name = "mauzi_macros"
+version = "0.0.1"
+dependencies = [
+ "literalext 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -998,6 +1019,7 @@ version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [metadata]
+"checksum accept-language 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "b6bdce1a8a46e0e6c485f94b1c4edaf771593c7ea1c2aca8a60af2bfe530477d"
 "checksum aho-corasick 0.6.3 (registry+https://github.com/rust-lang/crates.io-index)" = "500909c4f87a9e52355b26626d890833e9e1d53ac566db76c36faa984b889699"
 "checksum ansi_term 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)" = "23ac7c30002a5accbf7e8987d0632fa6de155b7c3d39d0067317a391e00a2ef6"
 "checksum antidote 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "34fde25430d87a9388dadbe6e34d7f72a462c8b43ac8d309b42b0a8505d7e2a5"

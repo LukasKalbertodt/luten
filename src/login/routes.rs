@@ -7,6 +7,7 @@ use rocket::State;
 
 use config;
 use db::Db;
+use dict::Locale;
 use errors::*;
 use super::{html, login};
 use template::Page;
@@ -22,6 +23,7 @@ fn login_form(
     auth_user: Option<AuthUser>,
     flash: Option<FlashMessage>,
     env: State<Environment>,
+    locale: Locale,
 ) -> StdResult<Markup, Redirect> {
     match auth_user {
         // If the user is already logged in, we just forward them to the index
@@ -41,7 +43,7 @@ fn login_form(
 
             let page = Page::empty()
                 .with_title("Login")
-                .with_content(html::login_page(&providers))
+                .with_content(html::login_page(&providers, locale))
                 .add_flashes(flash)
                 .render();
 

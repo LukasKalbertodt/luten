@@ -7,6 +7,7 @@ authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>"]
 codegen-units = 4
 
 [dependencies]
+accept-language = "1"
 chrono = { version = "0.4", features = ["serde"] }
 clap = "2.26.0"
 diesel = { version = "0.15.0", features = ["postgres", "chrono"] }
@@ -17,6 +18,7 @@ error-chain = "0.10"
 hex = { git = "https://github.com/LukasKalbertodt/rust-hex", branch = "bump-030" }
 lazy_static = "0.2"
 maud = { version = "0.17", features = ["rocket"] }
+mauzi = "0.0.1"
 option-filter = "1.0"
 palette = "0.2"
 pwhash = "0.1.2"

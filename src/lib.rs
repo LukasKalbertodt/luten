@@ -3,6 +3,7 @@
 #![allow(unused_doc_comment)]
 // ^ Otherwise, `error_chain!` and `quick_error!` generate a warning :/
 
+extern crate accept_language;
 extern crate chrono;
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_codegen;
@@ -11,6 +12,7 @@ extern crate dotenv;
 extern crate hex;
 #[macro_use] extern crate lazy_static;
 extern crate maud;
+extern crate mauzi;
 extern crate option_filter;
 extern crate palette;
 extern crate pwhash;
@@ -26,6 +28,7 @@ pub mod util;
 
 pub mod config;
 pub mod db;
+pub mod dict;
 pub mod errors;
 pub mod login;
 pub mod special_routes;
