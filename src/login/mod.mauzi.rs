@@ -1,4 +1,7 @@
-// Login error messages
+// Login error messages and other flash messages
+unit err_user_not_found {
+    De => "Der angegebene Nutzer wurde nicht gefunden.",
+}
 unit err_incorrect_secret {
     De => "Das eingegebene Passwort ist falsch.",
     En => "The given password is incorrect.",
@@ -6,8 +9,8 @@ unit err_incorrect_secret {
 unit err_provider_not_usable {
     De => "Der angegebene Nutzer kann nicht mit der gewählten Methode authentifiziert werden.",
 }
-unit err_user_not_found {
-    De => "Der angegebene Nutzer wurde nicht gefunden.",
+unit successful_logout {
+    De => "Du wurdest erfolgreich ausgeloggt.",
 }
 
 // The box containing the actual login-form

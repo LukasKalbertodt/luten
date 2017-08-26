@@ -25,6 +25,7 @@ use rocket::http::{Cookie, Cookies};
 use config;
 use db::Db;
 use db::schema::{sessions, users};
+use dict::{self, Locale};
 use errors::*;
 use user::{AuthUser, User};
 
@@ -88,6 +89,18 @@ quick_error! {
         /// A user was found, but cannot be authenticated with this provider.
         ProviderNotUsable {
             description("the given user cannot be authenticated with this provider")
+        }
+    }
+}
+
+impl LoginError {
+    pub fn msg(&self, locale: Locale) -> String {
+        let dict = dict::new(locale).login;
+
+        match *self {
+            LoginError::UserNotFound => dict.err_user_not_found(),
+            LoginError::SecretIncorrect => dict.err_incorrect_secret(),
+            LoginError::ProviderNotUsable => dict.err_provider_not_usable(),
         }
     }
 }

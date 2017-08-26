@@ -7,7 +7,7 @@ use rocket::State;
 
 use config;
 use db::Db;
-use dict::Locale;
+use dict::{self, Locale};
 use errors::*;
 use super::{html, login};
 use template::Page;
@@ -62,6 +62,7 @@ fn validate_data(
     cookies: Cookies,
     form: Form<LoginForm>,
     db: State<Db>,
+    locale: Locale,
 ) -> Result<StdResult<Redirect, Flash<Redirect>>> {
     let form = form.into_inner();
 
@@ -78,8 +79,11 @@ fn validate_data(
             Ok(Ok(Redirect::to("/")))
         }
         Err(Error(ErrorKind::LoginError(e), _)) => {
-            // TODO: proper error message
-            Ok(Err(Flash::error(Redirect::to("/login"), format!("{:?}", e))))
+            let flash = Flash::error(
+                Redirect::to("/login"),
+                e.msg(locale),
+            );
+            Ok(Err(flash))
         }
         Err(other) => bail!(other),
     }
@@ -87,13 +91,18 @@ fn validate_data(
 
 /// Handler to logout the user. If there is no login present, nothing happens.
 #[get("/logout")]
-fn logout(auth_user: Option<AuthUser>, cookies: Cookies, db: State<Db>) -> Result<Flash<Redirect>> {
+fn logout(
+    auth_user: Option<AuthUser>,
+    cookies: Cookies,
+    db: State<Db>,
+    locale: Locale,
+) -> Result<Flash<Redirect>> {
     if let Some(auth_user) = auth_user {
         auth_user.destroy_session(cookies, &db)?;
     }
     Ok(Flash::success(
         Redirect::to("/login"),
-        "Du wurdest erfolgreich ausgeloggt",
+        dict::new(locale).login.successful_logout(),
     ))
 }
 
