@@ -81,11 +81,8 @@ pub fn login_page(providers: &[&ProviderEntry], locale: Locale) -> Markup {
                 div class="c-card" {
                     div class="c-card__item c-card__item--divider" (dict.notice_box_title())
                     div class="c-card__item" {
-                        // TODO: i10n
                         ul class="login-notice-list" {
-                            li "Nutze zum Einloggen deine normalen Uni-Login-Daten"
-                            li "Die Authentifizierung erfolgt über das Uni-LDAP"
-                            li "Dein Password wird zu keiner Zeit gespeichert"
+                            (dict.notice_box_content())
                         }
                     }
                 }

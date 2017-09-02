@@ -2,6 +2,7 @@ use accept_language;
 use mauzi::mauzi;
 use rocket::Outcome;
 use rocket::request::{self, FromRequest, Request};
+use maud::{html, Markup};
 
 mauzi! {
     enum Locale {

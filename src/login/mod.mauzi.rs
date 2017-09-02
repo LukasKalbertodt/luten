@@ -22,8 +22,12 @@ unit username_placeholder {
     De => "Nutzername",
     En => "Username",
 }
-unit username_hint {
-    De => "Deine RZ-Kennung (z.B. xmuster)",    // TODO: italics around xmuster
+unit username_hint -> Markup {
+    De => { html! {
+        "Deine RZ-Kennung (z.B. "
+        i "xmuster"
+        ")"
+    }},
 }
 unit password_placeholder {
     De => "Passwort",
@@ -40,11 +44,15 @@ unit login_button_label { // TODO: it would be nice to say `login_button = box_t
 }
 
 
-// TODO: unit notice_box_content
-
-
 // The box containing further information about the login process
 unit notice_box_title {
     De => "Hinweise",
     En => "Hints",
+}
+unit notice_box_content -> Markup {
+    De => { html! {
+        li "Nutze zum Einloggen deine normalen Uni-Login-Daten"
+        li "Die Authentifizierung erfolgt über das Uni-LDAP"
+        li "Dein Passwort wird zu keiner Zeit gespeichert"
+    }}
 }
