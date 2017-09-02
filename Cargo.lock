@@ -12,7 +12,7 @@ dependencies = [
  "hex 0.3.0 (git+https://github.com/LukasKalbertodt/rust-hex?branch=bump-030)",
  "lazy_static 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "maud 0.17.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "mauzi 0.0.1",
+ "mauzi 0.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "option-filter 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "palette 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "pwhash 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -407,14 +407,16 @@ dependencies = [
 
 [[package]]
 name = "mauzi"
-version = "0.0.1"
+version = "0.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "mauzi_macros 0.0.1",
+ "mauzi_macros 0.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "mauzi_macros"
-version = "0.0.1"
+version = "0.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "literalext 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -1068,6 +1070,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum maud 0.17.1 (registry+https://github.com/rust-lang/crates.io-index)" = "80adfa068f12c79d86dbd7f46aef6251c6b99da2c667b28507af49dc417a9427"
 "checksum maud_htmlescape 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d0fb85bccffc42302ad1e1ed8679f6a39d1317f775a37fbc3f79bdfbe054bfb7"
 "checksum maud_macros 0.17.1 (registry+https://github.com/rust-lang/crates.io-index)" = "74defc8411297b9b246c4f54f7e23bde2b00757c2930b008a87f72567220baf2"
+"checksum mauzi 0.0.2 (registry+https://github.com/rust-lang/crates.io-index)" = "c8846175352fa2065ab44d226f47fea87e1aa046c0ea4b5063679335b9d11cab"
+"checksum mauzi_macros 0.0.2 (registry+https://github.com/rust-lang/crates.io-index)" = "573605d26179d208d093b319e50cfd0a9fd33b3f150e1b3c943e296fbb6a8704"
 "checksum memchr 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "1dbccc0e46f1ea47b9f17e6d67c5a96bd27030519c519c9c91327e31275a47b4"
 "checksum mime 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)" = "ba626b8a6de5da682e1caa06bdb42a335aee5a84db8e5046a3e8ab17ba0a3ae0"
 "checksum num 0.1.40 (registry+https://github.com/rust-lang/crates.io-index)" = "a311b77ebdc5dd4cf6449d81e4135d9f0e3b153839ac90e648a8ef538f923525"

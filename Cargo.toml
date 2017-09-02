@@ -18,7 +18,7 @@ error-chain = "0.10"
 hex = { git = "https://github.com/LukasKalbertodt/rust-hex", branch = "bump-030" }
 lazy_static = "0.2"
 maud = { version = "0.17", features = ["rocket"] }
-mauzi = "0.0.1"
+mauzi = "0.0.2"
 option-filter = "1.0"
 palette = "0.2"
 pwhash = "0.1.2"
