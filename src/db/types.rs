@@ -5,6 +5,7 @@
 //! hope that this code can be deleted in the future.
 
 use diesel::pg::Pg;
+use diesel::query_source::Queryable;
 use diesel::types::*;
 use diesel::row::Row;
 use std::error::Error;
@@ -56,6 +57,13 @@ impl ToSql<UserRole, Pg> for Role {
 impl FromSqlRow<UserRole, Pg> for Role {
     fn build_from_row<R: Row<Pg>>(row: &mut R) -> Result<Self, Box<Error + Send + Sync>> {
         FromSql::<UserRole, Pg>::from_sql(row.take())
+    }
+}
+
+impl Queryable<UserRole, Pg> for Role {
+    type Row = Self;
+    fn build(row: Self::Row) -> Self {
+        row
     }
 }
 

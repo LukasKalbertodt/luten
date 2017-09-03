@@ -93,7 +93,7 @@ impl User {
 }
 
 /// The role of the user.
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub enum Role {
     Admin,
     Tutor,
