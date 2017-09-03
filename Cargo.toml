@@ -7,20 +7,24 @@ authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>"]
 codegen-units = 4
 
 [dependencies]
+accept-language = "1"
 chrono = { version = "0.4", features = ["serde"] }
 clap = "2.26.0"
-diesel = { version = "0.15.0", features = ["postgres", "chrono"] }
-diesel_codegen = { version = "0.15.0", features = ["postgres"] }
+diesel = { version = "0.16.0", features = ["postgres", "chrono"] }
+diesel_codegen = { version = "0.16.0", features = ["postgres"] }
 dotenv = "0.10.1"
 error-chain = "0.10"
 # Replace this with crates.io version once merged
 hex = { git = "https://github.com/LukasKalbertodt/rust-hex", branch = "bump-030" }
+lazy_static = "0.2"
 maud = { version = "0.17", features = ["rocket"] }
+mauzi = "0.0.2"
 option-filter = "1.0"
+palette = "0.2"
 pwhash = "0.1.2"
 quick-error = "1"
 r2d2 = "0.7.3"
-r2d2-diesel = "0.15.0"
+r2d2-diesel = "0.16.0"
 rand = "0.3.16"
 rocket = "0.3.1"
 rocket_codegen = "0.3.1"

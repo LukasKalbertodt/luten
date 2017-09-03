@@ -1,6 +1,7 @@
 use diesel;
 use pwhash;
 use r2d2;
+use rocket;
 use std;
 
 use login;
@@ -22,6 +23,13 @@ error_chain! {
 
         // Our own errors (basically the recoverable ones)
         LoginError(login::LoginError);
+    }
+
+    errors {
+        // Rocket HTTP status
+        BadHttp(s: rocket::http::Status) {
+            description("Rocket HTTP error")
+        }
     }
 }
 

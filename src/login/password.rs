@@ -10,6 +10,7 @@ use pwhash::bcrypt;
 
 use db::schema::passwords;
 use db::Db;
+use dict::{self, Locale};
 use errors::*;
 use login::{self, LoginError};
 use user::User;
@@ -65,8 +66,14 @@ impl Password {
 pub struct InternalProvider;
 
 impl login::Provider for InternalProvider {
-    fn auth(&self, username: &str, secret: &str, db: &Db) -> Result<User> {
-        let user = User::from_username(username, db)?
+    fn name(&self, locale: Locale) -> String {
+        dict::new(locale).login.provider_name_password()
+    }
+
+    fn auth(&self, id: &str, secret: &str, db: &Db) -> Result<User> {
+        // TODO: here we have two queries, although we could get the same
+        // information using a join in one query. We might want to change this.
+        let user = User::from_username(id, db)?
             .ok_or(LoginError::UserNotFound)?;
 
         let pw = Password::load(&user, db)?

@@ -25,17 +25,30 @@ use rocket::http::{Cookie, Cookies};
 use config;
 use db::Db;
 use db::schema::{sessions, users};
+use dict::{self, Locale};
 use errors::*;
 use user::{AuthUser, User};
 
 mod html;
+pub mod ldap;
 pub mod password;
 pub mod routes;
 
 
 /// A login-provider. Is able to authenticate a user.
-pub trait Provider {
-    fn auth(&self, username: &str, secret: &str, db: &Db) -> Result<User>;
+pub trait Provider: 'static + Sync {
+    /// Returns a user facing name of the login provider.
+    fn name(&self, locale: Locale) -> String;
+
+    /// Tries to authenticate with this provider.
+    fn auth(&self, id: &str, secret: &str, db: &Db) -> Result<User>;
+}
+
+
+pub struct ProviderEntry {
+    pub id: &'static str,
+    pub dev_only: bool,
+    pub imp: Box<Provider>,
 }
 
 
@@ -79,11 +92,21 @@ quick_error! {
     }
 }
 
+impl LoginError {
+    pub fn msg(&self, locale: Locale) -> String {
+        let dict = dict::new(locale).login;
+
+        match *self {
+            LoginError::UserNotFound => dict.err_user_not_found(),
+            LoginError::SecretIncorrect => dict.err_incorrect_secret(),
+            LoginError::ProviderNotUsable => dict.err_provider_not_usable(),
+        }
+    }
+}
+
 
 
 #[derive(Debug, Clone, Eq, PartialEq, Identifiable, Queryable, Associations)]
-// #[belongs_to(User)]  <-- TODO: the feature `proc_macros` clashes with the
-// "Association feature" of diesel. We can't use joins for now :/
 pub struct Session {
     /// A binary string, `config::SESSION_ID_LEN` bytes long.
     pub id: Vec<u8>,
@@ -128,30 +151,20 @@ impl Session {
     /// exists, or if it has an invalid value, or if the session wasn't found
     /// in the database, `None` is returned.
     pub fn from_cookies(cookies: Cookies, db: &Db) -> Result<Option<AuthUser>> {
-        // TODO: once associations work again, use a join here instead of two
-        // queries.
-
         let session_id = cookies.get(config::SESSION_COOKIE_NAME)
             .and_then(|cookie| hex::decode(cookie.value()).ok())
             .filter(|session_id| session_id.len() == config::SESSION_ID_LEN);
 
         let session_id = try_opt_ok!(session_id);
 
-
-        // Try to find a session with the given id
-        let session = sessions::table
+        // Try to find a session with the given id, load the user owning that
+        // session and create an `AuthUser` from it.
+        sessions::table
             .find(session_id)
-            .first::<Session>(&*db.conn()?)
-            .optional()?;
-        let session = try_opt_ok!(session);
-
-        // Try to find the user referenced by that session. If found, combine
-        // that user with the session to make an `AuthUser`.
-        users::table
-            .find(session.user_id)
-            .first::<User>(&*db.conn()?)
+            .inner_join(users::table)
+            .first::<(Session, User)>(&*db.conn()?)
             .optional()?
-            .map(|user| AuthUser::new(user, session))
+            .map(|(session, user)| AuthUser::new(user, session))
             .make_ok()
     }
 

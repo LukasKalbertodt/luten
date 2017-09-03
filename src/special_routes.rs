@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use rocket::response::{NamedFile, Redirect};
+use rocket::response::{Flash, NamedFile, Redirect};
 use rocket::Request;
 use rocket::http::Cookie;
 
@@ -17,12 +17,15 @@ pub fn static_files(path: PathBuf) -> Option<NamedFile> {
 /// Redirect to `/login` if a route is requested that cannot be access when not
 /// logged in (most routes).
 #[error(401)]
-fn unauthorized(req: &Request) -> Redirect {
+fn unauthorized(req: &Request) -> Flash<Redirect> {
     let uri = req.uri().as_str().to_owned();
     let cookie = Cookie::build(config::INITIAL_REQ_COOKIE_NAME, uri)
         .path("/")
         .finish();
     req.cookies().add(cookie);
 
-    Redirect::to("/login")
+    Flash::error(
+        Redirect::to("/login"),
+        "Du musst eingeloggt sein, um die angefragte Seite zu sehen."
+    )
 }

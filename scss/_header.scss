@@ -1,0 +1,50 @@
+.nav-title-box {
+    font-family: Courgette;
+    font-size: 22px;
+    text-decoration: none;
+
+    // In the original nav classes, the height is given in "em". Since we want
+    // to increase the font size without enlarging the whole nav bar, we need
+    // to fix the size here.
+    height: 56px;
+    line-height: 56px;
+
+    &:hover {
+        text-decoration: underline dashed;
+    }
+}
+
+.nav-account-box {
+    position: relative;
+
+    .nav-account-children {
+        min-width: 100%;
+        position: absolute;
+        top: auto;
+        right: 0;
+        display: none;
+
+        .c-nav__content {
+            font-variant: small-caps;
+        }
+
+        li {
+            list-style: none;
+            width: 100%;
+            padding: 0;
+
+            a {
+                padding: 0 1em;
+                color: white;
+                height: 100%;
+                width: 100%;
+                text-decoration: none;
+                display: inline-block;
+            }
+        }
+    }
+
+    &:hover>.nav-account-children {
+        display: block;
+    }
+}

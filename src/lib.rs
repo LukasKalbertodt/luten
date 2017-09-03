@@ -3,14 +3,18 @@
 #![allow(unused_doc_comment)]
 // ^ Otherwise, `error_chain!` and `quick_error!` generate a warning :/
 
+extern crate accept_language;
 extern crate chrono;
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_codegen;
 extern crate dotenv;
 #[macro_use] extern crate error_chain;
 extern crate hex;
+#[macro_use] extern crate lazy_static;
 extern crate maud;
+extern crate mauzi;
 extern crate option_filter;
+extern crate palette;
 extern crate pwhash;
 #[macro_use] extern crate quick_error;
 extern crate r2d2;
@@ -24,6 +28,7 @@ pub mod util;
 
 pub mod config;
 pub mod db;
+pub mod dict;
 pub mod errors;
 pub mod login;
 pub mod special_routes;
@@ -72,9 +77,16 @@ pub mod dummy {
 
 pub fn start_server() {
     use db::Db;
+    use rocket::fairing::AdHoc;
 
     rocket::ignite()
         .manage(Db::open_connection())
+        .attach(AdHoc::on_attach(|rocket| {
+            // Here we insert the Rocket environment as managed state to
+            // retrieve it later.
+            let env = rocket.config().environment;
+            Ok(rocket.manage(env))
+        }))
         .mount("/", routes![
             dummy::index,
             dummy::dummy,
@@ -84,6 +96,8 @@ pub fn start_server() {
             login::routes::login_form,
             login::routes::validate_data,
             login::routes::logout,
+
+            user::routes::settings,
         ])
         .catch(errors![
             special_routes::unauthorized,

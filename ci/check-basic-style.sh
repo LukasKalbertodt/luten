@@ -8,7 +8,7 @@
 # - lines longer than XX chars
 
 # config
-COLS=100
+COLS=120
 FOLDER="."
 FILES='.+\.\(rs\|toml\|sh\)'
 EXCLUDE='^\(\.\/\)?target\/.*'
