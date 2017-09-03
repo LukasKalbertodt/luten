@@ -124,7 +124,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for AuthUser {
         match Session::from_cookies(req.cookies(), &db) {
             Err(e) => Outcome::Failure((Status::InternalServerError, Some(e))),
             Ok(Some(auth_user)) => Outcome::Success(auth_user),
-            Ok(None) => Outcome::Failure((Status::Unauthorized, None)),
+            Ok(None) => Outcome::Failure((Status::Forbidden, None)),
         }
     }
 }
