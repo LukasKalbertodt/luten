@@ -10,6 +10,7 @@ mauzi! {
         En,
     }
 
+    mod admin_panel;
     mod login;
 
     unit forbidden_flash -> Markup {

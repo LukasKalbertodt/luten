@@ -26,6 +26,7 @@ extern crate rocket_contrib;
 #[macro_use]
 pub mod util;
 
+pub mod admin_panel;
 pub mod config;
 pub mod db;
 pub mod dict;
@@ -88,6 +89,8 @@ pub fn start_server() {
             Ok(rocket.manage(config))
         }))
         .mount("/", routes![
+            admin_panel::routes::index,
+
             dummy::index,
             dummy::dummy,
 
