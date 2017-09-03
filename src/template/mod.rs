@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 use maud::{html, DOCTYPE, Markup, Render};
+use option_filter::OptionFilterExt;
 use rocket::request::FlashMessage;
 
 use config;
@@ -35,7 +36,7 @@ use user::AuthUser;
 ///
 pub struct Page {
     title: Cow<'static, str>,
-    nav_items: Vec<Cow<'static, str>>,
+    nav_items: Vec<NavItem>,
     flashes: Vec<Flash>,
     auth_user: Option<AuthUser>,
     content: Markup,
@@ -160,6 +161,10 @@ impl Page {
 
     fn render_nav(&self) -> Markup {
         let (title_fg, title_border) = title_colors();
+        let mut nav_items = self.nav_items.clone();
+        if self.auth_user.as_ref().filter(|u| u.is_admin()).is_some() {
+            nav_items.push(NavItem::new("Admin Panel", "/admin_panel"));
+        }
 
         html! {
             nav class="c-nav c-nav--inline" {
@@ -177,8 +182,8 @@ impl Page {
                     (config::WEBSITE_TITLE)
 
                 // All given nav items
-                @for item in &self.nav_items {
-                    span class="c-nav__item" (item)
+                @for item in nav_items {
+                    a class="c-nav__item" href=(item.url) (item.title)
                 }
 
                 // // TODO: unhide help?
@@ -209,6 +214,24 @@ impl Page {
                     }
                 }
             }
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct NavItem {
+    title: Cow<'static, str>,
+    url: Cow<'static, str>,
+}
+
+impl NavItem {
+    pub fn new<T, U>(title: T, url: U) -> Self
+        where T: Into<Cow<'static, str>>,
+              U: Into<Cow<'static, str>>,
+    {
+        Self {
+            title: title.into(),
+            url: url.into(),
         }
     }
 }
