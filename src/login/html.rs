@@ -28,6 +28,9 @@ pub fn login_page(providers: &[&ProviderEntry], locale: Locale) -> Markup {
                                         class="c-field"
                                         name="id"
                                         placeholder=(dict.username_placeholder());
+                                    // TODO: this hint is not really correct. The hint depends
+                                    // on the chosen login-provider. So we have to adjust the hints
+                                    // dynamically. We should. In the future, probably.
                                     div class="c-hint" (dict.username_hint())
                                 }
                             }
