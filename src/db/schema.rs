@@ -16,9 +16,13 @@ table! {
 joinable!(sessions -> users(user_id));
 
 table! {
+    use diesel::types::*;
+    use db::types::UserRole;
+
     users (id) {
         id -> Int8,
         username -> Text,
         name -> Nullable<Text>,
+        role -> UserRole,
     }
 }

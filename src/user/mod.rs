@@ -26,6 +26,9 @@ pub struct User {
 
     /// The real name of the user.
     pub name: Option<String>,
+
+    /// The status of the user: student, tutor or administrator.
+    pub role: Role,
 }
 
 impl User {
@@ -106,4 +109,13 @@ impl<'a, 'r> FromRequest<'a, 'r> for AuthUser {
             Ok(None) => Outcome::Failure((Status::Unauthorized, None)),
         }
     }
+}
+
+
+/// The role of the user.
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub enum Role {
+    Admin,
+    Tutor,
+    Student,
 }

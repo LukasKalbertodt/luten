@@ -8,6 +8,7 @@ use std::env;
 use errors::*;
 
 pub mod schema;
+mod types;
 
 
 /// A database connection pool.
