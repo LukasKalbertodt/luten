@@ -71,6 +71,8 @@ impl login::Provider for InternalProvider {
     }
 
     fn auth(&self, id: &str, secret: &str, db: &Db) -> Result<User> {
+        // TODO: here we have two queries, although we could get the same
+        // information using a join in one query. We might want to change this.
         let user = User::from_username(id, db)?
             .ok_or(LoginError::UserNotFound)?;
 
