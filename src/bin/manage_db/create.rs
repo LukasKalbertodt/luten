@@ -4,20 +4,38 @@ use std::io::{self, Write};
 
 use luten::db::Db;
 use luten::errors::*;
-use luten::user::User;
+use luten::user::{Role, User};
 
 use db_util::find_user;
-use util::{self, Global};
+use util::{self, FromStdin, Global};
 
 
 /// Create new entities in the database
 pub fn create(util: &Global, matches: &ArgMatches, db: &Db) -> Result<()> {
     match matches.subcommand_name().unwrap() {
         "user" => {
+            // In order to read the user role from terminal, we have to
+            // implement this trait.
+            impl FromStdin for Role {
+                fn from_input(s: &str) -> StdResult<Self, String> {
+                    match s {
+                        "admin" => Ok(Role::Admin),
+                        "tutor" => Ok(Role::Tutor),
+                        "student" => Ok(Role::Student),
+                        _ => Err("not a valid user role".into()),
+                    }
+                }
+                fn desc() -> String {
+                    "'UserRole' (one of 'admin', 'tutor', 'student')".into()
+                }
+            }
+
+
             println!("+-- Data for new user:");
             let result = User::create(
                 util::read("username")?,
                 util::read("name")?,
+                util::read("role")?,
                 db
             );
             println!("+-- Inserted:");

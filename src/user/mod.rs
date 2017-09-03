@@ -41,15 +41,21 @@ impl User {
             .make_ok()
     }
 
-    pub fn create(username: String, name: Option<String>, db: &Db) -> Result<Self> {
+    pub fn create(
+        username: String,
+        name: Option<String>,
+        role: Role,
+        db: &Db
+    ) -> Result<Self> {
         #[derive(Debug, Clone, Eq, PartialEq, Insertable)]
         #[table_name = "users"]
         struct NewUser {
             pub username: String,
             pub name: Option<String>,
+            pub role: Role,
         }
 
-        let new_user = NewUser { username, name };
+        let new_user = NewUser { username, name, role };
 
         diesel::insert(&new_user)
             .into(users::table)

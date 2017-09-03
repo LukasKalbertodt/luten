@@ -58,3 +58,5 @@ impl FromSqlRow<UserRole, Pg> for Role {
         FromSql::<UserRole, Pg>::from_sql(row.take())
     }
 }
+
+expression_impls!(UserRole -> Role);
