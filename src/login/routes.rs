@@ -1,5 +1,5 @@
 use maud::Markup;
-use rocket::config::Environment;
+use rocket::config::{Config, Environment};
 use rocket::http::{Cookies, Status};
 use rocket::request::{FlashMessage, Form};
 use rocket::response::{Flash, Redirect};
@@ -22,7 +22,7 @@ use user::AuthUser;
 fn login_form(
     auth_user: Option<AuthUser>,
     flash: Option<FlashMessage>,
-    env: State<Environment>,
+    config: State<Config>,
     locale: Locale,
 ) -> StdResult<Markup, Redirect> {
     match auth_user {
@@ -38,7 +38,9 @@ fn login_form(
             // providers in production. Maybe with a magic `i_am_a_dev` cookie
             // or something stupid like that.
             let providers = config::LOGIN_PROVIDERS.iter()
-                .filter(|prov| !(prov.dev_only && *env.inner() == Environment::Production))
+                .filter(|prov| !(
+                    prov.dev_only && config.inner().environment == Environment::Production
+                ))
                 .collect::<Vec<_>>();
 
             let page = Page::empty()

@@ -10,7 +10,19 @@ mauzi! {
         En,
     }
 
+    mod admin_panel;
     mod login;
+
+    unit forbidden_flash -> Markup {
+        De => { html! {
+            "Du hast nicht die notwendigen Rechte, um diese Seite aufzurufen! "
+            a href="/" "Zurück zur Startseite."
+        }},
+        En => { html! {
+            "You are lacking the permission to view this page! "
+            a href="/" "Back to the index page."
+        }}
+    }
 }
 
 impl<'a, 'r> FromRequest<'a, 'r> for Locale {

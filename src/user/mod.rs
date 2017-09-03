@@ -26,6 +26,9 @@ pub struct User {
 
     /// The real name of the user.
     pub name: Option<String>,
+
+    /// The status of the user: student, tutor or administrator.
+    pub role: Role,
 }
 
 impl User {
@@ -38,15 +41,21 @@ impl User {
             .make_ok()
     }
 
-    pub fn create(username: String, name: Option<String>, db: &Db) -> Result<Self> {
+    pub fn create(
+        username: String,
+        name: Option<String>,
+        role: Role,
+        db: &Db
+    ) -> Result<Self> {
         #[derive(Debug, Clone, Eq, PartialEq, Insertable)]
         #[table_name = "users"]
         struct NewUser {
             pub username: String,
             pub name: Option<String>,
+            pub role: Role,
         }
 
-        let new_user = NewUser { username, name };
+        let new_user = NewUser { username, name, role };
 
         diesel::insert(&new_user)
             .into(users::table)
@@ -65,6 +74,30 @@ impl User {
     pub fn name(&self) -> Option<&str> {
         self.name.as_ref().map(AsRef::as_ref)
     }
+
+    pub fn role(&self) -> Role {
+        self.role
+    }
+
+    pub fn is_admin(&self) -> bool {
+        self.role == Role::Admin
+    }
+
+    pub fn is_tutor(&self) -> bool {
+        self.role == Role::Tutor
+    }
+
+    pub fn is_student(&self) -> bool {
+        self.role == Role::Student
+    }
+}
+
+/// The role of the user.
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+pub enum Role {
+    Admin,
+    Tutor,
+    Student,
 }
 
 /// An authorized user with an active session. This type doesn't restrict
@@ -103,7 +136,33 @@ impl<'a, 'r> FromRequest<'a, 'r> for AuthUser {
         match Session::from_cookies(req.cookies(), &db) {
             Err(e) => Outcome::Failure((Status::InternalServerError, Some(e))),
             Ok(Some(auth_user)) => Outcome::Success(auth_user),
-            Ok(None) => Outcome::Failure((Status::Unauthorized, None)),
+            Ok(None) => Outcome::Failure((Status::Forbidden, None)),
+        }
+    }
+}
+
+/// An authorized user which has the user role `Admin`.
+///
+/// This type implements `FromRequest` and can therefore be used as request
+/// guard.
+pub struct AuthAdmin(pub AuthUser);
+
+impl Deref for AuthAdmin {
+    type Target = AuthUser;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl<'a, 'r> FromRequest<'a, 'r> for AuthAdmin {
+    type Error = Option<Error>;
+
+    fn from_request(req: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
+        let user = AuthUser::from_request(req)?;
+        if user.role() == Role::Admin {
+            Outcome::Success(AuthAdmin(user))
+        } else {
+            Outcome::Failure((Status::Unauthorized, None))
         }
     }
 }

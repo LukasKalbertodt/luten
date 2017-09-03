@@ -26,6 +26,7 @@ extern crate rocket_contrib;
 #[macro_use]
 pub mod util;
 
+pub mod admin_panel;
 pub mod config;
 pub mod db;
 pub mod dict;
@@ -82,12 +83,14 @@ pub fn start_server() {
     rocket::ignite()
         .manage(Db::open_connection())
         .attach(AdHoc::on_attach(|rocket| {
-            // Here we insert the Rocket environment as managed state to
+            // Here we insert the Rocket configuration as managed state to
             // retrieve it later.
-            let env = rocket.config().environment;
-            Ok(rocket.manage(env))
+            let config = rocket.config().clone();
+            Ok(rocket.manage(config))
         }))
         .mount("/", routes![
+            admin_panel::routes::index,
+
             dummy::index,
             dummy::dummy,
 
