@@ -33,7 +33,7 @@ impl Password {
     ///
     /// Errors if the user already has a password.
     pub fn create_for(user: &User, plain_pw: &str, db: &Db) -> Result<Self> {
-        let password = bcrypt::hash(plain_pw)?;
+        let password = Self::hash_of(plain_pw)?;
         let new = Self {
             user_id: user.id,
             hash: password
@@ -44,6 +44,12 @@ impl Password {
             .get_result::<Self>(&*db.conn()?)
             .chain_err(|| "Error inserting a new password")?
             .make_ok()
+    }
+
+    /// Returns the raw hash for the given plain text password. This hash will
+    /// be stored in the database when `create_for()` is called.
+    pub fn hash_of(plain_pw: &str) -> Result<String> {
+        bcrypt::hash(plain_pw).map_err(|e| e.into())
     }
 
     /// Loads the password of the given user from the database. Returns `None`
