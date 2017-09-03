@@ -78,6 +78,18 @@ impl User {
     pub fn role(&self) -> Role {
         self.role
     }
+
+    pub fn is_admin(&self) -> bool {
+        self.role == Role::Admin
+    }
+
+    pub fn is_tutor(&self) -> bool {
+        self.role == Role::Tutor
+    }
+
+    pub fn is_student(&self) -> bool {
+        self.role == Role::Student
+    }
 }
 
 /// The role of the user.
