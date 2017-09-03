@@ -82,10 +82,10 @@ pub fn start_server() {
     rocket::ignite()
         .manage(Db::open_connection())
         .attach(AdHoc::on_attach(|rocket| {
-            // Here we insert the Rocket environment as managed state to
+            // Here we insert the Rocket configuration as managed state to
             // retrieve it later.
-            let env = rocket.config().environment;
-            Ok(rocket.manage(env))
+            let config = rocket.config().clone();
+            Ok(rocket.manage(config))
         }))
         .mount("/", routes![
             dummy::index,
