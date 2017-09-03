@@ -39,7 +39,7 @@ pub mod routes;
 pub trait Provider: 'static + Sync {
     /// Returns a user facing name of the login provider.
     // TODO: Pass in `Locale` to make it localized
-    fn name(&self) -> String;
+    fn name(&self, locale: Locale) -> String;
 
     /// Tries to authenticate with this provider.
     fn auth(&self, id: &str, secret: &str, db: &Db) -> Result<User>;

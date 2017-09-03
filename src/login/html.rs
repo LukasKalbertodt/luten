@@ -55,7 +55,7 @@ pub fn login_page(providers: &[&ProviderEntry], locale: Locale) -> Markup {
                                 select class="c-field" name="login_provider" {
                                     @for provider in providers {
                                         // TODO: l10n
-                                        option value=(provider.id) (provider.imp.name())
+                                        option value=(provider.id) (provider.imp.name(locale))
                                     }
                                 }
                             }

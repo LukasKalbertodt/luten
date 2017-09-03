@@ -10,6 +10,7 @@ use pwhash::bcrypt;
 
 use db::schema::passwords;
 use db::Db;
+use dict::{self, Locale};
 use errors::*;
 use login::{self, LoginError};
 use user::User;
@@ -65,8 +66,8 @@ impl Password {
 pub struct InternalProvider;
 
 impl login::Provider for InternalProvider {
-    fn name(&self) -> String {
-        "Password (internal)".into()
+    fn name(&self, locale: Locale) -> String {
+        dict::new(locale).login.provider_name_password()
     }
 
     fn auth(&self, id: &str, secret: &str, db: &Db) -> Result<User> {

@@ -56,3 +56,14 @@ unit notice_box_content -> Markup {
         li "Dein Passwort wird zu keiner Zeit gespeichert"
     }}
 }
+
+
+// Names of login provider
+unit provider_name_ldap {
+    De => "Universität-LDAP",
+    En => "University-LDAP",
+}
+unit provider_name_password {
+    De => "Passwort (intern)",
+    En => "Password (internal)",
+}
