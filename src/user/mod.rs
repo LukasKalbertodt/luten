@@ -74,6 +74,18 @@ impl User {
     pub fn name(&self) -> Option<&str> {
         self.name.as_ref().map(AsRef::as_ref)
     }
+
+    pub fn role(&self) -> Role {
+        self.role
+    }
+}
+
+/// The role of the user.
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub enum Role {
+    Admin,
+    Tutor,
+    Student,
 }
 
 /// An authorized user with an active session. This type doesn't restrict
@@ -117,11 +129,28 @@ impl<'a, 'r> FromRequest<'a, 'r> for AuthUser {
     }
 }
 
+/// An authorized user which has the user role `Admin`.
+///
+/// This type implements `FromRequest` and can therefore be used as request
+/// guard.
+pub struct AuthAdmin(pub AuthUser);
 
-/// The role of the user.
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub enum Role {
-    Admin,
-    Tutor,
-    Student,
+impl Deref for AuthAdmin {
+    type Target = AuthUser;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl<'a, 'r> FromRequest<'a, 'r> for AuthAdmin {
+    type Error = Option<Error>;
+
+    fn from_request(req: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
+        let user = AuthUser::from_request(req)?;
+        if user.role() == Role::Admin {
+            Outcome::Success(AuthAdmin(user))
+        } else {
+            Outcome::Failure((Status::Unauthorized, None))
+        }
+    }
 }
