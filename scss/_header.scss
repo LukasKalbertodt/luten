@@ -26,6 +26,7 @@
 
         .c-nav__content {
             font-variant: small-caps;
+            cursor: default;
         }
 
         li {
@@ -45,6 +46,8 @@
     }
 
     &:hover>.nav-account-children {
+        box-shadow: 0px 5px 10px black;
         display: block;
+        z-index: 10;
     }
 }
