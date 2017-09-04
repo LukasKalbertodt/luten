@@ -12,6 +12,7 @@ mauzi! {
 
     mod admin_panel;
     mod login;
+    mod prep;
 
     unit forbidden_flash -> Markup {
         De => { html! {

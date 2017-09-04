@@ -32,6 +32,7 @@ pub mod db;
 pub mod dict;
 pub mod errors;
 pub mod login;
+pub mod prep;
 pub mod special_routes;
 pub mod state;
 pub mod template;
@@ -101,6 +102,8 @@ pub fn start_server() {
             login::routes::login_form,
             login::routes::validate_data,
             login::routes::logout,
+
+            prep::routes::overview,
 
             user::routes::settings,
         ])
