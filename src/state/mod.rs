@@ -39,7 +39,7 @@ impl CurrentAppState {
 macro_rules! state_req_guard {
     ($name:ident, $variant:ident) => {
         /// A request guard to ensure the current app state is "$variant".
-        pub struct $name;
+        pub struct $name(pub CurrentAppState);
 
         impl<'a, 'r> FromRequest<'a, 'r> for $name {
             type Error = ();
@@ -47,11 +47,12 @@ macro_rules! state_req_guard {
             fn from_request(req: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
                 let db = req.guard::<State<Db>>().expect("cannot retrieve DB connection from request");
                 let app_state = CurrentAppState::load(&db);
-                match app_state {
-                    Ok(CurrentAppState { state: AppState::$variant, .. }) => Outcome::Success($name),
-                    _ => Outcome::Forward(()),
+                if let Ok(app_state) = app_state {
+                    if app_state.state == AppState::$variant {
+                        return Outcome::Success($name(app_state));
+                    }
                 }
-
+                Outcome::Forward(())
             }
         }
     }
