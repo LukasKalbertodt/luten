@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use maud::{html, Markup};
+use maud::html;
 use rocket::response::{Flash, NamedFile, Redirect};
 use rocket::{Outcome, Request, State};
 use rocket::http::Cookie;
@@ -19,7 +19,7 @@ use user::{AuthUser, Role};
 /// This handler will always redirect instead of generating a response itself
 /// (except in the error case).
 #[get("/")]
-pub fn index(auth_user: AuthUser, db: State<Db>) -> Result<StdResult<Redirect, Markup>> {
+pub fn index(auth_user: AuthUser, db: State<Db>) -> Result<StdResult<Redirect, Page>> {
     let app_state = CurrentAppState::load(&db)?;
 
     // Redirect to the correct route depending on user role and app state.
@@ -29,7 +29,6 @@ pub fn index(auth_user: AuthUser, db: State<Db>) -> Result<StdResult<Redirect, M
             Err(
                 Page::error(html! { "unimplemented!" })
                     .with_auth_user(&auth_user)
-                    .render()
             )
         }
     }.make_ok()
@@ -49,7 +48,7 @@ pub fn static_files(path: PathBuf) -> Option<NamedFile> {
 /// Redirect to `/login` if there is no login present. Show a big red error
 /// otherwise.
 #[error(403)]
-fn unauthorized(req: &Request) -> StdResult<Flash<Redirect>, Markup> {
+fn unauthorized(req: &Request) -> StdResult<Flash<Redirect>, Page> {
     if let Outcome::Success(auth_user) = req.guard::<AuthUser>() {
         // In this case a login IS present, but it lacks the permissions to do
         // something. In this case it doesn't make sense to forward to the
@@ -62,8 +61,7 @@ fn unauthorized(req: &Request) -> StdResult<Flash<Redirect>, Markup> {
                 OurFlash::error(html! {
                     (dict::new(locale).forbidden_flash())
                 }),
-            ])
-            .render();
+            ]);
 
         Err(page)
     } else {

@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use diesel::prelude::*;
-use maud::Markup;
 use rocket::config::Config;
 use rocket::State;
 
@@ -20,7 +19,7 @@ pub fn index(
     locale: Locale,
     db: State<Db>,
     config: State<Config>,
-) -> Result<Markup> {
+) -> Result<Page> {
     use diesel::expression::dsl::*;
     use db::schema::users;
 
@@ -45,7 +44,6 @@ pub fn index(
         .with_auth_user(&admin)
         .with_content(html::index(locale, &stats, &config))
         .with_active_nav_route("/admin_panel")
-        .render()
         .make_ok()
 }
 
@@ -55,7 +53,7 @@ pub fn state(
     admin: AuthAdmin,
     locale: Locale,
     db: State<Db>,
-) -> Result<Markup> {
+) -> Result<Page> {
     let app_state = CurrentAppState::load(&db)?;
 
 
@@ -83,6 +81,5 @@ pub fn state(
         .with_auth_user(&admin)
         .with_active_nav_route("/admin_panel")
         .with_content(html::state(locale, &app_state))
-        .render()
         .make_ok()
 }

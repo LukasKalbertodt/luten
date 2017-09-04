@@ -1,4 +1,4 @@
-use maud::{html, Markup};
+use maud::html;
 use rocket::State;
 
 use super::html;
@@ -15,7 +15,7 @@ fn overview(
     locale: Locale,
     _db: State<Db>,
     // TODO: use `StatePreparation` guard
-) -> Result<Markup> {
+) -> Result<Page> {
     let dict = dict::new(locale).prep;
 
     match auth_user.role() {
@@ -30,21 +30,18 @@ fn overview(
                 ])
                 .with_active_nav_route("/prep")
                 .with_content(html::student_overview(locale))
-                .render()
         }
 
         // ===== Tutor ========================================================
         Role::Tutor => {
             Page::error(html! { "unimplemented" })
                 .with_auth_user(&auth_user)
-                .render()
         }
 
         // ===== Admin ========================================================
         Role::Admin => {
             Page::error(html! { "unimplemented" })
                 .with_auth_user(&auth_user)
-                .render()
         }
     }.make_ok()
 

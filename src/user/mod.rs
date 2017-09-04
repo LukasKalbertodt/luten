@@ -102,7 +102,7 @@ pub enum Role {
 
 /// An authorized user with an active session. This type doesn't restrict
 /// access to any properties, as the user is logged in.
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AuthUser {
     user: User,
     session: Session,

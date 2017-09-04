@@ -1,7 +1,9 @@
 use std::borrow::Cow;
 use maud::{html, DOCTYPE, Markup, Render};
 use option_filter::OptionFilterExt;
+use rocket::Request;
 use rocket::request::FlashMessage;
+use rocket::response::{self, Responder};
 
 use config;
 use user::AuthUser;
@@ -34,6 +36,7 @@ use user::AuthUser;
 /// }
 /// ```
 ///
+#[derive(Debug)]
 pub struct Page {
     title: Cow<'static, str>,
     nav_items: Vec<NavItem>,
@@ -58,9 +61,8 @@ impl Page {
 
     /// An empty page with a single error flash.
     pub fn error(flash_content: Markup) -> Self {
-        let mut out = Self::empty();
-        out.add_flashes(vec![Flash::error(flash_content)]);
-        out
+        Self::empty()
+            .add_flashes(vec![Flash::error(flash_content)])
     }
 
     /// Sets the title.
@@ -68,7 +70,7 @@ impl Page {
     /// Note that this "title" is only the changing part of the title. The
     /// value in the <title> tag will have a postfixed "-- Foo" where "Foo" is
     /// the value of `config::WEBSITE_TITLE`.
-    pub fn with_title<T>(&mut self, title: T) -> &mut Self
+    pub fn with_title<T>(mut self, title: T) -> Self
         where T: Into<Cow<'static, str>>
     {
         self.title = title.into();
@@ -79,7 +81,7 @@ impl Page {
     ///
     /// This should always be called if a user is logged in. Setting the user
     /// generates the "Account" item in the nav bar, which is hidden otherwise.
-    pub fn with_auth_user(&mut self, auth_user: &AuthUser) -> &mut Self {
+    pub fn with_auth_user(mut self, auth_user: &AuthUser) -> Self {
         self.auth_user = Some(auth_user.clone());
         self
     }
@@ -94,7 +96,7 @@ impl Page {
     /// This method accepts anything that can be turned into an iterator which
     /// yields elements that can be turned into a `Flash`. This conveniently
     /// allows to pass `Option<rocket::FlashMessage>`!
-    pub fn add_flashes<I, T>(&mut self, flashes: I) -> &mut Self
+    pub fn add_flashes<I, T>(mut self, flashes: I) -> Self
         where I: IntoIterator<Item=T>,
               T: Into<Flash>,
     {
@@ -106,7 +108,7 @@ impl Page {
     ///
     /// The nav items are placed in the nav bar between the brand-text and the
     /// "Account" item.
-    pub fn add_nav_items<I>(&mut self, nav_items: I) -> &mut Self
+    pub fn add_nav_items<I>(mut self, nav_items: I) -> Self
         where I: IntoIterator<Item=NavItem>
     {
         self.nav_items.extend(nav_items);
@@ -115,7 +117,7 @@ impl Page {
 
     /// Sets a nav route as active. The corresponding nav item will be
     /// highlighted.
-    pub fn with_active_nav_route<T>(&mut self, active_nav_route: T) -> &mut Self
+    pub fn with_active_nav_route<T>(mut self, active_nav_route: T) -> Self
         where T: Into<Cow<'static, str>>
     {
         self.active_nav_route = Some(active_nav_route.into());
@@ -123,7 +125,7 @@ impl Page {
     }
 
     /// Set the main content of the page.
-    pub fn with_content<T>(&mut self, content: T) -> &mut Self
+    pub fn with_content<T>(mut self, content: T) -> Self
         where T: Render
     {
         self.content = content.render();
@@ -131,7 +133,12 @@ impl Page {
     }
 
     /// Finalize the page by rendering it into a `Markup` (basically a string).
-    pub fn render(&self) -> Markup {
+    fn render(mut self, req: &Request) -> Markup {
+        // Check for Rocket flashes
+        if let Some(flash) = req.guard::<FlashMessage>().succeeded() {
+            self.flashes.push(flash.into());
+        }
+
         html! { (DOCTYPE) html {
             // ===============================================================
             // Start <head>
@@ -242,6 +249,12 @@ impl Page {
                 }
             }
         }
+    }
+}
+
+impl<'r> Responder<'r> for Page {
+    fn respond_to(self, req: &Request) -> response::Result<'r> {
+        self.render(req).respond_to(req)
     }
 }
 

@@ -1,5 +1,5 @@
 use rocket::State;
-use maud::{html, Markup};
+use maud::html;
 
 use user::AuthUser;
 use db::Db;
@@ -7,7 +7,7 @@ use template::{Flash, Page};
 
 
 #[get("/settings")]
-pub fn settings(auth_user: AuthUser, _db: State<Db>) -> Markup {
+pub fn settings(auth_user: AuthUser, _db: State<Db>) -> Page {
     // TODO: implement
 
     Page::empty()
@@ -18,5 +18,4 @@ pub fn settings(auth_user: AuthUser, _db: State<Db>) -> Markup {
         .with_content(html! {
             "ToDo: Settings"
         })
-        .render()
 }

@@ -1,7 +1,6 @@
-use maud::Markup;
 use rocket::config::{Config, Environment};
 use rocket::http::{Cookies, Status};
-use rocket::request::{FlashMessage, Form};
+use rocket::request::Form;
 use rocket::response::{Flash, Redirect};
 use rocket::State;
 
@@ -21,10 +20,9 @@ use user::AuthUser;
 #[get("/login")]
 fn login_form(
     auth_user: Option<AuthUser>,
-    flash: Option<FlashMessage>,
     config: State<Config>,
     locale: Locale,
-) -> StdResult<Markup, Redirect> {
+) -> StdResult<Page, Redirect> {
     match auth_user {
         // If the user is already logged in, we just forward them to the index
         // page. They shouldn't be able to see the login form. It's confusing.
@@ -43,13 +41,10 @@ fn login_form(
                 ))
                 .collect::<Vec<_>>();
 
-            let page = Page::empty()
+            Page::empty()
                 .with_title("Login")
                 .with_content(html::login_page(&providers, locale))
-                .add_flashes(flash)
-                .render();
-
-            Ok(page)
+                .make_ok()
         }
     }
 }
