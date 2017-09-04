@@ -13,58 +13,89 @@ use std::io::Write;
 
 use user::Role;
 
-// This struct represents the SQL type 'user_role' in PG. Its Rust definition
-// is `user::Role`.
-#[derive(Debug)]
-pub struct UserRole;
 
-impl HasSqlType<UserRole> for Pg {
-    fn metadata(lookup: &Self::MetadataLookup) -> Self::TypeMetadata {
-        lookup.lookup_type("user_role")
-    }
-}
-
-impl NotNull for UserRole {}
-
-impl FromSql<UserRole, Pg> for Role {
-    fn from_sql(bytes: Option<&[u8]>) -> Result<Self, Box<Error + Send + Sync>> {
-        match bytes {
-            Some(b"admin") => Ok(Role::Admin),
-            Some(b"tutor") => Ok(Role::Tutor),
-            Some(b"student") => Ok(Role::Student),
-            Some(_) => Err("Invalid role variant".into()),
-            None => Err("Unexpected null for non-null column".into()),
+/// Macro to generate boilerplate code needed to use a postgres enum types.
+///
+/// Parameters:
+/// 1. `pg_type`: a string literal containing the type name in postgres, e.g.
+///               "user_role".
+/// 2. `diesel_ty`: a name for a dummy type representing the postgres type.
+///                 This is the type used in the `table!` macro. You can choose
+///                 it however you like, but it should be the camel-cased form
+///                 of `pg_type`.
+/// 3. `real_ty`: the name of your real enum type.
+///
+/// After those three parameters, a list of variant-"postgres value" pairs is
+/// given.
+macro_rules! enum_pg_type {
+    (
+        $pg_type:expr,
+        $diesel_ty:ident,
+        $real_ty:ident;
+        {
+            $($variant:ident => $pg_val:expr , )+
         }
+    ) => {
+        // This struct represents the SQL type 'user_role' in PG. Its Rust definition
+        // is `user::Role`.
+        #[derive(Debug)]
+        pub struct $diesel_ty;
+
+        impl HasSqlType<$diesel_ty> for Pg {
+            fn metadata(lookup: &Self::MetadataLookup) -> Self::TypeMetadata {
+                lookup.lookup_type($pg_type)
+            }
+        }
+
+        impl NotNull for $diesel_ty {}
+
+        impl FromSql<$diesel_ty, Pg> for $real_ty {
+            fn from_sql(bytes: Option<&[u8]>) -> Result<Self, Box<Error + Send + Sync>> {
+                match bytes {
+                    $(
+                        Some($pg_val) => Ok($real_ty::$variant),
+                    )+
+                    Some(_) => Err("Invalid variant".into()),
+                    None => Err("Unexpected null for non-null column".into()),
+                }
+            }
+        }
+
+        impl ToSql<$diesel_ty, Pg> for $real_ty {
+            fn to_sql<W: Write>(
+                &self,
+                out: &mut ToSqlOutput<W, Pg>,
+            ) -> Result<IsNull, Box<Error + Send + Sync>> {
+                let bytes: &'static [u8] = match *self {
+                    $(
+                        $real_ty::$variant => $pg_val,
+                    )+
+                };
+                out.write_all(bytes)
+                    .map(|_| IsNull::No)
+                    .map_err(|e| e.into())
+            }
+        }
+
+        impl FromSqlRow<$diesel_ty, Pg> for $real_ty {
+            fn build_from_row<R: Row<Pg>>(row: &mut R) -> Result<Self, Box<Error + Send + Sync>> {
+                FromSql::<$diesel_ty, Pg>::from_sql(row.take())
+            }
+        }
+
+        impl Queryable<$diesel_ty, Pg> for $real_ty {
+            type Row = Self;
+            fn build(row: Self::Row) -> Self {
+                row
+            }
+        }
+
+        expression_impls!($diesel_ty -> $real_ty);
     }
 }
 
-impl ToSql<UserRole, Pg> for Role {
-    fn to_sql<W: Write>(
-        &self,
-        out: &mut ToSqlOutput<W, Pg>,
-    ) -> Result<IsNull, Box<Error + Send + Sync>> {
-        let bytes: &'static [u8] = match *self {
-            Role::Admin => b"admin",
-            Role::Tutor => b"tutor",
-            Role::Student => b"student",
-        };
-        out.write_all(bytes)
-            .map(|_| IsNull::No)
-            .map_err(|e| e.into())
-    }
-}
-
-impl FromSqlRow<UserRole, Pg> for Role {
-    fn build_from_row<R: Row<Pg>>(row: &mut R) -> Result<Self, Box<Error + Send + Sync>> {
-        FromSql::<UserRole, Pg>::from_sql(row.take())
-    }
-}
-
-impl Queryable<UserRole, Pg> for Role {
-    type Row = Self;
-    fn build(row: Self::Row) -> Self {
-        row
-    }
-}
-
-expression_impls!(UserRole -> Role);
+enum_pg_type! ("user_role", UserRole, Role; {
+    Admin => b"admin",
+    Tutor => b"tutor",
+    Student => b"student",
+});
