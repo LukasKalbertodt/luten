@@ -6,6 +6,7 @@ use rocket::request::FlashMessage;
 use rocket::response::{self, Responder};
 
 use config;
+use state::FrozenState;
 use user::AuthUser;
 
 
@@ -138,6 +139,21 @@ impl Page {
         if let Some(flash) = req.guard::<FlashMessage>().succeeded() {
             self.flashes.push(flash.into());
         }
+
+        // Check for a frozen application and show a flash in that case
+        if let Some(frozen_state) = req.guard::<FrozenState>().succeeded() {
+           self.flashes.push(Flash::info(
+                html! {
+                    "This website is frozen right now. This means that you can't do "
+                    "anything. This state is usually temporary and was activated by an "
+                    "administrator."
+                    @if let Some(reason) = frozen_state.0.reason {
+                        "Reason: \"" (reason) "\"."
+                    }
+                }
+           ));
+        }
+
 
         html! { (DOCTYPE) html {
             // ===============================================================
