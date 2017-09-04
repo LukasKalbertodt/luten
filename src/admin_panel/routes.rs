@@ -44,6 +44,7 @@ pub fn index(
         .with_title("Admin Panel")
         .with_auth_user(&admin)
         .with_content(html::index(locale, &stats, &config))
+        .with_active_nav_route("/admin_panel")
         .render()
         .make_ok()
 }
@@ -80,6 +81,7 @@ pub fn state(
     Page::empty()
         .with_title(dict::new(locale).admin_panel.state_title())
         .with_auth_user(&admin)
+        .with_active_nav_route("/admin_panel")
         .with_content(html::state(locale, &app_state))
         .render()
         .make_ok()

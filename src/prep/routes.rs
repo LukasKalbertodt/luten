@@ -28,6 +28,7 @@ fn overview(
                     NavItem::new(dict.nav_overview_title(), "/prep"),
                     NavItem::new(dict.nav_timeslots_title(), "/prep/timeslots"),
                 ])
+                .with_active_nav_route("/prep")
                 .with_content(html::student_overview(locale))
                 .render()
         }

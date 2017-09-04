@@ -40,6 +40,7 @@ pub struct Page {
     flashes: Vec<Flash>,
     auth_user: Option<AuthUser>,
     content: Markup,
+    active_nav_route: Option<Cow<'static, str>>,
 }
 
 impl Page {
@@ -51,18 +52,15 @@ impl Page {
             flashes: vec![],
             auth_user: None,
             content: html!{},
+            active_nav_route: None,
         }
     }
 
     /// An empty page with a single error flash.
     pub fn error(flash_content: Markup) -> Self {
-        Self {
-            title: "".into(),
-            nav_items: vec![],
-            flashes: vec![Flash::error(flash_content)],
-            auth_user: None,
-            content: html! {},
-        }
+        let mut out = Self::empty();
+        out.add_flashes(vec![Flash::error(flash_content)]);
+        out
     }
 
     /// Sets the title.
@@ -76,15 +74,6 @@ impl Page {
         self.title = title.into();
         self
     }
-
-    // /// Sets the items of the navigation bar.
-    // pub fn with_nav<T>(&mut self, nav: T) -> &mut Self
-    //     where T: IntoIterator,
-    //           T::Item: Into<Cow<'static, str>>,
-    // {
-    //     self.nav_items = nav.into_iter().map(|e| e.into()).collect();
-    //     self
-    // }
 
     /// Sets the "auth user" (the user that is logged in).
     ///
@@ -121,6 +110,15 @@ impl Page {
         where I: IntoIterator<Item=NavItem>
     {
         self.nav_items.extend(nav_items);
+        self
+    }
+
+    /// Sets a nav route as active. The corresponding nav item will be
+    /// highlighted.
+    pub fn with_active_nav_route<T>(&mut self, active_nav_route: T) -> &mut Self
+        where T: Into<Cow<'static, str>>
+    {
+        self.active_nav_route = Some(active_nav_route.into());
         self
     }
 
@@ -205,7 +203,14 @@ impl Page {
 
                 // All given nav items
                 @for item in nav_items {
-                    a class="c-nav__item" href=(item.url) (item.title)
+                    a class={
+                        "c-nav__item"
+                        @if Some(&item.url) == self.active_nav_route.as_ref() {
+                            " c-nav__item--active"
+                        } @else {
+                            ""
+                        }
+                    } href=(item.url) (item.title)
                 }
 
                 // // TODO: unhide help?
