@@ -6,8 +6,8 @@ services:
   - postgresql
 
 before_install:
-  # SCSS compiler
-  - gem install sass
+  # Install SCSS compiler if it's not cached
+  - hash sass 2>/dev/null || gem install sass
 
   # install diesel_cli if it's not cached
   - hash diesel 2>/dev/null || cargo install -f diesel_cli
@@ -24,4 +24,7 @@ script: |
   cargo build --verbose && \
   cargo test --verbose
 
-cache: cargo
+cache:
+  cargo: true
+  directories:
+    - .gem
