@@ -10,7 +10,7 @@ pub fn student_overview(locale: Locale) -> Markup {
     let dict = dict::new(locale).prep;
 
     html! {
-        div class="c-card prep-status-card u-high" {
+        div class="c-card prep-status-card u-higher" {
             div class="c-card__item c-card__item--info c-card__item--divider" {
                 (dict.state_title())
                 ": Informationen"
