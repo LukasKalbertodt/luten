@@ -113,6 +113,17 @@ impl Page {
         self
     }
 
+    /// Adds nav items to the page.
+    ///
+    /// The nav items are placed in the nav bar between the brand-text and the
+    /// "Account" item.
+    pub fn add_nav_items<I>(&mut self, nav_items: I) -> &mut Self
+        where I: IntoIterator<Item=NavItem>
+    {
+        self.nav_items.extend(nav_items);
+        self
+    }
+
     /// Set the main content of the page.
     pub fn with_content<T>(&mut self, content: T) -> &mut Self
         where T: Render
