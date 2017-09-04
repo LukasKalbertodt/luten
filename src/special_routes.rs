@@ -2,14 +2,38 @@ use std::path::{Path, PathBuf};
 
 use maud::{html, Markup};
 use rocket::response::{Flash, NamedFile, Redirect};
-use rocket::{Outcome, Request};
+use rocket::{Outcome, Request, State};
 use rocket::http::Cookie;
 
 use config;
+use db::Db;
 use dict::{self, Locale};
 use errors::*;
+use state::{AppState, CurrentAppState};
 use template::{Flash as OurFlash, Page};
-use user::AuthUser;
+use user::{AuthUser, Role};
+
+
+/// The index page.
+///
+/// This handler will always redirect instead of generating a response itself
+/// (except in the error case).
+#[get("/")]
+pub fn index(auth_user: AuthUser, db: State<Db>) -> Result<StdResult<Redirect, Markup>> {
+    let app_state = CurrentAppState::load(&db)?;
+
+    // Redirect to the correct route depending on user role and app state.
+    match (auth_user.role(), app_state.state) {
+        (Role::Student, AppState::Preparation) => Ok(Redirect::to("/prep")),
+        _ => {
+            Err(
+                Page::error(html! { "unimplemented!" })
+                    .with_auth_user(&auth_user)
+                    .render()
+            )
+        }
+    }.make_ok()
+}
 
 /// Route to serve static file requests from the `static/` directory.
 ///
