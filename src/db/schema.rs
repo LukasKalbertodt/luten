@@ -1,4 +1,16 @@
 table! {
+    use diesel::types::*;
+    use db::types::AppState;
+
+    current_app_state (id) {
+        id -> Bool,
+        state -> AppState,
+        reason -> Nullable<Text>,
+        next_state_switch -> Nullable<Timestamptz>,
+    }
+}
+
+table! {
     passwords (user_id) {
         user_id -> Int8,
         hash -> Bpchar,

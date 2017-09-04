@@ -12,6 +12,7 @@ use std::error::Error;
 use std::io::Write;
 
 use user::Role;
+use state::AppState as RealAppState;
 
 
 /// Macro to generate boilerplate code needed to use a postgres enum types.
@@ -94,8 +95,14 @@ macro_rules! enum_pg_type {
     }
 }
 
-enum_pg_type! ("user_role", UserRole, Role; {
+enum_pg_type!("user_role", UserRole, Role; {
     Admin => b"admin",
     Tutor => b"tutor",
     Student => b"student",
+});
+
+enum_pg_type! ("app_state", AppState, RealAppState; {
+    Preparation => b"pPreparation",
+    Running => b"running",
+    Frozen => b"frozen",
 });
