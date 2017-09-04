@@ -33,6 +33,7 @@ pub mod dict;
 pub mod errors;
 pub mod login;
 pub mod special_routes;
+pub mod state;
 pub mod template;
 pub mod user;
 
@@ -90,6 +91,7 @@ pub fn start_server() {
         }))
         .mount("/", routes![
             admin_panel::routes::index,
+            admin_panel::routes::state,
 
             dummy::index,
             dummy::dummy,

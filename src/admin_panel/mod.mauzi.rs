@@ -1,8 +1,11 @@
+// ===========================================================================
+// Index page
+// ===========================================================================
 unit title {
     De => "Administrationsoberfläche",
 }
 
-unit statistics_title {
+unit statistics_headline {
     De => "Statistiken",
 }
 
@@ -18,6 +21,30 @@ unit num_students {
 }
 
 
-unit config_title {
+unit config_headline {
     De => "Server-Konfiguration",
+}
+
+
+// ===========================================================================
+// State managing page
+// ===========================================================================
+unit state_title {
+    De => "App Status verwalten",
+}
+
+unit current_state {
+    De => "Aktueller Status",
+}
+unit state_reason {
+    De => "Begründung",
+}
+unit no_reason {
+    De => "Keine",
+}
+unit next_state_switch {
+    De => "Vorraussichtlich nächster Status-Wechsel",
+}
+unit no_state_switch_estimate {
+    De => "Nicht angegeben",
 }
