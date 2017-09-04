@@ -16,9 +16,9 @@ pub enum AppState {
 #[derive(Debug, Clone, Eq, PartialEq, Queryable)]
 pub struct CurrentAppState {
     id: bool,
-    state: AppState,
-    reason: Option<String>,
-    next_state_switch: Option<DateTime<Utc>>,
+    pub state: AppState,
+    pub reason: Option<String>,
+    pub next_state_switch: Option<DateTime<Utc>>,
 }
 
 impl CurrentAppState {
