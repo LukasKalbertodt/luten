@@ -54,6 +54,17 @@ impl Page {
         }
     }
 
+    /// An empty page with a single error flash.
+    pub fn error(flash_content: Markup) -> Self {
+        Self {
+            title: "".into(),
+            nav_items: vec![],
+            flashes: vec![Flash::error(flash_content)],
+            auth_user: None,
+            content: html! {},
+        }
+    }
+
     /// Sets the title.
     ///
     /// Note that this "title" is only the changing part of the title. The
