@@ -60,14 +60,14 @@ mauzi! {
             @if let Some(reason) = reason {
                 p {
                     b "Grund für Deaktivierung: "
-                    "\"" (reason) "\""
+                    "„" (reason) "“"
                 }
             }
 
             @if let Some(end) = end {
                 p {
                     b "Vorraussichtliche Reaktivierung des Systems: "
-                    "„" (end) "“"
+                    (end)
                 }
             }
         }}
@@ -82,14 +82,14 @@ mauzi! {
             @if let Some(reason) = reason {
                 p {
                     b "Reason: "
-                    "\"" (reason) "\""
+                    "“" (reason) "”"
                 }
             }
 
             @if let Some(end) = end {
                 p {
                     b "Estimated time when the system is unfrozen: "
-                    "“" (end) "”"
+                    (end)
                 }
             }
         }}
