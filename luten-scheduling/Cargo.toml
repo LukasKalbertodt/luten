@@ -1,5 +1,5 @@
 [package]
-name = "timeslot-algo"
+name = "luten-scheduling"
 version = "0.1.0"
 authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>"]
 
