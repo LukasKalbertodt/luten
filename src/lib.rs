@@ -55,14 +55,14 @@ pub fn start_server() {
             admin_panel::routes::index,
             admin_panel::routes::state,
 
-            special_routes::static_files,
-            special_routes::index,
-
             login::routes::login_form,
             login::routes::validate_data,
             login::routes::logout,
 
             prep::routes::overview,
+
+            special_routes::static_files,
+            special_routes::index,
 
             user::routes::settings,
         ])
