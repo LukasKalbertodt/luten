@@ -1,3 +1,5 @@
+//! Helper to actually output some HTML.
+
 use std::borrow::Cow;
 use maud::{html, DOCTYPE, Markup, Render};
 use option_filter::OptionFilterExt;
@@ -17,7 +19,7 @@ use user::AuthUser;
 /// the surrounding tags, such as <html>, the <head> section and the main
 /// structure of the <body> section. All the HTML generation can be influenced
 /// by setting attributes on this type, such as the `title` attribute, which
-/// is used to fill the <title> tag.
+/// is used to fill the `<title>` tag.
 ///
 /// All routes which return a standard HTML result, will look roughly like
 /// this:
@@ -61,7 +63,7 @@ impl Page {
     /// An empty page with a single error flash.
     pub fn error<M: Render>(flash_content: M) -> Self {
         Self::empty()
-            .add_flashes(vec![FlashBubble::error(flash_content)])
+            .add_flash(FlashBubble::error(flash_content))
     }
 
     /// An empty page showing a single error saying the page is unimplemented.
@@ -72,8 +74,8 @@ impl Page {
     /// Sets the title.
     ///
     /// Note that this "title" is only the changing part of the title. The
-    /// value in the <title> tag will have a postfixed "-- Foo" where "Foo" is
-    /// the value of `config::WEBSITE_TITLE`.
+    /// value in the `<title>` tag will have a postfixed "-- Foo" where "Foo"
+    /// is the value of `config::WEBSITE_TITLE`.
     pub fn with_title<T>(mut self, title: T) -> Self
         where T: Into<Cow<'static, str>>
     {
@@ -88,14 +90,8 @@ impl Page {
     /// "info" flashes, each with their individual color. For example, the
     /// message on a failed login attempt is a flash.
     ///
-    /// This method accepts anything that can be turned into an iterator which
-    /// yields elements that can be turned into a `Flash`. This conveniently
-    /// allows to pass `Option<rocket::FlashMessage>`!
-    pub fn add_flashes<I, T>(mut self, flashes: I) -> Self
-        where I: IntoIterator<Item=T>,
-              T: Into<FlashBubble>,
-    {
-        self.flashes.extend(flashes.into_iter().map(|t| t.into()));
+    pub fn add_flash<T: Into<FlashBubble>>(mut self, flash: T) -> Self {
+        self.flashes.push(flash.into());
         self
     }
 
@@ -275,6 +271,7 @@ impl<'r> Responder<'r> for Page {
     }
 }
 
+/// An item in the navigation bar at the very top of the page.
 #[derive(Debug, Clone)]
 pub struct NavItem {
     title: Cow<'static, str>,

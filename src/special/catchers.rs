@@ -22,9 +22,7 @@ fn unauthorized(req: &Request) -> StdResult<Flash<Redirect>, Page> {
         let locale = req.guard::<Locale>().unwrap();
 
         Page::empty()
-            .add_flashes(vec![
-                FlashBubble::error(dict::new(locale).forbidden_flash()),
-            ])
+            .add_flash(FlashBubble::error(dict::new(locale).forbidden_flash()))
             .make_err()
     } else {
         // In this case, there is no login present. We will forward to the
