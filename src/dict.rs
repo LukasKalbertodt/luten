@@ -1,3 +1,18 @@
+//! This module hold the dictionary used for localization.
+//!
+//! We want to support multiple languages in our tool, so we have to use some
+//! kind of localization. There aren't any stable i18n or l10n crates in the
+//! Rust eco-system right now. Thus I (Lukas) wrote my own which I plan to
+//! develop alongside with this project. It's called `mauzi` and is very young
+//! and bare-bone. Some TODO comments in these dictionary definitions are
+//! actually intended for mauzi-development.
+//!
+//! Anyway, mauzi let's you define dictionaries hosting multiple translations
+//! fairly easily. I hope the syntax is more or less self-explanatory.
+//!
+//! The dictionary definition is spread over multiple files: this file and
+//! several `mod.mauzi.rs` files.
+
 use accept_language;
 use chrono::{DateTime, Utc};
 use maud::{html, Markup};
@@ -5,11 +20,14 @@ use mauzi::mauzi;
 use rocket::Outcome;
 use rocket::request::{self, FromRequest, Request};
 
-
+// We implement `FromRequest` for the mauzi-generated `Locale` type to easily
+// obtain it in any handler.
 impl<'a, 'r> FromRequest<'a, 'r> for Locale {
     type Error = ();
 
     fn from_request(req: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
+        // TODO: this could be improved... We basically parse the request
+        // header and use `En` as default locale.
         let locale = req.headers().get_one("accept-language")
             .and_then(|val| {
                 accept_language::intersection(val, vec!["de", "en"]).first().cloned()
@@ -36,6 +54,11 @@ mauzi! {
     mod admin_panel;
     mod login;
     mod prep;
+
+
+    // Below are translation units which are somewhat global. Everything that
+    // is only used by a specific part of this application should be defined in
+    // the corresponding module.
 
     unit forbidden_flash -> Markup {
         De => { html! {
@@ -95,6 +118,8 @@ mauzi! {
         }}
     }
 
+
+    // Page navigation
     unit nav_account {
         _ => "Account",
     }
