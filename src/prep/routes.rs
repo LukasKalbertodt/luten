@@ -22,7 +22,6 @@ fn overview(
         // ===== Student ======================================================
         Role::Student => {
             Page::empty()
-                .with_auth_user(&auth_user)
                 .with_title(dict.overview_title())
                 .add_nav_items(vec![
                     NavItem::new(dict.nav_overview_title(), "/prep"),
@@ -35,13 +34,11 @@ fn overview(
         // ===== Tutor ========================================================
         Role::Tutor => {
             Page::error(html! { "unimplemented" })
-                .with_auth_user(&auth_user)
         }
 
         // ===== Admin ========================================================
         Role::Admin => {
             Page::error(html! { "unimplemented" })
-                .with_auth_user(&auth_user)
         }
     }.make_ok()
 

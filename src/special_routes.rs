@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use maud::html;
 use rocket::response::{Flash, NamedFile, Redirect};
-use rocket::{Outcome, Request, State};
+use rocket::{Request, State};
 use rocket::http::Cookie;
 
 use config;
@@ -35,7 +35,6 @@ pub fn index(auth_user: AuthUser, db: State<Db>) -> Result<StdResult<Redirect, P
         _ => {
             Err(
                 Page::error(html! { "unimplemented!" })
-                    .with_auth_user(&auth_user)
             )
         }
     }.make_ok()
@@ -56,14 +55,13 @@ pub fn static_files(path: PathBuf) -> Option<NamedFile> {
 /// otherwise.
 #[error(403)]
 fn unauthorized(req: &Request) -> StdResult<Flash<Redirect>, Page> {
-    if let Outcome::Success(auth_user) = req.guard::<AuthUser>() {
+    if req.guard::<AuthUser>().is_success() {
         // In this case a login IS present, but it lacks the permissions to do
         // something. In this case it doesn't make sense to forward to the
         // login page. We will show an error instead.
         let locale = req.guard::<Locale>().unwrap();
 
         let page = Page::empty()
-            .with_auth_user(&auth_user)
             .add_flashes(vec![
                 OurFlash::error(html! {
                     (dict::new(locale).forbidden_flash())

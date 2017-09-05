@@ -7,11 +7,10 @@ use template::{Flash, Page};
 
 
 #[get("/settings")]
-pub fn settings(auth_user: AuthUser, _db: State<Db>) -> Page {
+pub fn settings(_auth_user: AuthUser, _db: State<Db>) -> Page {
     // TODO: implement
 
     Page::empty()
-        .with_auth_user(&auth_user)
         .add_flashes(vec![
             Flash::warning(html! { "Settings-page is not implemented yet!" })
         ])

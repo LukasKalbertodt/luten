@@ -42,7 +42,7 @@ pub struct Page {
     title: Cow<'static, str>,
     nav_items: Vec<NavItem>,
     flashes: Vec<Flash>,
-    auth_user: Option<AuthUser>,
+    // auth_user: Option<AuthUser>,
     content: Markup,
     active_nav_route: Option<Cow<'static, str>>,
 }
@@ -54,7 +54,7 @@ impl Page {
             title: "".into(),
             nav_items: vec![],
             flashes: vec![],
-            auth_user: None,
+            // auth_user: None,
             content: html!{},
             active_nav_route: None,
         }
@@ -75,15 +75,6 @@ impl Page {
         where T: Into<Cow<'static, str>>
     {
         self.title = title.into();
-        self
-    }
-
-    /// Sets the "auth user" (the user that is logged in).
-    ///
-    /// This should always be called if a user is logged in. Setting the user
-    /// generates the "Account" item in the nav bar, which is hidden otherwise.
-    pub fn with_auth_user(mut self, auth_user: &AuthUser) -> Self {
-        self.auth_user = Some(auth_user.clone());
         self
     }
 
@@ -155,6 +146,8 @@ impl Page {
         }
 
 
+
+
         html! { (DOCTYPE) html {
             // ===============================================================
             // Start <head>
@@ -183,7 +176,7 @@ impl Page {
             // Start <body>
             // ===============================================================
             body class="c-text" {
-                header (self.render_nav())
+                header (self.render_nav(req))
                 main class="o-container o-container--large u-pillar-box--small" {
                     // Show all flashes
                     div class="u-letter-box--small" {
@@ -202,10 +195,16 @@ impl Page {
         } }
     }
 
-    fn render_nav(&self) -> Markup {
+    fn render_nav(&self, req: &Request) -> Markup {
         let (title_fg, title_border) = title_colors();
+
+        // Try to create an auth user from the request.
+        let auth_user = req.guard::<AuthUser>().succeeded();
+
+        // Add "Admin Panel" nav item if the user is an admin
+        // TODO: l10n
         let mut nav_items = self.nav_items.clone();
-        if self.auth_user.as_ref().filter(|u| u.is_admin()).is_some() {
+        if auth_user.as_ref().filter(|u| u.is_admin()).is_some() {
             nav_items.push(NavItem::new("Admin Panel", "/admin_panel"));
         }
 
@@ -240,7 +239,7 @@ impl Page {
                 // span class="c-nav__item" "Hilfe"
 
                 // Show account entry if the user has been logged in
-                @if let Some(ref auth_user) = self.auth_user {
+                @if let Some(auth_user) = auth_user {
                     div class="c-nav__item c-nav__item--right c-nav__item--info nav-account-box" {
                         i class="fa fa-user" {}
                         " Account (" (auth_user.username()) ")"
