@@ -57,14 +57,13 @@ fn unauthorized(req: &Request) -> StdResult<Flash<Redirect>, Page> {
         // login page. We will show an error instead.
         let locale = req.guard::<Locale>().unwrap();
 
-        let page = Page::empty()
+        Page::empty()
             .add_flashes(vec![
                 OurFlash::error(html! {
                     (dict::new(locale).forbidden_flash())
                 }),
-            ]);
-
-        Err(page)
+            ])
+            .make_err()
     } else {
         // In this case, there is no login present. We will forward to the
         // login page.

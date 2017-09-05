@@ -34,10 +34,11 @@ error_chain! {
 }
 
 
-/// This helper traits makes it possible to call `make_ok()` on all types.
+/// This helper trait makes it possible to call `make_ok()` and `make_err()` on
+/// all types.
 ///
-/// The problem is, that wrapping stuff into `Ok()` is sometimes really
-/// annoying if this stuff has multiple lines. Example:
+/// The problem is, that wrapping stuff into `Ok()` or `Err()` is sometimes
+/// really annoying if this stuff has multiple lines. Example:
 ///
 /// ```ignore
 /// Ok(
@@ -49,7 +50,7 @@ error_chain! {
 /// ```
 ///
 /// This way, the whole thing is indented one additional level and we have two
-/// nearly empty line. Sure, one could use another strategy to break the line,
+/// nearly empty lines. Sure, one could use another strategy to break the line,
 /// but it's still ugly.
 ///
 /// So instead, we can write this:
@@ -64,12 +65,16 @@ error_chain! {
 ///
 /// Maybe it's questionable if this is a good solution, but I like it a lot
 /// better. This shouldn't be use for situations in which `Ok()` is fine!
-pub trait MakeOkExt: Sized {
+pub trait MakeResExt: Sized {
     fn make_ok<E>(self) -> StdResult<Self, E>;
+    fn make_err<O>(self) -> StdResult<O, Self>;
 }
 
-impl<T> MakeOkExt for T {
+impl<T> MakeResExt for T {
     fn make_ok<E>(self) -> StdResult<Self, E> {
         Ok(self)
+    }
+    fn make_err<O>(self) -> StdResult<O, Self> {
+        Err(self)
     }
 }
