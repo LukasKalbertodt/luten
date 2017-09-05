@@ -177,7 +177,7 @@ impl Page {
             // Start <body>
             // ===============================================================
             body class="c-text" {
-                header (self.render_nav(req))
+                header (self.render_nav(req, locale))
                 main class="o-container o-container--large u-pillar-box--small" {
                     // Show all flashes
                     div class="u-letter-box--small" {
@@ -196,8 +196,9 @@ impl Page {
         } }
     }
 
-    fn render_nav(&self, req: &Request) -> Markup {
+    fn render_nav(&self, req: &Request, locale: Locale) -> Markup {
         let (title_fg, title_border) = title_colors();
+        let dict = dict::new(locale);
 
         // Try to create an auth user from the request.
         let auth_user = req.guard::<AuthUser>().succeeded();
@@ -236,14 +237,12 @@ impl Page {
                     } href=(item.url) (item.title)
                 }
 
-                // // TODO: unhide help?
-                // span class="c-nav__item" "Hilfe"
-
                 // Show account entry if the user has been logged in
                 @if let Some(auth_user) = auth_user {
                     div class="c-nav__item c-nav__item--right c-nav__item--info nav-account-box" {
                         i class="fa fa-user" {}
-                        " Account (" (auth_user.username()) ")"
+                        " " (dict.nav_account()) " (" (auth_user.username()) ")"
+
                         ul class="nav-account-children c-nav" {
                             @if let Some(name) = auth_user.name() {
                                 li class="c-nav__content u-centered c-text--loud" (name)
@@ -251,13 +250,15 @@ impl Page {
                             li class="c-nav__item" {
                                 a href="/settings" {
                                     i class="fa fa-sliders" {}
-                                    " Einstellungen"
+                                    " "
+                                    (dict.nav_settings())
                                 }
                             }
                             li class="c-nav__item" {
                                 a href="/logout" {
                                     i class="fa fa-sign-out" {}
-                                    " Logout"
+                                    " "
+                                    (dict.nav_logout())
                                 }
                             }
                         }

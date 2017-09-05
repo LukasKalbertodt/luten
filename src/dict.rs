@@ -94,4 +94,16 @@ mauzi! {
             }
         }}
     }
+
+    unit nav_account {
+        _ => "Account",
+    }
+    unit nav_settings {
+        De => "Einstellungen",
+        En => "Settings",
+    }
+    unit nav_logout {
+        De => "Ausloggen",
+        En => "Logout",
+    }
 }
