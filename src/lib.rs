@@ -41,9 +41,6 @@ extern crate rand;
 extern crate rocket;
 
 
-#[macro_use]
-pub mod util;
-
 pub mod admin_panel;
 pub mod config;
 pub mod db;

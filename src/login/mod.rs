@@ -155,7 +155,10 @@ impl Session {
             .and_then(|cookie| hex::decode(cookie.value()).ok())
             .filter(|session_id| session_id.len() == config::SESSION_ID_LEN);
 
-        let session_id = try_opt_ok!(session_id);
+        let session_id = match session_id {
+            None => return Ok(None),
+            Some(v) => v,
+        };
 
         // Try to find a session with the given id, load the user owning that
         // session and create an `AuthUser` from it.
