@@ -40,7 +40,7 @@ use user::AuthUser;
 pub struct Page {
     title: Cow<'static, str>,
     nav_items: Vec<NavItem>,
-    flashes: Vec<Flash>,
+    flashes: Vec<FlashBubble>,
     content: Markup,
     active_nav_route: Option<Cow<'static, str>>,
 }
@@ -60,7 +60,7 @@ impl Page {
     /// An empty page with a single error flash.
     pub fn error(flash_content: Markup) -> Self {
         Self::empty()
-            .add_flashes(vec![Flash::error(flash_content)])
+            .add_flashes(vec![FlashBubble::error(flash_content)])
     }
 
     /// An empty page showing a single error saying the page is unimplemented.
@@ -92,7 +92,7 @@ impl Page {
     /// allows to pass `Option<rocket::FlashMessage>`!
     pub fn add_flashes<I, T>(mut self, flashes: I) -> Self
         where I: IntoIterator<Item=T>,
-              T: Into<Flash>,
+              T: Into<FlashBubble>,
     {
         self.flashes.extend(flashes.into_iter().map(|t| t.into()));
         self
@@ -136,7 +136,7 @@ impl Page {
         // Check for a frozen application and show a flash in that case. This
         // flash is always shown first.
         if let Some(frozen_state) = req.guard::<FrozenState>().succeeded() {
-           self.flashes.insert(0, Flash::info(
+           self.flashes.insert(0, FlashBubble::info(
                 html! {
                     "This website is frozen right now. This means that you can't do "
                     "anything. This state is usually temporary and was activated by an "
@@ -296,12 +296,12 @@ impl NavItem {
 
 /// A small box at the top of the website.
 #[derive(Debug)]
-pub struct Flash {
+pub struct FlashBubble {
     content: Markup,
     kind: FlashKind,
 }
 
-impl Flash {
+impl FlashBubble {
     pub fn info(content: Markup) -> Self {
         Self {
             kind: FlashKind::Info,
@@ -331,7 +331,7 @@ impl Flash {
     }
 }
 
-impl From<FlashMessage> for Flash {
+impl From<FlashMessage> for FlashBubble {
     fn from(msg: FlashMessage) -> Self {
         let kind = match msg.name() {
             "success" => FlashKind::Success,

@@ -10,7 +10,7 @@ use db::Db;
 use dict::{self, Locale};
 use errors::*;
 use state::{AppState, CurrentAppState};
-use template::{Flash as OurFlash, Page};
+use template::{FlashBubble, Page};
 use user::{AuthUser, Role};
 
 
@@ -59,7 +59,7 @@ fn unauthorized(req: &Request) -> StdResult<Flash<Redirect>, Page> {
 
         Page::empty()
             .add_flashes(vec![
-                OurFlash::error(html! {
+                FlashBubble::error(html! {
                     (dict::new(locale).forbidden_flash())
                 }),
             ])
