@@ -1,3 +1,12 @@
+//! Defines the global `Error` and `Result` type and provides some helper
+//! functionality for error handling.
+//!
+//! Please see the documentation of `error-chain` for more information. In
+//! short: we define a big `Error` type here which can store everything that
+//! can potentially go wrong. This means that we are using only one error type
+//! in the whole program. Additionally, `Result` is redefined to include this
+//! exact error type.
+
 use diesel;
 use pwhash;
 use r2d2;
@@ -15,6 +24,9 @@ pub use std::error::Error as StdError;
 error_chain! {
     // All kinds of errors that can occur in this application
     foreign_links {
+        // Errors that we don't expect to handle. But we also don't want to
+        // panic. Instead, unhandled errors should result in a "500 internal
+        // server error".
         DbPoolInit(r2d2::InitializationError);
         DbPoolTimeout(r2d2::GetTimeout);
         Db(diesel::result::Error);
