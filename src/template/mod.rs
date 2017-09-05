@@ -22,9 +22,9 @@ use user::AuthUser;
 /// this:
 ///
 /// ```ignore
-/// use maud::{html, Markup};
+/// use maud::html;
 ///
-/// fn handler() -> Markup {
+/// fn handler() -> Page {
 ///     // Do stuff...
 ///
 ///     Page::empty()
@@ -33,7 +33,6 @@ use user::AuthUser;
 ///         .with_content(html! {
 ///             h1 "Hello"
 ///         })
-///         .render()
 /// }
 /// ```
 ///
