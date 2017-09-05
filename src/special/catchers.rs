@@ -1,48 +1,14 @@
-use std::path::{Path, PathBuf};
 
 use maud::html;
-use rocket::response::{Flash, NamedFile, Redirect};
-use rocket::{Request, State};
+use rocket::response::{Flash, Redirect};
+use rocket::Request;
 use rocket::http::Cookie;
 
 use config;
-use db::Db;
 use dict::{self, Locale};
 use errors::*;
-use state::{AppState, CurrentAppState};
 use template::{FlashBubble, Page};
-use user::{AuthUser, Role};
-
-
-/// The index page.
-///
-/// This handler will always redirect instead of generating a response itself
-/// (except in the error case).
-#[get("/")]
-pub fn index(auth_user: AuthUser, db: State<Db>) -> Result<StdResult<Redirect, Page>> {
-    let app_state = CurrentAppState::load(&db)?;
-
-    // Redirect to the correct route depending on user role and app state.
-    match (auth_user.role(), app_state.state) {
-        // Preparation state
-        (Role::Student, AppState::Preparation) => Ok(Redirect::to("/prep")),
-
-        // Frozen state: admins are redirected to the admin panel, all others
-        // see a empty page with a flash bubble talking about the state.
-        (Role::Admin, AppState::Frozen) => Ok(Redirect::to("/admin_panel")),
-        (_, AppState::Frozen) => Err(Page::empty()),
-
-        _ => Err(Page::unimplemented()),
-    }.make_ok()
-}
-
-/// Route to serve static file requests from the `static/` directory.
-///
-/// Thanks to Rocket, this is *path traversal attack* save.
-#[get("/static/<path..>")]
-pub fn static_files(path: PathBuf) -> Option<NamedFile> {
-    NamedFile::open(Path::new("static/").join(path)).ok()
-}
+use user::AuthUser;
 
 
 /// Catcher for 403 Forbidden.

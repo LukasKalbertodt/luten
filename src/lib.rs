@@ -33,7 +33,7 @@ pub mod dict;
 pub mod errors;
 pub mod login;
 pub mod prep;
-pub mod special_routes;
+pub mod special;
 pub mod state;
 pub mod template;
 pub mod user;
@@ -61,13 +61,13 @@ pub fn start_server() {
 
             prep::routes::overview,
 
-            special_routes::static_files,
-            special_routes::index,
+            special::routes::static_files,
+            special::routes::index,
 
             user::routes::settings,
         ])
         .catch(errors![
-            special_routes::unauthorized,
+            special::catchers::unauthorized,
         ])
         .launch();
 }
