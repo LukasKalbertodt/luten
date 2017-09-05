@@ -1,3 +1,20 @@
+//! A web app to manage homework assignments.
+//!
+//! This documentation is written for luten developers and ordinary users
+//! will probably not benefit from this.
+//!
+//!
+//! ## Overview
+//!
+//! The main code of this application lives in a library crate called `luten`.
+//! Right now, you are reading the documentation of its root module. This is a
+//! library crate to allow access to "model" types from other tools. You can
+//! find some helper tools in the `src/bin/` directory.
+//!
+//! You can find more detailed information on all submodules in the respective
+//! documentations.
+
+// Necessary for Rocket & Maud
 #![feature(plugin, custom_derive, proc_macro)]
 #![plugin(rocket_codegen)]
 
@@ -40,6 +57,11 @@ pub mod template;
 pub mod user;
 
 
+/// Starts a Rocket server with all routes mounted.
+///
+/// This is basically the `main()` function of this crate. To actually start
+/// the server, there is a small executable `src/bin/start_server.rs`. You can
+/// execute it via `cargo run --bin start_server`.
 pub fn start_server() {
     use db::Db;
     use rocket::fairing::AdHoc;
