@@ -1,4 +1,4 @@
-//! Everything related to the login- and session-system.
+//! Everything related to the login- and session-system. **Has routes.**
 //!
 //! Users need to be logged in for almost all routes in this web app. The user
 //! can choose between different *login providers* to login. There is one
@@ -8,10 +8,9 @@
 //! In addition to the main functionality around login providers and the
 //! session-system, this module also provides routes for:
 //!
-//! - get `/login`
-//! - post `/login`
-//! - get `/logout`
-//!
+//! - GET `/login`
+//! - POST `/login`
+//! - GET `/logout`
 
 use chrono::DateTime;
 use chrono::offset::Utc;

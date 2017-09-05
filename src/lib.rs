@@ -13,6 +13,32 @@
 //!
 //! You can find more detailed information on all submodules in the respective
 //! documentations.
+//!
+//!
+//! ## Module structure
+//!
+//! There are different kinds of top-level modules in this crate:
+//!
+//! - **Helper/internal modules**: these modules don't contain anything that is
+//!   directly shown on the website. Rather, stuff from these modules is used
+//!   in other modules. List: [`config`](config/index.html),
+//!   [`db`](db/index.html), [`errors`](errors/index.html),
+//!   [`state`](state/index.html) and [`template`](template/index.html).
+//! - **Route modules**: these modules are directly responsible for what is
+//!   visible on the website. They contain the route-handlers. List:
+//!   [`admin_panel`](admin_panel/index.html), [`login`](login/index.html),
+//!   [`prep`](prep/index.html), [`special`](special/index.html) and
+//!   [`user`](user/index.html).
+//! - **Dictionary modules**: the root dictionary module is
+//!   [`dict`](dict/index.html). Please see its documentation for more
+//!   information.
+//!
+//! The directories of route modules often contain the following files:
+//!
+//! - `mod.rs`: root of sub-module (crude MVC equivalent: model)
+//! - `routes.rs`: definition of all routes (crude MVC equivalent: controller)
+//! - `html.rs`: the HTML definition (crude MVC equivalent: view)
+//! - `mod.mauzi.rs`: the definition for this module
 
 // Necessary for Rocket & Maud
 #![feature(plugin, custom_derive, proc_macro)]
