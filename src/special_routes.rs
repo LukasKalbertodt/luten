@@ -32,11 +32,7 @@ pub fn index(auth_user: AuthUser, db: State<Db>) -> Result<StdResult<Redirect, P
         (Role::Admin, AppState::Frozen) => Ok(Redirect::to("/admin_panel")),
         (_, AppState::Frozen) => Err(Page::empty()),
 
-        _ => {
-            Err(
-                Page::error(html! { "unimplemented!" })
-            )
-        }
+        _ => Err(Page::unimplemented()),
     }.make_ok()
 }
 

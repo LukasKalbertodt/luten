@@ -63,6 +63,11 @@ impl Page {
             .add_flashes(vec![Flash::error(flash_content)])
     }
 
+    /// An empty page showing a single error saying the page is unimplemented.
+    pub fn unimplemented() -> Self {
+        Self::error(html! { "This page is not implemented yet!" })
+    }
+
     /// Sets the title.
     ///
     /// Note that this "title" is only the changing part of the title. The

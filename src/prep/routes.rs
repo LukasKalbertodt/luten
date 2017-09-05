@@ -1,4 +1,3 @@
-use maud::html;
 use rocket::State;
 
 use super::html;
@@ -33,12 +32,12 @@ fn overview(
 
         // ===== Tutor ========================================================
         Role::Tutor => {
-            Page::error(html! { "unimplemented" })
+            Page::unimplemented()
         }
 
         // ===== Admin ========================================================
         Role::Admin => {
-            Page::error(html! { "unimplemented" })
+            Page::unimplemented()
         }
     }.make_ok()
 
