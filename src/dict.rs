@@ -1,4 +1,4 @@
-//! This module hold the dictionary used for localization.
+//! This module holds the dictionary used for localization.
 //!
 //! We want to support multiple languages in our tool, so we have to use some
 //! kind of localization. There aren't any stable i18n or l10n crates in the
