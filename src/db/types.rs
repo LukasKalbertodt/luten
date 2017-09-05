@@ -102,7 +102,7 @@ enum_pg_type!("user_role", UserRole, Role; {
 });
 
 enum_pg_type! ("app_state", AppState, RealAppState; {
-    Preparation => b"pPreparation",
+    Preparation => b"preparation",
     Running => b"running",
     Frozen => b"frozen",
 });

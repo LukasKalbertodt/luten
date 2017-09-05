@@ -1,3 +1,12 @@
+//! Defines the global `Error` and `Result` type and provides some helper
+//! functionality for error handling.
+//!
+//! Please see the documentation of `error-chain` for more information. In
+//! short: we define a big `Error` type here which can store everything that
+//! can potentially go wrong. This means that we are using only one error type
+//! in the whole program. Additionally, `Result` is redefined to include this
+//! exact error type.
+
 use diesel;
 use pwhash;
 use r2d2;
@@ -15,6 +24,9 @@ pub use std::error::Error as StdError;
 error_chain! {
     // All kinds of errors that can occur in this application
     foreign_links {
+        // Errors that we don't expect to handle. But we also don't want to
+        // panic. Instead, unhandled errors should result in a "500 internal
+        // server error".
         DbPoolInit(r2d2::InitializationError);
         DbPoolTimeout(r2d2::GetTimeout);
         Db(diesel::result::Error);
@@ -34,10 +46,11 @@ error_chain! {
 }
 
 
-/// This helper traits makes it possible to call `make_ok()` on all types.
+/// This helper trait makes it possible to call `make_ok()` and `make_err()` on
+/// all types.
 ///
-/// The problem is, that wrapping stuff into `Ok()` is sometimes really
-/// annoying if this stuff has multiple lines. Example:
+/// The problem is, that wrapping stuff into `Ok()` or `Err()` is sometimes
+/// really annoying if this stuff has multiple lines. Example:
 ///
 /// ```ignore
 /// Ok(
@@ -49,7 +62,7 @@ error_chain! {
 /// ```
 ///
 /// This way, the whole thing is indented one additional level and we have two
-/// nearly empty line. Sure, one could use another strategy to break the line,
+/// nearly empty lines. Sure, one could use another strategy to break the line,
 /// but it's still ugly.
 ///
 /// So instead, we can write this:
@@ -64,12 +77,16 @@ error_chain! {
 ///
 /// Maybe it's questionable if this is a good solution, but I like it a lot
 /// better. This shouldn't be use for situations in which `Ok()` is fine!
-pub trait MakeOkExt: Sized {
+pub trait MakeResExt: Sized {
     fn make_ok<E>(self) -> StdResult<Self, E>;
+    fn make_err<O>(self) -> StdResult<O, Self>;
 }
 
-impl<T> MakeOkExt for T {
+impl<T> MakeResExt for T {
     fn make_ok<E>(self) -> StdResult<Self, E> {
         Ok(self)
+    }
+    fn make_err<O>(self) -> StdResult<O, Self> {
+        Err(self)
     }
 }

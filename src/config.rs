@@ -1,3 +1,9 @@
+//! Global configuration of the app.
+//!
+//! Some of this stuff (like the WEBSITE_TITLE) could be specified in an
+//! external file (and we should think about moving it there). Other constants,
+//! however, need to be defined in Rust source code (like login providers).
+
 use login;
 
 
@@ -11,8 +17,8 @@ use login;
 /// potentially in a few other places.
 pub const WEBSITE_TITLE: &str = "Info-A Testate";
 
-/// A list of usable login providers.
 lazy_static! {
+    /// A list of usable login providers.
     pub static ref LOGIN_PROVIDERS: Vec<login::ProviderEntry> = vec![
         login::ProviderEntry {
             id: "internal_password",

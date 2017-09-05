@@ -1,3 +1,10 @@
+//! User handling. **Has routes**.
+//!
+//! This module mainly consists of functionality to work with users. It has a
+//! few routes, thought:
+//!
+//! - GET `/settings`: user specific settings
+
 use diesel;
 use diesel::prelude::*;
 use rocket::{Outcome, State};
@@ -14,7 +21,7 @@ use login::Session;
 pub mod routes;
 
 
-
+/// A representation of a user in the database.
 #[derive(Debug, Clone, Eq, PartialEq, Identifiable, Queryable, Associations)]
 pub struct User {
     /// Artificial unique ID. The `username` is already unique, but storing an
@@ -32,6 +39,8 @@ pub struct User {
 }
 
 impl User {
+    /// Tries to find a user with the given username in the database and
+    /// returns it.
     pub fn from_username(username: &str, db: &Db) -> Result<Option<Self>> {
         // Find the user with the given username.
         users::table
@@ -41,11 +50,12 @@ impl User {
             .make_ok()
     }
 
+    /// Creates a new user from the given data and stores it in the database.
     pub fn create(
         username: String,
         name: Option<String>,
         role: Role,
-        db: &Db
+        db: &Db,
     ) -> Result<Self> {
         #[derive(Debug, Clone, Eq, PartialEq, Insertable)]
         #[table_name = "users"]
@@ -102,7 +112,12 @@ pub enum Role {
 
 /// An authorized user with an active session. This type doesn't restrict
 /// access to any properties, as the user is logged in.
-#[derive(Clone, Eq, PartialEq)]
+///
+/// This type implements `FromRequest` and can thus be easily obtain in any
+/// handler. The `from_request()` call fails if there is no user logged in.
+/// This way, handlers can easily ensure that they can only be visited with a
+/// valid login session.
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AuthUser {
     user: User,
     session: Session,
@@ -125,7 +140,6 @@ impl Deref for AuthUser {
     }
 }
 
-
 impl<'a, 'r> FromRequest<'a, 'r> for AuthUser {
     type Error = Option<Error>;
 
@@ -140,6 +154,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for AuthUser {
         }
     }
 }
+
 
 /// An authorized user which has the user role `Admin`.
 ///

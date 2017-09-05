@@ -1,9 +1,15 @@
+//! Helper to actually output some HTML.
+
 use std::borrow::Cow;
 use maud::{html, DOCTYPE, Markup, Render};
 use option_filter::OptionFilterExt;
+use rocket::Request;
 use rocket::request::FlashMessage;
+use rocket::response::{self, Responder};
 
 use config;
+use dict::{self, Locale};
+use state::FrozenState;
 use user::AuthUser;
 
 
@@ -13,15 +19,15 @@ use user::AuthUser;
 /// the surrounding tags, such as <html>, the <head> section and the main
 /// structure of the <body> section. All the HTML generation can be influenced
 /// by setting attributes on this type, such as the `title` attribute, which
-/// is used to fill the <title> tag.
+/// is used to fill the `<title>` tag.
 ///
 /// All routes which return a standard HTML result, will look roughly like
 /// this:
 ///
 /// ```ignore
-/// use maud::{html, Markup};
+/// use maud::html;
 ///
-/// fn handler() -> Markup {
+/// fn handler() -> Page {
 ///     // Do stuff...
 ///
 ///     Page::empty()
@@ -30,16 +36,16 @@ use user::AuthUser;
 ///         .with_content(html! {
 ///             h1 "Hello"
 ///         })
-///         .render()
 /// }
 /// ```
 ///
+#[derive(Debug)]
 pub struct Page {
     title: Cow<'static, str>,
     nav_items: Vec<NavItem>,
-    flashes: Vec<Flash>,
-    auth_user: Option<AuthUser>,
+    flashes: Vec<FlashBubble>,
     content: Markup,
+    active_nav_route: Option<Cow<'static, str>>,
 }
 
 impl Page {
@@ -49,38 +55,31 @@ impl Page {
             title: "".into(),
             nav_items: vec![],
             flashes: vec![],
-            auth_user: None,
             content: html!{},
+            active_nav_route: None,
         }
+    }
+
+    /// An empty page with a single error flash.
+    pub fn error<M: Render>(flash_content: M) -> Self {
+        Self::empty()
+            .add_flash(FlashBubble::error(flash_content))
+    }
+
+    /// An empty page showing a single error saying the page is unimplemented.
+    pub fn unimplemented() -> Self {
+        Self::error("This page is not implemented yet!")
     }
 
     /// Sets the title.
     ///
     /// Note that this "title" is only the changing part of the title. The
-    /// value in the <title> tag will have a postfixed "-- Foo" where "Foo" is
-    /// the value of `config::WEBSITE_TITLE`.
-    pub fn with_title<T>(&mut self, title: T) -> &mut Self
+    /// value in the `<title>` tag will have a postfixed "-- Foo" where "Foo"
+    /// is the value of `config::WEBSITE_TITLE`.
+    pub fn with_title<T>(mut self, title: T) -> Self
         where T: Into<Cow<'static, str>>
     {
         self.title = title.into();
-        self
-    }
-
-    // /// Sets the items of the navigation bar.
-    // pub fn with_nav<T>(&mut self, nav: T) -> &mut Self
-    //     where T: IntoIterator,
-    //           T::Item: Into<Cow<'static, str>>,
-    // {
-    //     self.nav_items = nav.into_iter().map(|e| e.into()).collect();
-    //     self
-    // }
-
-    /// Sets the "auth user" (the user that is logged in).
-    ///
-    /// This should always be called if a user is logged in. Setting the user
-    /// generates the "Account" item in the nav bar, which is hidden otherwise.
-    pub fn with_auth_user(&mut self, auth_user: &AuthUser) -> &mut Self {
-        self.auth_user = Some(auth_user.clone());
         self
     }
 
@@ -91,19 +90,33 @@ impl Page {
     /// "info" flashes, each with their individual color. For example, the
     /// message on a failed login attempt is a flash.
     ///
-    /// This method accepts anything that can be turned into an iterator which
-    /// yields elements that can be turned into a `Flash`. This conveniently
-    /// allows to pass `Option<rocket::FlashMessage>`!
-    pub fn add_flashes<I, T>(&mut self, flashes: I) -> &mut Self
-        where I: IntoIterator<Item=T>,
-              T: Into<Flash>,
+    pub fn add_flash<T: Into<FlashBubble>>(mut self, flash: T) -> Self {
+        self.flashes.push(flash.into());
+        self
+    }
+
+    /// Adds nav items to the page.
+    ///
+    /// The nav items are placed in the nav bar between the brand-text and the
+    /// "Account" item.
+    pub fn add_nav_items<I>(mut self, nav_items: I) -> Self
+        where I: IntoIterator<Item=NavItem>
     {
-        self.flashes.extend(flashes.into_iter().map(|t| t.into()));
+        self.nav_items.extend(nav_items);
+        self
+    }
+
+    /// Sets a nav route as active. The corresponding nav item will be
+    /// highlighted.
+    pub fn with_active_nav_route<T>(mut self, active_nav_route: T) -> Self
+        where T: Into<Cow<'static, str>>
+    {
+        self.active_nav_route = Some(active_nav_route.into());
         self
     }
 
     /// Set the main content of the page.
-    pub fn with_content<T>(&mut self, content: T) -> &mut Self
+    pub fn with_content<T>(mut self, content: T) -> Self
         where T: Render
     {
         self.content = content.render();
@@ -111,7 +124,27 @@ impl Page {
     }
 
     /// Finalize the page by rendering it into a `Markup` (basically a string).
-    pub fn render(&self) -> Markup {
+    fn render(mut self, req: &Request) -> Markup {
+        let locale = req.guard::<Locale>().unwrap();
+        let dict = dict::new(locale);
+
+        // Check for Rocket flashes
+        if let Some(flash) = req.guard::<FlashMessage>().succeeded() {
+            self.flashes.push(flash.into());
+        }
+
+        // Check for a frozen application and show a flash in that case. This
+        // flash is always shown first.
+        if let Some(frozen_state) = req.guard::<FrozenState>().succeeded() {
+            let flash = FlashBubble::info(
+                dict.frozen_flash(frozen_state.0.reason(), frozen_state.0.next_state_switch)
+            );
+            self.flashes.insert(0, flash);
+        }
+
+
+
+
         html! { (DOCTYPE) html {
             // ===============================================================
             // Start <head>
@@ -140,7 +173,7 @@ impl Page {
             // Start <body>
             // ===============================================================
             body class="c-text" {
-                header (self.render_nav())
+                header (self.render_nav(req, locale))
                 main class="o-container o-container--large u-pillar-box--small" {
                     // Show all flashes
                     div class="u-letter-box--small" {
@@ -159,10 +192,17 @@ impl Page {
         } }
     }
 
-    fn render_nav(&self) -> Markup {
+    fn render_nav(&self, req: &Request, locale: Locale) -> Markup {
         let (title_fg, title_border) = title_colors();
+        let dict = dict::new(locale);
+
+        // Try to create an auth user from the request.
+        let auth_user = req.guard::<AuthUser>().succeeded();
+
+        // Add "Admin Panel" nav item if the user is an admin
+        // TODO: l10n
         let mut nav_items = self.nav_items.clone();
-        if self.auth_user.as_ref().filter(|u| u.is_admin()).is_some() {
+        if auth_user.as_ref().filter(|u| u.is_admin()).is_some() {
             nav_items.push(NavItem::new("Admin Panel", "/admin_panel"));
         }
 
@@ -183,17 +223,22 @@ impl Page {
 
                 // All given nav items
                 @for item in nav_items {
-                    a class="c-nav__item" href=(item.url) (item.title)
+                    a class={
+                        "c-nav__item"
+                        @if Some(&item.url) == self.active_nav_route.as_ref() {
+                            " c-nav__item--active"
+                        } @else {
+                            ""
+                        }
+                    } href=(item.url) (item.title)
                 }
 
-                // // TODO: unhide help?
-                // span class="c-nav__item" "Hilfe"
-
                 // Show account entry if the user has been logged in
-                @if let Some(ref auth_user) = self.auth_user {
+                @if let Some(auth_user) = auth_user {
                     div class="c-nav__item c-nav__item--right c-nav__item--info nav-account-box" {
                         i class="fa fa-user" {}
-                        " Account (" (auth_user.username()) ")"
+                        " " (dict.nav_account()) " (" (auth_user.username()) ")"
+
                         ul class="nav-account-children c-nav" {
                             @if let Some(name) = auth_user.name() {
                                 li class="c-nav__content u-centered c-text--loud" (name)
@@ -201,13 +246,15 @@ impl Page {
                             li class="c-nav__item" {
                                 a href="/settings" {
                                     i class="fa fa-sliders" {}
-                                    " Einstellungen"
+                                    " "
+                                    (dict.nav_settings())
                                 }
                             }
                             li class="c-nav__item" {
                                 a href="/logout" {
                                     i class="fa fa-sign-out" {}
-                                    " Logout"
+                                    " "
+                                    (dict.nav_logout())
                                 }
                             }
                         }
@@ -218,6 +265,13 @@ impl Page {
     }
 }
 
+impl<'r> Responder<'r> for Page {
+    fn respond_to(self, req: &Request) -> response::Result<'r> {
+        self.render(req).respond_to(req)
+    }
+}
+
+/// An item in the navigation bar at the very top of the page.
 #[derive(Debug, Clone)]
 pub struct NavItem {
     title: Cow<'static, str>,
@@ -238,42 +292,42 @@ impl NavItem {
 
 /// A small box at the top of the website.
 #[derive(Debug)]
-pub struct Flash {
+pub struct FlashBubble {
     content: Markup,
     kind: FlashKind,
 }
 
-impl Flash {
-    pub fn info(content: Markup) -> Self {
+impl FlashBubble {
+    pub fn info<M: Render>(content: M) -> Self {
         Self {
             kind: FlashKind::Info,
-            content,
+            content: content.render(),
         }
     }
 
-    pub fn success(content: Markup) -> Self {
+    pub fn success<M: Render>(content: M) -> Self {
         Self {
             kind: FlashKind::Success,
-            content,
+            content: content.render(),
         }
     }
 
-    pub fn warning(content: Markup) -> Self {
+    pub fn warning<M: Render>(content: M) -> Self {
         Self {
             kind: FlashKind::Warning,
-            content,
+            content: content.render(),
         }
     }
 
-    pub fn error(content: Markup) -> Self {
+    pub fn error<M: Render>(content: M) -> Self {
         Self {
             kind: FlashKind::Error,
-            content,
+            content: content.render(),
         }
     }
 }
 
-impl From<FlashMessage> for Flash {
+impl From<FlashMessage> for FlashBubble {
     fn from(msg: FlashMessage) -> Self {
         let kind = match msg.name() {
             "success" => FlashKind::Success,

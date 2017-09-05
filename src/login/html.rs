@@ -57,7 +57,6 @@ pub fn login_page(providers: &[&ProviderEntry], locale: Locale) -> Markup {
                                 label class="c-label" for="login_provider" (dict.login_provider_label())
                                 select class="c-field" name="login_provider" {
                                     @for provider in providers {
-                                        // TODO: l10n
                                         option value=(provider.id) (provider.imp.name(locale))
                                     }
                                 }
