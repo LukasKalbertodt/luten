@@ -33,6 +33,10 @@ impl CurrentAppState {
             .first::<Self>(&*db.conn()?)?
             .make_ok()
     }
+
+    pub fn reason(&self) -> Option<&str> {
+        self.reason.as_ref().map(AsRef::as_ref)
+    }
 }
 
 

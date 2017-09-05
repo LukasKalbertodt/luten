@@ -6,6 +6,7 @@ use rocket::request::FlashMessage;
 use rocket::response::{self, Responder};
 
 use config;
+use dict::{self, Locale};
 use state::FrozenState;
 use user::AuthUser;
 
@@ -128,6 +129,9 @@ impl Page {
 
     /// Finalize the page by rendering it into a `Markup` (basically a string).
     fn render(mut self, req: &Request) -> Markup {
+        let locale = req.guard::<Locale>().unwrap();
+        let dict = dict::new(locale);
+
         // Check for Rocket flashes
         if let Some(flash) = req.guard::<FlashMessage>().succeeded() {
             self.flashes.push(flash.into());
@@ -136,16 +140,10 @@ impl Page {
         // Check for a frozen application and show a flash in that case. This
         // flash is always shown first.
         if let Some(frozen_state) = req.guard::<FrozenState>().succeeded() {
-           self.flashes.insert(0, FlashBubble::info(
-                html! {
-                    "This website is frozen right now. This means that you can't do "
-                    "anything. This state is usually temporary and was activated by an "
-                    "administrator."
-                    @if let Some(reason) = frozen_state.0.reason {
-                        "Reason: \"" (reason) "\"."
-                    }
-                }
-           ));
+            let flash = FlashBubble::info(
+                dict.frozen_flash(frozen_state.0.reason(), frozen_state.0.next_state_switch)
+            );
+            self.flashes.insert(0, flash);
         }
 
 
