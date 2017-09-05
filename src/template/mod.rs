@@ -58,14 +58,14 @@ impl Page {
     }
 
     /// An empty page with a single error flash.
-    pub fn error(flash_content: Markup) -> Self {
+    pub fn error<M: Render>(flash_content: M) -> Self {
         Self::empty()
             .add_flashes(vec![FlashBubble::error(flash_content)])
     }
 
     /// An empty page showing a single error saying the page is unimplemented.
     pub fn unimplemented() -> Self {
-        Self::error(html! { "This page is not implemented yet!" })
+        Self::error("This page is not implemented yet!")
     }
 
     /// Sets the title.
@@ -302,31 +302,31 @@ pub struct FlashBubble {
 }
 
 impl FlashBubble {
-    pub fn info(content: Markup) -> Self {
+    pub fn info<M: Render>(content: M) -> Self {
         Self {
             kind: FlashKind::Info,
-            content,
+            content: content.render(),
         }
     }
 
-    pub fn success(content: Markup) -> Self {
+    pub fn success<M: Render>(content: M) -> Self {
         Self {
             kind: FlashKind::Success,
-            content,
+            content: content.render(),
         }
     }
 
-    pub fn warning(content: Markup) -> Self {
+    pub fn warning<M: Render>(content: M) -> Self {
         Self {
             kind: FlashKind::Warning,
-            content,
+            content: content.render(),
         }
     }
 
-    pub fn error(content: Markup) -> Self {
+    pub fn error<M: Render>(content: M) -> Self {
         Self {
             kind: FlashKind::Error,
-            content,
+            content: content.render(),
         }
     }
 }

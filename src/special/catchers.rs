@@ -1,5 +1,3 @@
-
-use maud::html;
 use rocket::response::{Flash, Redirect};
 use rocket::Request;
 use rocket::http::Cookie;
@@ -25,9 +23,7 @@ fn unauthorized(req: &Request) -> StdResult<Flash<Redirect>, Page> {
 
         Page::empty()
             .add_flashes(vec![
-                FlashBubble::error(html! {
-                    (dict::new(locale).forbidden_flash())
-                }),
+                FlashBubble::error(dict::new(locale).forbidden_flash()),
             ])
             .make_err()
     } else {
