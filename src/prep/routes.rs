@@ -9,8 +9,18 @@ use template::{NavItem, Page};
 use user::{AuthUser, Role};
 
 
+fn nav_items(locale: Locale) -> Vec<NavItem> {
+    // TODO: pass `Dict` once possible
+    let dict = dict::new(locale).prep;
+
+    vec![
+        NavItem::new(dict.nav_overview_title(), "/prep"),
+        NavItem::new(dict.nav_timeslots_title(), "/prep/timeslots"),
+    ]
+}
+
 #[get("/prep")]
-fn overview(
+pub fn overview(
     auth_user: AuthUser,
     locale: Locale,
     _db: State<Db>,
@@ -23,10 +33,7 @@ fn overview(
         Role::Student => {
             Page::empty()
                 .with_title(dict.overview_title())
-                .add_nav_items(vec![
-                    NavItem::new(dict.nav_overview_title(), "/prep"),
-                    NavItem::new(dict.nav_timeslots_title(), "/prep/timeslots"),
-                ])
+                .add_nav_items(nav_items(locale))
                 .with_active_nav_route("/prep")
                 .with_content(html::student_overview(locale))
         }
@@ -41,5 +48,4 @@ fn overview(
             Page::unimplemented()
         }
     }.make_ok()
-
 }
