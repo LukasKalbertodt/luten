@@ -4,6 +4,7 @@ use super::html;
 use db::Db;
 use dict::{self, Locale};
 use errors::*;
+use state::PreparationState;
 use template::{NavItem, Page};
 use user::{AuthUser, Role};
 
@@ -13,7 +14,7 @@ fn overview(
     auth_user: AuthUser,
     locale: Locale,
     _db: State<Db>,
-    // TODO: use `StatePreparation` guard
+    _state: PreparationState,
 ) -> Result<Page> {
     let dict = dict::new(locale).prep;
 
