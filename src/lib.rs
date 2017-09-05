@@ -1,7 +1,8 @@
 #![feature(plugin, custom_derive, proc_macro)]
 #![plugin(rocket_codegen)]
+
+// Otherwise, `error_chain!` and `quick_error!` generate warnings :/
 #![allow(unused_doc_comment)]
-// ^ Otherwise, `error_chain!` and `quick_error!` generate a warning :/
 
 extern crate accept_language;
 extern crate chrono;
@@ -21,7 +22,7 @@ extern crate r2d2;
 extern crate r2d2_diesel;
 extern crate rand;
 extern crate rocket;
-extern crate rocket_contrib;
+
 
 #[macro_use]
 pub mod util;
