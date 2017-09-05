@@ -42,7 +42,6 @@ pub struct Page {
     title: Cow<'static, str>,
     nav_items: Vec<NavItem>,
     flashes: Vec<Flash>,
-    // auth_user: Option<AuthUser>,
     content: Markup,
     active_nav_route: Option<Cow<'static, str>>,
 }
@@ -54,7 +53,6 @@ impl Page {
             title: "".into(),
             nav_items: vec![],
             flashes: vec![],
-            // auth_user: None,
             content: html!{},
             active_nav_route: None,
         }
