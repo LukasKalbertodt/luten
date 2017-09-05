@@ -131,9 +131,10 @@ impl Page {
             self.flashes.push(flash.into());
         }
 
-        // Check for a frozen application and show a flash in that case
+        // Check for a frozen application and show a flash in that case. This
+        // flash is always shown first.
         if let Some(frozen_state) = req.guard::<FrozenState>().succeeded() {
-           self.flashes.push(Flash::info(
+           self.flashes.insert(0, Flash::info(
                 html! {
                     "This website is frozen right now. This means that you can't do "
                     "anything. This state is usually temporary and was activated by an "
