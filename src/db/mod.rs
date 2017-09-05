@@ -1,3 +1,5 @@
+//! Diesel database schema and utilities for database handling.
+
 use diesel::pg::PgConnection;
 use dotenv::dotenv;
 use r2d2::{self, Pool, PooledConnection};
@@ -13,8 +15,8 @@ mod types;
 
 /// A database connection pool.
 ///
-/// Is managed as `State` in the Rocket instance. Can be retrieved simply by
-/// add a `db: State<Db>` parameter to your handler. Afterwards you want to
+/// It is managed as `State` in the Rocket instance. Can be retrieved simply by
+/// adding a `db: State<Db>` parameter to your handler. Afterwards you want to
 /// call `.conn()` and pass it to diesel.
 pub struct Db {
     pub pool: Pool<ConnectionManager<PgConnection>>,
