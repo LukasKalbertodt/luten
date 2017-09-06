@@ -38,7 +38,7 @@
 //! - `mod.rs`: root of sub-module (crude MVC equivalent: model)
 //! - `routes.rs`: definition of all routes (crude MVC equivalent: controller)
 //! - `html.rs`: the HTML definition (crude MVC equivalent: view)
-//! - `mod.mauzi.rs`: the definition for this module
+//! - `mod.mauzi.rs`: the dictionary definition for this module
 
 // Necessary for Rocket & Maud
 #![feature(plugin, custom_derive, proc_macro)]
