@@ -78,6 +78,7 @@ pub mod prep;
 pub mod special;
 pub mod state;
 pub mod template;
+pub mod timeslot;
 pub mod user;
 
 

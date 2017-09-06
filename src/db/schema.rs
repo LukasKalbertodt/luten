@@ -29,6 +29,17 @@ joinable!(sessions -> users(user_id));
 
 table! {
     use diesel::types::*;
+    use db::types::DayOfWeek;
+
+    timeslots (id) {
+        id -> Int2,
+        day -> DayOfWeek,
+        time -> Time,
+    }
+}
+
+table! {
+    use diesel::types::*;
     use db::types::UserRole;
 
     users (id) {
