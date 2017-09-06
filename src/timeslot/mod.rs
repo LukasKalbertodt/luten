@@ -1,6 +1,11 @@
-use chrono;
+use chrono::{self, NaiveTime};
+use diesel;
+use diesel::prelude::*;
 
 use dict::{self, Locale};
+use db::Db;
+use db::schema::timeslots;
+use errors::*;
 
 /// Day of the week.
 ///
@@ -50,6 +55,43 @@ impl DayOfWeek {
         }
     }
 }
+
+#[derive(Debug, Clone, Eq, PartialEq, Queryable)]
+pub struct TimeSlot {
+    id: i16,
+    day: DayOfWeek,
+    time: NaiveTime,
+}
+
+impl TimeSlot {
+    /// Loads and returns the timeslot with the given id from the database.
+    pub fn load_from_id(id: i16, db: &Db) -> Result<Option<Self>> {
+        timeslots::table
+            .find(id)
+            .first::<Self>(&*db.conn()?)
+            .optional()?
+            .make_ok()
+    }
+
+    /// Creates a new timeslot with the given data and stores it in the
+    /// database.
+    pub fn create(day: DayOfWeek, time: NaiveTime, db: &Db) -> Result<Self> {
+        #[derive(Insertable)]
+        #[table_name = "timeslots"]
+        struct NewTimeSlot {
+            day: DayOfWeek,
+            time: NaiveTime,
+        }
+
+        let new_timeslot = NewTimeSlot { day, time };
+
+        diesel::insert(&new_timeslot)
+            .into(timeslots::table)
+            .get_result::<Self>(&*db.conn()?)?
+            .make_ok()
+    }
+}
+
 
 impl From<chrono::Weekday> for DayOfWeek {
     fn from(c: chrono::Weekday) -> Self {
