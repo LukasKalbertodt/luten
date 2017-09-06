@@ -54,6 +54,7 @@ mauzi! {
     mod admin_panel;
     mod login;
     mod prep;
+    mod timeslot;
 
 
     // Below are translation units which are somewhat global. Everything that
