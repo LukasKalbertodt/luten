@@ -15,9 +15,10 @@ In order to build and launch Luten, you need to install a number of tools:
   `.travis.yml`. You want to set an override via `rustup` (`$ rustup override
   set nightly` in the `luten` directory).
 - **A PostgreSQL database**. To install the DBS using Ubuntu, you can execute
-  `$ sudo apt install postgresql`. You probably also want to `install
-  pgadmin3`.
-- **Diesel CLI tool**. Install via `$ cargo install diesel_cli`.
+  `$ sudo apt install postgresql libpg-dev`. You probably also want to
+  `install pgadmin3`.
+- **Diesel CLI tool**. Install via `$ cargo install diesel_cli
+  --no-default-features --features "postgres"`.
 - **SASS compiler**. Using Ubuntu, you can execute `$ sudo apt install
   rubygems && gem install sass`.
 
@@ -29,7 +30,7 @@ that, you first have to tell Diesel the path to your database. Create a file
 DATABASE_URL=postgres://username:password@localhost/database_name
 ```
 
-Afterwards execute `$ diesel migration run`. Your system should now be ready.
+Afterwards execute `$ diesel setup`. Your system should now be ready.
 
 ### Building & Running
 
