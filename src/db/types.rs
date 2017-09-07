@@ -6,8 +6,8 @@
 
 use diesel::pg::Pg;
 use diesel::query_source::Queryable;
-use diesel::types::*;
 use diesel::row::Row;
+use diesel::types::*;
 use std::error::Error;
 use std::io::Write;
 
@@ -90,6 +90,8 @@ macro_rules! enum_pg_type {
                 row
             }
         }
+
+        impl SingleValue for $diesel_ty {}
 
         expression_impls!($diesel_ty -> $real_ty);
     }
