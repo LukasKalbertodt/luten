@@ -15,7 +15,7 @@ use errors::*;
 use user::Student;
 
 
-
+/// Preferences by a student, set by the student during the preparation state.
 #[derive(Debug, Clone, Insertable, Queryable)]
 #[table_name = "prep_student_preferences"]
 pub struct StudentPreferences {
@@ -56,6 +56,10 @@ impl StudentPreferences {
             .chain_err(|| "failed to insert new StudentPreferences")
     }
 
+    /// Creates a default preference-object and inserts it into the database.
+    ///
+    /// Note that the default values are hardcoded here for now. Later, in the
+    /// bright future, we will make preferences much more customizable.
     pub fn create_default(user: &Student, db: &Db) -> Result<Self> {
         Self::create(user, None, false, db)
     }
