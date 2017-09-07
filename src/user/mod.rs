@@ -41,7 +41,7 @@ pub struct User {
 impl User {
     /// Tries to find a user with the given username in the database and
     /// returns it.
-    pub fn from_username(username: &str, db: &Db) -> Result<Option<Self>> {
+    pub fn load_by_username(username: &str, db: &Db) -> Result<Option<Self>> {
         // Find the user with the given username.
         users::table
             .filter(users::username.eq(username))

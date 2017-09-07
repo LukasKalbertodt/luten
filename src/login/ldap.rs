@@ -49,7 +49,7 @@ impl login::Provider for Provider {
             .chain_err(|| ErrorKind::LoginError(LoginError::CredentialsIncorrect))?;
 
         // Find the user in the database...
-        if let Some(user) = User::from_username(id, db)? {
+        if let Some(user) = User::load_by_username(id, db)? {
             Ok(user)
         }
 
