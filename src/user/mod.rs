@@ -100,6 +100,30 @@ impl User {
     pub fn is_student(&self) -> bool {
         self.role == Role::Student
     }
+
+    pub fn into_admin(self) -> StdResult<Admin, Self> {
+        if self.is_admin() {
+            Ok(Admin(self))
+        } else {
+            Err(self)
+        }
+    }
+
+    pub fn into_tutor(self) -> StdResult<Tutor, Self> {
+        if self.is_tutor() {
+            Ok(Tutor(self))
+        } else {
+            Err(self)
+        }
+    }
+
+    pub fn into_student(self) -> StdResult<Student, Self> {
+        if self.is_student() {
+            Ok(Student(self))
+        } else {
+            Err(self)
+        }
+    }
 }
 
 /// The role of the user.
@@ -109,6 +133,35 @@ pub enum Role {
     Tutor,
     Student,
 }
+
+macro_rules! create_user_role_type {
+    ($role:ident) => {
+        #[derive(Debug, Clone)]
+        pub struct $role(User);
+
+        impl $role {
+            pub fn id(&self) -> i64 {
+                self.0.id
+            }
+
+            pub fn username(&self) -> &str {
+                &self.0.username
+            }
+
+            pub fn name(&self) -> Option<&str> {
+                self.0.name.as_ref().map(AsRef::as_ref)
+            }
+
+            pub fn into_inner(self) -> User {
+                self.0
+            }
+        }
+    }
+}
+
+create_user_role_type!(Student);
+create_user_role_type!(Tutor);
+create_user_role_type!(Admin);
 
 /// An authorized user with an active session. This type doesn't restrict
 /// access to any properties, as the user is logged in.
