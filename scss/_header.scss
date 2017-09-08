@@ -50,4 +50,19 @@
         display: block;
         z-index: 10;
     }
+
+    .logout-button {
+        background-color: transparent;
+        border: none;
+        color: white;
+        cursor: pointer;
+        display: inline-block;
+        font-family: inherit;
+        font-size: inherit;
+        height: 100%;
+        margin: 0;
+        padding: 0 1em;
+        text-align: left;
+        width: 100%;
+    }
 }

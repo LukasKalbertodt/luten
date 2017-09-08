@@ -251,10 +251,14 @@ impl Page {
                                 }
                             }
                             li class="c-nav__item" {
-                                a href="/logout" {
-                                    i class="fa fa-sign-out" {}
-                                    " "
-                                    (dict.nav_logout())
+
+                                form action="/logout" method="POST" style="height: 100%" {
+                                    input type="hidden" name="_method" value="DELETE" {}
+                                    button type="submit" class="logout-button" {
+                                        i class="fa fa-sign-out" {}
+                                        " "
+                                        (dict.nav_logout())
+                                    }
                                 }
                             }
                         }

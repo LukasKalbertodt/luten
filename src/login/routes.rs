@@ -87,7 +87,7 @@ fn validate_data(
 }
 
 /// Handler to logout the user. If there is no login present, nothing happens.
-#[get("/logout")]
+#[delete("/logout")]
 fn logout(
     auth_user: Option<AuthUser>,
     cookies: Cookies,
