@@ -40,7 +40,18 @@ pub fn find_user(db: &Db) -> Result<User> {
 
             }
             Some('@') => {
-                // TODO
+                let username = &line[1..];
+                let result = users::table
+                    .filter(users::columns::username.eq(username))
+                    .first(&*db.conn()?)
+                    .optional()?;
+
+                match result {
+                    Some(u) => return Ok(u),
+                    None => {
+                        println!("No user with username {} found!", username);
+                    }
+                }
             }
             _ => {
                 println!("Invalid input! Use the syntax as described above!");

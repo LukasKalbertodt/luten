@@ -14,6 +14,7 @@ use term_painter::{Color, ToStyle};
 use luten::db::Db;
 use luten::errors::*;
 use luten::user::{Role, User};
+use luten::login::password::Password;
 
 
 fn main() {
@@ -41,10 +42,16 @@ fn main() {
             &db,
         )?;
 
+        let dummy_password = "dummy";
+        Password::create_for(&student, dummy_password, &db)?;
+        Password::create_for(&tutor, dummy_password, &db)?;
+        Password::create_for(&admin, dummy_password, &db)?;
+
+
         println!("Inserted:");
-        println!("{:?}", student);
-        println!("{:?}", tutor);
-        println!("{:?}", admin);
+        println!("'{:?}' with password '{}'", student, dummy_password);
+        println!("'{:?}' with password '{}'", tutor, dummy_password);
+        println!("'{:?}' with password '{}'", admin, dummy_password);
 
         Ok(())
     };
