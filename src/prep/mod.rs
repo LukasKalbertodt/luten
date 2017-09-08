@@ -16,7 +16,7 @@ use user::Student;
 
 
 /// Preferences by a student, set by the student during the preparation state.
-#[derive(Debug, Clone, Insertable, Queryable)]
+#[derive(Debug, Clone, Insertable, Queryable, AsChangeset)]
 #[table_name = "prep_student_preferences"]
 pub struct StudentPreferences {
     user_id: i64,
@@ -62,5 +62,21 @@ impl StudentPreferences {
     /// bright future, we will make preferences much more customizable.
     pub fn create_default(user: &Student, db: &Db) -> Result<Self> {
         Self::create(user, None, false, db)
+    }
+
+    /// Updates the database with this value.
+    pub fn update(&self, db: &Db) -> Result<()> {
+        diesel::update(prep_student_preferences::table)
+            .set(self)
+            .execute(&*db.conn()?)
+            .map_err(|e| -> Error { e.into() })
+            .and_then(|affected_rows| {
+                if affected_rows != 1 {
+                    Err("number of affected rows != 1".into())
+                } else {
+                    Ok(())
+                }
+            })
+            .chain_err(|| "failed to update student prep preferences")
     }
 }
