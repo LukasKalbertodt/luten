@@ -13,6 +13,7 @@ use r2d2;
 use rocket;
 use std;
 
+use dict::{self, Locale};
 use login;
 
 
@@ -89,4 +90,15 @@ impl<T> MakeResExt for T {
     fn make_err<O>(self) -> StdResult<O, Self> {
         Err(self)
     }
+}
+
+/// This method is used whenever the user sends a bad request which shouldn't
+/// happen. It returns an error message to show to the user.
+///
+/// Evil users can just send arbitrary requests to `post` handlers. But for
+/// normal users, they should be restricted by the HTML form. So if such a bad
+/// request occurs, it is an indicator for a bug or an "attack".
+pub fn bad_request(locale: Locale) -> String {
+    // TODO: log potential bug
+    dict::new(locale).bad_request_flash()
 }
