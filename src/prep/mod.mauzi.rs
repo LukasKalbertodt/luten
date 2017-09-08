@@ -29,3 +29,8 @@ unit explanation {
            passenden Partner findet, kannst du hier deine Termin- sowie \
            Partner-Präferenzen angeben.",
 }
+
+
+unit flash_success_storing_preferences {
+    De => "Die Einstellungen wurden erfolgreich gespeichert.",
+}

@@ -64,6 +64,8 @@ pub fn set_general_settings(
         Ok(Flash::error(Redirect::to("/prep"), msg))
     }
 
+    let dict = dict::new(locale).prep;
+
     // The auth_user needs to be a student. Tutors and admins should not be
     // forwarded to this route.
     let student = match auth_user.into_user().into_student() {
@@ -102,10 +104,7 @@ pub fn set_general_settings(
     // Finally, store the changes in the database.
     pref.update(&db)?;
 
-    Ok(Flash::success(
-        Redirect::to("/prep"),
-        "Die Einstellungen wurden erfolgreich gespeichert.",
-    ))
+    Ok(Flash::success(Redirect::to("/prep"), dict.flash_success_storing_preferences()))
 }
 
 #[derive(Debug, Clone, FromForm)]
