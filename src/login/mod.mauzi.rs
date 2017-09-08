@@ -28,6 +28,11 @@ unit username_hint -> Markup {
         i "xmuster"
         ")"
     }},
+    En => { html! {
+        "Your rz-login (e.g. "
+        i "xmuster"
+        ")"
+    }},
 }
 unit password_placeholder {
     De => "Passwort",
@@ -54,7 +59,12 @@ unit notice_box_content -> Markup {
         li "Nutze zum Einloggen deine normalen Uni-Login-Daten"
         li "Die Authentifizierung erfolgt über das Uni-LDAP"
         li "Dein Passwort wird zu keiner Zeit gespeichert"
-    }}
+    }},
+    En => { html! {
+        li "Use your usual university login data for logging in"
+        li "The university's LDAP is used for authentification"
+        li "Your password will never be stored"
+    }},
 }
 
 
