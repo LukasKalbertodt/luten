@@ -61,7 +61,12 @@ pub fn student_overview(locale: Locale, pref: &StudentPreferences) -> Markup {
                                     checked?[pref.partner.is_some()]
                                     "Partner auswählen"
                                 br;
-                                input type="text" name="partner_id" {}
+                                input
+                                    type="text"
+                                    name="partner_id"
+                                    placeholder="RZ-Kennung des Partners"
+                                    value=(pref.partner.as_ref().map(|s| s.as_str()).unwrap_or(""))
+                                    {}
                             }
                         }
                     }
