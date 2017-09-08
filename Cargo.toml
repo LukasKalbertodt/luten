@@ -17,6 +17,7 @@ error-chain = "0.10"
 # Replace this with crates.io version once merged
 hex = { git = "https://github.com/LukasKalbertodt/rust-hex", branch = "bump-030" }
 lazy_static = "0.2"
+ldap3 = "0.5"
 maud = { version = "0.17", features = ["rocket"] }
 mauzi = "0.0.2"
 option-filter = "1.0"

@@ -55,6 +55,7 @@ extern crate dotenv;
 #[macro_use] extern crate error_chain;
 extern crate hex;
 #[macro_use] extern crate lazy_static;
+extern crate ldap3;
 extern crate maud;
 extern crate mauzi;
 extern crate option_filter;
