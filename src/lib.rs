@@ -108,6 +108,7 @@ pub fn start_server() {
             login::routes::logout,
 
             prep::routes::overview,
+            prep::routes::set_general_settings,
 
             special::routes::static_files,
             special::routes::index,

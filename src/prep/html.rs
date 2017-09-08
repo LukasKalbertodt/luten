@@ -29,7 +29,7 @@ pub fn student_overview(locale: Locale) -> Markup {
         }
 
         h2 "Einstellungen"
-        form {
+        form method="post" action="/prep_student_settings" {
             section {
                 h3 class="c-heading" "Partner"
                 div class="o-grid o-grid--xsmall-full o-grid--small-full o-grid--medium-full" {
@@ -43,12 +43,14 @@ pub fn student_overview(locale: Locale) -> Markup {
                         }
                     }
                     div class="o-grid__cell o-grid__cell--width-60" {
-                        fieldset class="o-fieldset" {
+                        fieldset class="o-fieldset" name="partner" {
                             label class="c-field c-field--choice" {
-                                input type="radio" name="optionsRadios" "Zufallspartner"
+                                input type="radio" name="partner" value="random" "Zufallspartner"
                             }
                             label class="c-field c-field--choice" {
-                                input type="radio" name="optionsRadios" "Partner auswählen"
+                                input type="radio" name="partner" value="chosen" "Partner auswählen"
+                                br;
+                                input type="text" name="partner_id" {}
                             }
                         }
                     }
@@ -71,15 +73,17 @@ pub fn student_overview(locale: Locale) -> Markup {
                     div class="o-grid__cell o-grid__cell--width-60" {
                         fieldset class="o-fieldset" {
                             label class="c-field c-field--choice" {
-                                input type="radio" name="optionsRadios" checked? "Deutsch"
+                                input type="radio" name="language" value="de" checked? "Deutsch"
                             }
                             label class="c-field c-field--choice" {
-                                input type="radio" name="optionsRadios" "Englisch"
+                                input type="radio" name="language" value="en" "English"
                             }
                         }
                     }
                 }
             }
+
+            input type="submit" "Speichern"
         }
     }
 }
