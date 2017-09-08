@@ -196,6 +196,10 @@ impl AuthUser {
     pub fn destroy_session(self, cookies: Cookies, db: &Db) -> Result<()> {
         self.session.destroy(cookies, db)
     }
+
+    pub fn into_user(self) -> User {
+        self.user
+    }
 }
 
 impl Deref for AuthUser {
