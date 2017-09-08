@@ -16,6 +16,7 @@ use db::Db;
 use db::schema::users;
 use errors::*;
 use login::Session;
+use prep::StudentPreferences;
 
 
 pub mod routes;
@@ -67,10 +68,21 @@ impl User {
 
         let new_user = NewUser { username, name, role };
 
-        diesel::insert(&new_user)
+        let inserted = diesel::insert(&new_user)
             .into(users::table)
-            .get_result::<User>(&*db.conn()?)?
-            .make_ok()
+            .get_result::<User>(&*db.conn()?)?;
+
+        // Insert default preferences for the user
+        let out = match role {
+            Role::Student => {
+                let student = inserted.into_student().unwrap();
+                StudentPreferences::create_default(&student, db)?;
+                student.into_inner()
+            }
+            _ => inserted,
+        };
+
+        Ok(out)
     }
 
     pub fn id(&self) -> i64 {
