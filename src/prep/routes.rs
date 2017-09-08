@@ -1,6 +1,7 @@
 use rocket::State;
 use rocket::response::{Flash, Redirect};
 use rocket::request::Form;
+use option_filter::OptionFilterExt;
 
 use super::{html, StudentPreferences};
 use db::Db;
@@ -8,7 +9,7 @@ use dict::{self, Locale};
 use errors::*;
 use state::PreparationState;
 use template::{NavItem, Page};
-use user::{AuthUser, Role};
+use user::{AuthUser, Role, User};
 
 
 fn nav_items(locale: Locale) -> Vec<NavItem> {
@@ -36,11 +37,20 @@ pub fn overview(
             let student = auth_user.into_user().into_student().unwrap();
             let pref = StudentPreferences::load_for(&student, &db)?;
 
+            let partner = pref.partner.as_ref()
+                .map_or(Ok(None), |name| User::load_by_username(name, &db))?
+                .and_then(|u| u.into_student().ok())
+                .filter(|s| s.id() != student.id());
+
             Page::empty()
                 .with_title(dict.overview_title())
                 .add_nav_items(nav_items(locale))
                 .with_active_nav_route("/prep")
-                .with_content(html::student_overview(locale, &pref))
+                .with_content(html::student_overview(
+                    locale,
+                    &pref,
+                    &partner,
+                ))
         }
 
         // ===== Tutor ========================================================

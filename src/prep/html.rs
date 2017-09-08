@@ -3,10 +3,15 @@ use maud::{html, Markup};
 
 use super::StudentPreferences;
 use dict::{self, Locale};
+use user::Student;
 
 
 
-pub fn student_overview(locale: Locale, pref: &StudentPreferences) -> Markup {
+pub fn student_overview(
+    locale: Locale,
+    pref: &StudentPreferences,
+    partner: &Option<Student>
+) -> Markup {
     // TODO: l10n
     let dict = dict::new(locale).prep;
 
@@ -23,8 +28,25 @@ pub fn student_overview(locale: Locale, pref: &StudentPreferences) -> Markup {
                 b "Dein Status:"
                 ul {
                     li "Terminwahl: Keine Termine ausgewählt!"
-                    li "Partner: Zufallspartner"
-                    li "Sprache: Deutsch"
+                    li {
+                        "Partner: "
+                        b @if let Some(ref partner_id) = pref.partner {
+                            (partner_id)
+                            @if let Some(ref name) = partner.as_ref().and_then(|s| s.name()) {
+                                " (" (name) ")"
+                            }
+                        } @else {
+                            i "Zufälliger Partner"
+                        }
+                    }
+                    li {
+                        "Sprache: "
+                        b @if pref.prefers_english {
+                            "English"
+                        } @else {
+                            "Deutsch"
+                        }
+                    }
                 }
             }
         }
