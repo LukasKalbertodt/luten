@@ -51,18 +51,20 @@ pub fn student_overview(locale: Locale, pref: &StudentPreferences) -> Markup {
                                     name="partner"
                                     value="random"
                                     checked?[pref.partner.is_none()]
-                                    "Zufallspartner"
+                                "Zufallspartner"
                             }
                             label class="c-field c-field--choice" {
                                 input
                                     type="radio"
+                                    class="prep-partner-chosen"
                                     name="partner"
                                     value="chosen"
                                     checked?[pref.partner.is_some()]
-                                    "Partner auswählen"
-                                br;
+                                "Partner auswählen"
                                 input
                                     type="text"
+                                    id="prep-partner-field"
+                                    class="c-field u-letter-box--small prep-partner-field"
                                     name="partner_id"
                                     placeholder="RZ-Kennung des Partners"
                                     value=(pref.partner.as_ref().map(|s| s.as_str()).unwrap_or(""))
