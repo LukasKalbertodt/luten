@@ -16,8 +16,9 @@ use user::Student;
 
 
 /// Preferences by a student, set by the student during the preparation state.
-#[derive(Debug, Clone, Insertable, Queryable, AsChangeset)]
+#[derive(Debug, Clone, Identifiable, Insertable, Queryable, AsChangeset)]
 #[table_name = "prep_student_preferences"]
+#[primary_key(user_id)]
 pub struct StudentPreferences {
     user_id: i64,
     pub partner: Option<String>,
@@ -66,7 +67,7 @@ impl StudentPreferences {
 
     /// Updates the database with this value.
     pub fn update(&self, db: &Db) -> Result<()> {
-        diesel::update(prep_student_preferences::table)
+        diesel::update(prep_student_preferences::table.find(self.user_id))
             .set(self)
             .execute(&*db.conn()?)
             .map_err(|e| -> Error { e.into() })
