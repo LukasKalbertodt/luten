@@ -69,9 +69,9 @@ impl Password {
 }
 
 /// Authenticating users via passwords stored by this application.
-pub struct InternalProvider;
+pub struct Provider;
 
-impl login::Provider for InternalProvider {
+impl login::Provider for Provider {
     fn name(&self, locale: Locale) -> String {
         dict::new(locale).login.provider_name_password()
     }

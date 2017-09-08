@@ -23,7 +23,7 @@ lazy_static! {
         login::ProviderEntry {
             id: "internal_password",
             dev_only: true,
-            imp: Box::new(login::password::InternalProvider),
+            imp: Box::new(login::password::Provider),
         },
         login::ProviderEntry {
             id: "ldap",
