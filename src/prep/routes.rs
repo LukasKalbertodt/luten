@@ -25,7 +25,7 @@ fn nav_items(locale: Locale) -> Vec<NavItem> {
 pub fn overview(
     auth_user: AuthUser,
     locale: Locale,
-    _db: State<Db>,
+    db: State<Db>,
     _state: PreparationState,
 ) -> Result<Page> {
     let dict = dict::new(locale).prep;
@@ -33,11 +33,14 @@ pub fn overview(
     match auth_user.role() {
         // ===== Student ======================================================
         Role::Student => {
+            let student = auth_user.into_user().into_student().unwrap();
+            let pref = StudentPreferences::load_for(&student, &db)?;
+
             Page::empty()
                 .with_title(dict.overview_title())
                 .add_nav_items(nav_items(locale))
                 .with_active_nav_route("/prep")
-                .with_content(html::student_overview(locale))
+                .with_content(html::student_overview(locale, &pref))
         }
 
         // ===== Tutor ========================================================

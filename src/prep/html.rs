@@ -1,11 +1,12 @@
 use maud::{html, Markup};
 
 
+use super::StudentPreferences;
 use dict::{self, Locale};
 
 
 
-pub fn student_overview(locale: Locale) -> Markup {
+pub fn student_overview(locale: Locale, pref: &StudentPreferences) -> Markup {
     // TODO: l10n
     let dict = dict::new(locale).prep;
 
@@ -45,10 +46,20 @@ pub fn student_overview(locale: Locale) -> Markup {
                     div class="o-grid__cell o-grid__cell--width-60" {
                         fieldset class="o-fieldset" name="partner" {
                             label class="c-field c-field--choice" {
-                                input type="radio" name="partner" value="random" "Zufallspartner"
+                                input
+                                    type="radio"
+                                    name="partner"
+                                    value="random"
+                                    checked?[pref.partner.is_none()]
+                                    "Zufallspartner"
                             }
                             label class="c-field c-field--choice" {
-                                input type="radio" name="partner" value="chosen" "Partner auswählen"
+                                input
+                                    type="radio"
+                                    name="partner"
+                                    value="chosen"
+                                    checked?[pref.partner.is_some()]
+                                    "Partner auswählen"
                                 br;
                                 input type="text" name="partner_id" {}
                             }
@@ -73,10 +84,20 @@ pub fn student_overview(locale: Locale) -> Markup {
                     div class="o-grid__cell o-grid__cell--width-60" {
                         fieldset class="o-fieldset" {
                             label class="c-field c-field--choice" {
-                                input type="radio" name="language" value="de" checked? "Deutsch"
+                                input
+                                    type="radio"
+                                    name="language"
+                                    value="de"
+                                    checked?[!pref.prefers_english]
+                                    "Deutsch"
                             }
                             label class="c-field c-field--choice" {
-                                input type="radio" name="language" value="en" "English"
+                                input
+                                    type="radio"
+                                    name="language"
+                                    value="en"
+                                    checked?[pref.prefers_english]
+                                    "English"
                             }
                         }
                     }
