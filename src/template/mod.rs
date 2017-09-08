@@ -192,6 +192,7 @@ impl Page {
                     // The main content
                     (self.content)
                 }
+                footer style="height: 70px;" {}
             }
         } }
     }
