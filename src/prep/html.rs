@@ -29,12 +29,12 @@ pub fn student_overview(locale: Locale, pref: &StudentPreferences) -> Markup {
             }
         }
 
-        h2 "Einstellungen"
+        h1 class="c-heading" "Einstellungen"
         form method="post" action="/prep_student_settings" {
-            section {
-                h3 class="c-heading" "Partner"
+            section class="u-letter-box--medium" {
+                h2 class="c-heading" "Partner"
                 div class="o-grid o-grid--xsmall-full o-grid--small-full o-grid--medium-full" {
-                    div class="o-grid__cell o-grid__cell--width-fixed flex-right c-card" {
+                    div class="o-grid__cell o-grid__cell--width-fixed prep-hint-box c-card" {
                         div class="c-card__item c-card__item--info c-card__item--divider" {
                             "Hinweise"
                         }
@@ -68,10 +68,10 @@ pub fn student_overview(locale: Locale, pref: &StudentPreferences) -> Markup {
                 }
             }
 
-            section {
-                h3 class="c-heading" "Bevorzugte Sprache"
+            section class="u-letter-box--medium" {
+                h2 class="c-heading" "Bevorzugte Sprache"
                 div class="o-grid o-grid--xsmall-full o-grid--small-full o-grid--medium-full" {
-                    div class="o-grid__cell o-grid__cell--width-fixed flex-right c-card" {
+                    div class="o-grid__cell o-grid__cell--width-fixed prep-hint-box c-card" {
                         div class="c-card__item c-card__item--info c-card__item--divider" {
                             "Hinweise:"
                         }
@@ -104,7 +104,18 @@ pub fn student_overview(locale: Locale, pref: &StudentPreferences) -> Markup {
                 }
             }
 
-            input type="submit" "Speichern"
+            section class="u-letter-box--medium" {
+                div class="o-grid o-grid--xsmall-full o-grid--small-full o-grid--medium-full" {
+                    div class="o-grid__cell o-grid__cell--width-fixed prep-hint-box" {
+                    }
+                    div class="o-grid__cell o-grid__cell--width-60" {
+                        input
+                            class="c-button c-button--success u-large c-button--block"
+                            type="submit"
+                            value="Speichern" {}
+                    }
+                }
+            }
         }
     }
 }
