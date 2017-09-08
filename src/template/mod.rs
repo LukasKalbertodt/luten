@@ -252,12 +252,12 @@ impl Page {
                             }
                             li class="c-nav__item" {
 
-                                form action="/logout" method="POST" {
+                                form action="/logout" method="POST" style="height: 100%" {
                                     input type="hidden" name="_method" value="DELETE" {}
-                                    input type="submit" value=(dict.nav_logout()){
-                                        //i class="fa fa-sign-out" {}
-                                        //" "
-                                        //(dict.nav_logout())
+                                    button type="submit" class="logout-button" {
+                                        i class="fa fa-sign-out" {}
+                                        " "
+                                        (dict.nav_logout())
                                     }
                                 }
                             }
