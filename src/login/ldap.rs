@@ -1,7 +1,8 @@
-//! LDAP authentification
+//! LDAP authentification.
 //!
 //! Within Luten, users are usally authenticated via LDAP. This module provides
-//! any logic necessary to communicate with the LDAP server.
+//! any logic necessary to communicate with the LDAP server in order to verify
+//! the users credentials.
 
 use ldap3::{LdapConn, Scope, SearchEntry};
 
@@ -17,7 +18,7 @@ const LDAP_BASE: &'static str = "ou=people,dc=uni-osnabrueck,dc=de";
 const LDAP_CN: &'static str = "cn";
 const LDAP_UID: &'static str = "uid";
 
-/// LDAP authentification provider
+/// Authenticating users via LDAP.
 pub struct Provider;
 
 impl login::Provider for Provider {

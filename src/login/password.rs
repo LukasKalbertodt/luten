@@ -1,6 +1,6 @@
-//! Module about webapp internal passwords.
+//! Internal password authentification.
 //!
-//! This web app can store passwords for users as well. This is usually only
+//! Luten can store passwords for users as well. This is usually only
 //! used for users in development or for dummy-users. Real users should
 //! probably be authenticated via LDAP or something like that.
 
@@ -14,7 +14,6 @@ use dict::{self, Locale};
 use errors::*;
 use login::{self, LoginError};
 use user::User;
-
 
 /// A bcrypt-hashed password.
 ///
