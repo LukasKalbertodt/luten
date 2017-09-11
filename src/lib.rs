@@ -78,6 +78,7 @@ pub mod prep;
 pub mod special;
 pub mod state;
 pub mod template;
+pub mod timeslot;
 pub mod user;
 
 
@@ -107,6 +108,7 @@ pub fn start_server() {
             login::routes::logout,
 
             prep::routes::overview,
+            prep::routes::set_general_settings,
 
             special::routes::static_files,
             special::routes::index,

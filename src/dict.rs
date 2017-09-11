@@ -54,6 +54,7 @@ mauzi! {
     mod admin_panel;
     mod login;
     mod prep;
+    mod timeslot;
 
 
     // Below are translation units which are somewhat global. Everything that
@@ -118,6 +119,10 @@ mauzi! {
         }}
     }
 
+    unit bad_request_flash {
+        De => "Dein Browser hat eine ungültige Anfrage gesendet. Falls dieser Fehler wiederholt \
+               auftritt, wende dich bitte an einen Übungsleiter!",
+    }
 
     // Page navigation
     unit nav_account {

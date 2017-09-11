@@ -1,82 +1,144 @@
 use maud::{html, Markup};
 
 
+use super::StudentPreferences;
 use dict::{self, Locale};
+use user::Student;
 
 
 
-pub fn student_overview(locale: Locale) -> Markup {
+pub fn student_overview(
+    locale: Locale,
+    pref: &StudentPreferences,
+    partner: &Option<Student>
+) -> Markup {
     // TODO: l10n
     let dict = dict::new(locale).prep;
 
     html! {
         div class="c-card prep-status-card u-higher" {
             div class="c-card__item c-card__item--info c-card__item--divider" {
-                (dict.state_title())
-                ": Informationen"
+                (dict.explanation_box_title())
             }
             div class="c-card__item" {
-                p (dict.explanation())
+                p (dict.explanation_for_students())
             }
-            div class="c-card__item" {
-                b "Dein Status:"
-                ul {
-                    li "Terminwahl: Keine Termine ausgewählt!"
-                    li "Partner: Zufallspartner"
-                    li "Sprache: Deutsch"
-                }
-            }
+            div class="c-card__item" ({
+                // Name of partner or random partner
+                let partner = if let Some(ref partner_id) = pref.partner {
+                    html! {
+                        (partner_id)
+                        @if let Some(ref name) = partner.as_ref().and_then(|s| s.name()) {
+                            " (" (name) ")"
+                        }
+                    }
+                } else {
+                    html! { i (dict.random_partner()) }
+                };
+
+                // Language
+                let language = if pref.prefers_english {
+                    "English"
+                } else {
+                    "Deutsch"
+                };
+
+                dict.student_status(
+                    html! { "Keine Termine ausgewählt" },   // TODO
+                    html! { b (partner) },
+                    html! { b (language) },
+                )
+            })
         }
 
-        h2 "Einstellungen"
-        form {
-            section {
-                h3 class="c-heading" "Partner"
+        h1 class="c-heading" (dict.settings_headline())
+        form method="post" action="/prep_student_settings" {
+            section class="u-letter-box--medium" {
+                h2 class="c-heading" (dict.partner_sub_headline())
                 div class="o-grid o-grid--xsmall-full o-grid--small-full o-grid--medium-full" {
-                    div class="o-grid__cell o-grid__cell--width-fixed flex-right c-card" {
+                    div class="o-grid__cell o-grid__cell--width-fixed prep-hint-box c-card" {
                         div class="c-card__item c-card__item--info c-card__item--divider" {
-                            "Hinweise"
+                            (dict.hints_title())
                         }
-                        div class="c-card__item" {
-                            "Du kannst dir entweder einen Zufallspartner zuweisen lassen oder einen "
-                            "Kommilitonen angeben, den du gerne als Partner hättest."
-                        }
+                        div class="c-card__item" (dict.partner_hints())
                     }
                     div class="o-grid__cell o-grid__cell--width-60" {
-                        fieldset class="o-fieldset" {
+                        fieldset class="o-fieldset" name="partner" {
                             label class="c-field c-field--choice" {
-                                input type="radio" name="optionsRadios" "Zufallspartner"
+                                input
+                                    type="radio"
+                                    name="partner"
+                                    value="random"
+                                    checked?[pref.partner.is_none()]
+                                    onchange="Luten.Util.disableField('prep-partner-field')"
+                                    (dict.random_partner())
                             }
                             label class="c-field c-field--choice" {
-                                input type="radio" name="optionsRadios" "Partner auswählen"
+                                input
+                                    type="radio"
+                                    class="prep-partner-chosen"
+                                    name="partner"
+                                    value="chosen"
+                                    checked?[pref.partner.is_some()]
+                                    onchange="Luten.Util.enableField('prep-partner-field')"
+                                    (dict.choose_partner())
+
+                                input
+                                    type="text"
+                                    id="prep-partner-field"
+                                    class="c-field u-letter-box--small prep-partner-field"
+                                    name="partner_id"
+                                    placeholder=(dict.id_of_partner_placeholder())
+                                    value=(pref.partner.as_ref().map(|s| s.as_str()).unwrap_or(""))
+                                    disabled?[pref.partner.is_none()]
+                                    {}
                             }
                         }
                     }
                 }
             }
 
-            section {
-                h3 class="c-heading" "Bevorzugte Sprache"
+            section class="u-letter-box--medium" {
+                h2 class="c-heading" (dict.language_sub_headline())
                 div class="o-grid o-grid--xsmall-full o-grid--small-full o-grid--medium-full" {
-                    div class="o-grid__cell o-grid__cell--width-fixed flex-right c-card" {
+                    div class="o-grid__cell o-grid__cell--width-fixed prep-hint-box c-card" {
                         div class="c-card__item c-card__item--info c-card__item--divider" {
-                            "Hinweise:"
+                            (dict.hints_title())
                         }
-                        div class="c-card__item" {
-                            "Wenn du der Deutschen Sprache nicht mächtig bist, kannst du hier festlegen, "
-                            "dass du lieber ein Testat auf Englisch möchtest."
-
-                        }
+                        div class="c-card__item" (dict.language_hints())
                     }
                     div class="o-grid__cell o-grid__cell--width-60" {
                         fieldset class="o-fieldset" {
                             label class="c-field c-field--choice" {
-                                input type="radio" name="optionsRadios" checked? "Deutsch"
+                                input
+                                    type="radio"
+                                    name="language"
+                                    value="de"
+                                    checked?[!pref.prefers_english]
+                                    "Deutsch"
                             }
                             label class="c-field c-field--choice" {
-                                input type="radio" name="optionsRadios" "Englisch"
+                                input
+                                    type="radio"
+                                    name="language"
+                                    value="en"
+                                    checked?[pref.prefers_english]
+                                    "English"
                             }
                         }
+                    }
+                }
+            }
+
+            section class="u-letter-box--medium" {
+                div class="o-grid o-grid--xsmall-full o-grid--small-full o-grid--medium-full" {
+                    div class="o-grid__cell o-grid__cell--width-fixed prep-hint-box" {
+                    }
+                    div class="o-grid__cell o-grid__cell--width-60" {
+                        input
+                            class="c-button c-button--success u-large c-button--block"
+                            type="submit"
+                            value=(dict.save_form()) {}
                     }
                 }
             }

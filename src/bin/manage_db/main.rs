@@ -27,8 +27,9 @@ use luten::db::Db;
 #[macro_use]
 mod util;
 
-mod db_util;
 mod create;
+mod db_util;
+mod fix;
 mod list;
 
 
@@ -65,7 +66,17 @@ fn main() {
                 .subcommands(vec![
                     SubCommand::with_name("user"),
                     SubCommand::with_name("password"),
-                ])
+                ]),
+            SubCommand::with_name("fix")
+                .about("Fixes several inconsistencies in the database")
+                .setting(AppSettings::SubcommandRequired)
+                .subcommands(vec![
+                    SubCommand::with_name("missing_prep_preferences")
+                        .about(
+                            "Each user should have prep-preferences associated with it. If that's \
+                             not the case, this command will add default preferences."
+                        ),
+                ]),
         ])
         .get_matches();
 
@@ -83,6 +94,7 @@ fn main() {
     let res = match sub_name {
         "list" => list::list(&util, &sub_matches, &db),
         "create" => create::create(&util, &sub_matches, &db),
+        "fix" => fix::fix(&util, &sub_matches, &db),
         _ => unreachable!(),
     };
 

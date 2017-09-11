@@ -19,6 +19,15 @@ table! {
 joinable!(passwords -> users(user_id));
 
 table! {
+    prep_student_preferences (user_id) {
+        user_id -> Int8,
+        partner -> Nullable<Text>,
+        prefers_english -> Bool,
+    }
+}
+joinable!(prep_student_preferences -> users(user_id));
+
+table! {
     sessions (id) {
         id -> Bytea,
         user_id -> Int8,
@@ -26,6 +35,17 @@ table! {
     }
 }
 joinable!(sessions -> users(user_id));
+
+table! {
+    use diesel::types::*;
+    use db::types::DayOfWeek;
+
+    timeslots (id) {
+        id -> Int2,
+        day -> DayOfWeek,
+        time -> Time,
+    }
+}
 
 table! {
     use diesel::types::*;

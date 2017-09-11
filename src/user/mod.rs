@@ -16,6 +16,7 @@ use db::Db;
 use db::schema::users;
 use errors::*;
 use login::Session;
+use prep::StudentPreferences;
 
 
 pub mod routes;
@@ -41,7 +42,7 @@ pub struct User {
 impl User {
     /// Tries to find a user with the given username in the database and
     /// returns it.
-    pub fn from_username(username: &str, db: &Db) -> Result<Option<Self>> {
+    pub fn load_by_username(username: &str, db: &Db) -> Result<Option<Self>> {
         // Find the user with the given username.
         users::table
             .filter(users::username.eq(username))
@@ -67,10 +68,21 @@ impl User {
 
         let new_user = NewUser { username, name, role };
 
-        diesel::insert(&new_user)
+        let inserted = diesel::insert(&new_user)
             .into(users::table)
-            .get_result::<User>(&*db.conn()?)?
-            .make_ok()
+            .get_result::<User>(&*db.conn()?)?;
+
+        // Insert default preferences for the user
+        let out = match role {
+            Role::Student => {
+                let student = inserted.into_student().unwrap();
+                StudentPreferences::create_default(&student, db)?;
+                student.into_inner()
+            }
+            _ => inserted,
+        };
+
+        Ok(out)
     }
 
     pub fn id(&self) -> i64 {
@@ -100,6 +112,30 @@ impl User {
     pub fn is_student(&self) -> bool {
         self.role == Role::Student
     }
+
+    pub fn into_admin(self) -> StdResult<Admin, Self> {
+        if self.is_admin() {
+            Ok(Admin(self))
+        } else {
+            Err(self)
+        }
+    }
+
+    pub fn into_tutor(self) -> StdResult<Tutor, Self> {
+        if self.is_tutor() {
+            Ok(Tutor(self))
+        } else {
+            Err(self)
+        }
+    }
+
+    pub fn into_student(self) -> StdResult<Student, Self> {
+        if self.is_student() {
+            Ok(Student(self))
+        } else {
+            Err(self)
+        }
+    }
 }
 
 /// The role of the user.
@@ -109,6 +145,35 @@ pub enum Role {
     Tutor,
     Student,
 }
+
+macro_rules! create_user_role_type {
+    ($role:ident) => {
+        #[derive(Debug, Clone)]
+        pub struct $role(User);
+
+        impl $role {
+            pub fn id(&self) -> i64 {
+                self.0.id
+            }
+
+            pub fn username(&self) -> &str {
+                &self.0.username
+            }
+
+            pub fn name(&self) -> Option<&str> {
+                self.0.name.as_ref().map(AsRef::as_ref)
+            }
+
+            pub fn into_inner(self) -> User {
+                self.0
+            }
+        }
+    }
+}
+
+create_user_role_type!(Student);
+create_user_role_type!(Tutor);
+create_user_role_type!(Admin);
 
 /// An authorized user with an active session. This type doesn't restrict
 /// access to any properties, as the user is logged in.
@@ -130,6 +195,10 @@ impl AuthUser {
 
     pub fn destroy_session(self, cookies: Cookies, db: &Db) -> Result<()> {
         self.session.destroy(cookies, db)
+    }
+
+    pub fn into_user(self) -> User {
+        self.user
     }
 }
 

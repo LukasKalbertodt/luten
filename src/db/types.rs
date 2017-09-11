@@ -6,14 +6,14 @@
 
 use diesel::pg::Pg;
 use diesel::query_source::Queryable;
-use diesel::types::*;
 use diesel::row::Row;
+use diesel::types::*;
 use std::error::Error;
 use std::io::Write;
 
 use user::Role;
 use state::AppState as RealAppState;
-
+use timeslot::DayOfWeek as RealDayOfWeek;
 
 /// Macro to generate boilerplate code needed to use a postgres enum types.
 ///
@@ -91,6 +91,8 @@ macro_rules! enum_pg_type {
             }
         }
 
+        impl SingleValue for $diesel_ty {}
+
         expression_impls!($diesel_ty -> $real_ty);
     }
 }
@@ -105,4 +107,14 @@ enum_pg_type! ("app_state", AppState, RealAppState; {
     Preparation => b"preparation",
     Running => b"running",
     Frozen => b"frozen",
+});
+
+enum_pg_type! ("day_of_week", DayOfWeek, RealDayOfWeek; {
+    Monday => b"monday",
+    Tuesday => b"tuesday",
+    Wednesday => b"wednesday",
+    Thursday => b"thursday",
+    Friday => b"friday",
+    Saturday => b"saturday",
+    Sunday => b"sunday",
 });
