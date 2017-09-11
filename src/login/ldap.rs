@@ -2,13 +2,13 @@
 //!
 //! **Completely unimplemented!**
 
+use ldap3::{LdapConn, Scope, SearchEntry};
+
 use db::Db;
 use dict::{self, Locale};
 use errors::*;
 use login::{self, LoginError};
 use user::{User, Role};
-
-use ldap3::{LdapConn, Scope, SearchEntry};
 
 pub struct Provider;
 
