@@ -9,19 +9,19 @@ before_install:
   # SCSS compiler
   - gem install sass
 
-  # install diesel_cli if it's not cached
+  # Install diesel_cli if not cached
   - hash diesel 2>/dev/null || cargo install -f diesel_cli
 
 before_script:
   - cp ci/.env.travis .env
   - diesel setup
 
-env:
-  - RUSTFLAGS="--deny warnings"
-
-script: |
-  ci/check-basic-style.sh && \
-  cargo build --verbose && \
-  cargo test --verbose
+script:
+  - ci/run.sh
 
 cache: cargo
+
+sudo: false
+
+git:
+    depth: 1
