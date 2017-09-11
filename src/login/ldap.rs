@@ -36,10 +36,8 @@ impl login::Provider for Provider {
         let ldap = LdapConn::new(LDAP_URL)?;
 
         // Authenticate
-        ldap.simple_bind(
-            &format!("{}={},{}", LDAP_UID, id, LDAP_BASE),
-            secret
-        )?
+        let ldap_user = format!("{}={},{}", LDAP_UID, id, LDAP_BASE);
+        ldap.simple_bind(&ldap_user, secret)?
             .success()
             // TODO LoginError::CredentialsIncorrect
             .chain_err(|| ErrorKind::LoginError(LoginError::SecretIncorrect))?;
