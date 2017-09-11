@@ -25,7 +25,7 @@ pub struct Timeslot {
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct SlotAssignment {
-    ratings: HashMap<Timeslot, SlotRating>,
+    pub ratings: HashMap<Timeslot, SlotRating>,
 }
 
 impl SlotAssignment {
