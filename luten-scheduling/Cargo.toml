@@ -5,3 +5,4 @@ authors = ["Lukas Kalbertodt <lukas.kalbertodt@gmail.com>"]
 
 [dependencies]
 chrono = "0.4"
+rand = "0.3"
