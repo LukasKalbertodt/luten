@@ -8,7 +8,7 @@ use types::*;
 
 
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct Solution {
     testats: Vec<(Timeslot, Tutor, Student)>,
 }

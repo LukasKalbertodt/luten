@@ -16,32 +16,29 @@ pub fn small_instances() -> Vec<Instance> {
     let tutor1 = Tutor {
         name: "tobias".into(),
         slot_assignment: SlotAssignment::new(&[slots[0]], &[slots[1]]),
-        english_testats: true,
+        scale_factor: 1.0,
     };
     let tutor2 = Tutor {
         name: "karo".into(),
         slot_assignment: SlotAssignment::new(&[slots[2]], &[slots[3]]),
-        english_testats: false,
+        scale_factor: 1.0,
     };
 
     let student1 = Student {
         name: "susi".into(),
         slot_assignment: SlotAssignment::new(&[slots[1]], &[]),
-        prefers_english: false,
         partner: Some("willi".into()),
     };
 
     let student2 = Student {
         name: "willi".into(),
         slot_assignment: SlotAssignment::new(&[slots[2], slots[3]], &[slots[1]]),
-        prefers_english: false,
         partner: Some("susi".into()),
     };
 
     let student3 = Student {
         name: "lisa".into(),
         slot_assignment: SlotAssignment::new(&[slots[0], slots[1]], &[]),
-        prefers_english: true,
         partner: None,
     };
 
