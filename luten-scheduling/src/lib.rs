@@ -5,13 +5,18 @@ pub mod instances;
 
 use types::*;
 
-
-
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub enum Team {
+    Single(Student),
+    Full(Student, Student),
+}
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct Solution {
-    testats: Vec<(Timeslot, Tutor, Student)>,
+    testats: Vec<(Timeslot, Tutor, Team)>,
 }
+
+
 
 pub fn solve(instance: &Instance) -> Solution {
 
