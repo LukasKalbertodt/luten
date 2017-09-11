@@ -134,7 +134,7 @@ pub fn random_instance(no_of_students: u16, no_of_tutors: u16) -> Instance {
         Tutor {
             name: t.to_string(),
             slot_assignment: fill_slots(&mut rng, good_blocks, tolerable_blocks, good_slots, tolerable_slots),
-            english_testats: rng.gen_weighted_bool(3),
+            scale_factor: if rng.gen_weighted_bool(10) { 2.0 } else { 1.0 }
         }
     }).collect();
 
@@ -155,13 +155,11 @@ pub fn random_instance(no_of_students: u16, no_of_tutors: u16) -> Instance {
         students.push(Student {
             name: (p * 2).to_string(),
             slot_assignment: slot_assignment.clone(),
-                prefers_english: english,
-                partner: Some(((p * 2) + 1).to_string()),
+            partner: Some(((p * 2) + 1).to_string()),
         });
         students.push(Student {
             name: ((p * 2) + 1).to_string(),
             slot_assignment: slot_assignment,
-            prefers_english: english,
             partner: Some((p * 2).to_string()),
         });
     }
@@ -176,7 +174,6 @@ pub fn random_instance(no_of_students: u16, no_of_tutors: u16) -> Instance {
         Student {
             name: s.to_string(),
             slot_assignment: fill_slots(&mut rng, good_blocks, tolerable_blocks, good_slots, tolerable_slots),
-            prefers_english: rng.gen_weighted_bool(10),
             partner: None,
         }
     }));

@@ -48,23 +48,22 @@ impl SlotAssignment {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct Tutor {
     pub name: String,
     pub slot_assignment: SlotAssignment,
-    pub english_testats: bool,
+    pub scale_factor: f32,
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Student {
     pub name: String,
     pub slot_assignment: SlotAssignment,
-    pub prefers_english: bool,
     pub partner: Option<String>,
 }
 
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct Instance {
     pub students: Vec<Student>,
     pub tutors: Vec<Tutor>,
