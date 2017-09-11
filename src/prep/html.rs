@@ -73,6 +73,7 @@ pub fn student_overview(
                                     name="partner"
                                     value="random"
                                     checked?[pref.partner.is_none()]
+                                    onchange="Luten.Util.disableField('prep-partner-field')"
                                 "Zufallspartner"
                             }
                             label class="c-field c-field--choice" {
@@ -82,6 +83,7 @@ pub fn student_overview(
                                     name="partner"
                                     value="chosen"
                                     checked?[pref.partner.is_some()]
+                                    onchange="Luten.Util.enableField('prep-partner-field')"
                                 "Partner auswählen"
                                 input
                                     type="text"
@@ -90,6 +92,7 @@ pub fn student_overview(
                                     name="partner_id"
                                     placeholder="RZ-Kennung des Partners"
                                     value=(pref.partner.as_ref().map(|s| s.as_str()).unwrap_or(""))
+                                    disabled?[pref.partner.is_none()]
                                     {}
                             }
                         }
