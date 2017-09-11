@@ -84,6 +84,11 @@ quick_error! {
             description("the given secret is not correct")
         }
 
+        /// There is no user with the given username or the given password is not correct.
+        CredentialsIncorrect {
+            description("the given user does not exists or the password is incorret")
+        }
+
         /// A user was found, but cannot be authenticated with this provider.
         ProviderNotUsable {
             description("the given user cannot be authenticated with this provider")
@@ -98,6 +103,7 @@ impl LoginError {
         match *self {
             LoginError::UserNotFound => dict.err_user_not_found(),
             LoginError::SecretIncorrect => dict.err_incorrect_secret(),
+            LoginError::CredentialsIncorrect => dict.err_credentials_incorrect(),
             LoginError::ProviderNotUsable => dict.err_provider_not_usable(),
         }
     }

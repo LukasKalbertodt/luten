@@ -39,8 +39,7 @@ impl login::Provider for Provider {
         let ldap_user = format!("{}={},{}", LDAP_UID, id, LDAP_BASE);
         ldap.simple_bind(&ldap_user, secret)?
             .success()
-            // TODO LoginError::CredentialsIncorrect
-            .chain_err(|| ErrorKind::LoginError(LoginError::SecretIncorrect))?;
+            .chain_err(|| ErrorKind::LoginError(LoginError::CredentialsIncorrect))?;
 
         // Find the user in the database...
         if let Some(user) = User::from_username(id, db)? {

@@ -6,6 +6,10 @@ unit err_incorrect_secret {
     De => "Das eingegebene Passwort ist falsch.",
     En => "The given password is incorrect.",
 }
+unit err_credentials_incorrect {
+    De => "Der Nutzer existiert nicht oder das Kennwort ist falsch.",
+    En => "The given username does not exist or the password is wrong.",
+}
 unit err_provider_not_usable {
     De => "Der angegebene Nutzer kann nicht mit der gewählten Methode authentifiziert werden.",
 }
