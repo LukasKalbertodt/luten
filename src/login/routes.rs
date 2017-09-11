@@ -60,7 +60,7 @@ fn validate_data(
     form: Form<LoginForm>,
     db: State<Db>,
     locale: Locale,
-) -> Result<StdResult<Redirect, Flash<Redirect>>> {
+) -> Result<Flash<Redirect>> {
     let form = form.into_inner();
 
     // Find the login provider the user chose. If there is no such provider,
@@ -73,14 +73,18 @@ fn validate_data(
     match res {
         Ok(_) => {
             // TODO: redirect to the original request path
-            Ok(Ok(Redirect::to("/")))
+            let flash = Flash::success(
+                Redirect::to("/"),
+                dict::new(locale).login.successful_login(),
+            );
+            Ok(flash)
         }
         Err(Error(ErrorKind::LoginError(e), _)) => {
             let flash = Flash::error(
                 Redirect::to("/login"),
                 e.msg(locale),
             );
-            Ok(Err(flash))
+            Ok(flash)
         }
         Err(other) => bail!(other),
     }

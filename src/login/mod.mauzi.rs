@@ -9,8 +9,11 @@ unit err_incorrect_secret {
 unit err_provider_not_usable {
     De => "Der angegebene Nutzer kann nicht mit der gewählten Methode authentifiziert werden.",
 }
+unit successful_login {
+    De => "Du wurdest erfolgreich angemeldet.",
+}
 unit successful_logout {
-    De => "Du wurdest erfolgreich ausgeloggt.",
+    De => "Du wurdest erfolgreich abgemeldet.",
 }
 
 // The box containing the actual login-form
