@@ -10,6 +10,11 @@ use errors::*;
 use login::{self, LoginError};
 use user::{User, Role};
 
+const LDAP_URL: &'static str = "ldaps://ldap.uni-osnabrueck.de";
+const LDAP_BASE: &'static str = "ou=people,dc=uni-osnabrueck,dc=de";
+const LDAP_CN: &'static str = "cn";
+const LDAP_UID: &'static str = "uid";
+
 pub struct Provider;
 
 impl login::Provider for Provider {
@@ -19,11 +24,11 @@ impl login::Provider for Provider {
 
     fn auth(&self, id: &str, secret: &str, db: &Db) -> Result<User> {
         // Open a connection to the LDAP server
-        let ldap = LdapConn::new("ldaps://ldap.uni-osnabrueck.de")?;
+        let ldap = LdapConn::new(LDAP_URL)?;
 
         // Authenticate
         ldap.simple_bind(
-            &format!("uid={},ou=people,dc=uni-osnabrueck,dc=de", id),
+            &format!("{}={},{}", LDAP_UID, id, LDAP_BASE),
             secret
         )?
             .success()
@@ -39,14 +44,14 @@ impl login::Provider for Provider {
         else {
             // Load the real name
             let (mut rs, _) = ldap.search(
-                "ou=people,dc=uni-osnabrueck,dc=de",
+                LDAP_BASE,
                 Scope::Subtree,
-                &format!("uid={}", id),
-                vec!["cn"]
+                &format!("{}={}", LDAP_UID, id),
+                vec![LDAP_CN]
             )?.success()?;
             let name = SearchEntry::construct(rs.remove(0))
                 .attrs
-                .remove("cn")
+                .remove(LDAP_CN)
                 .and_then(|mut v| {
                     if v.is_empty() {
                         None
