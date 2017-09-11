@@ -1,0 +1,11 @@
+{
+  "name": "luten",
+  "version": "0.1.0",
+  "author": "Lukas Kalbertodt <lukas.kalbertodt@gmail.com>",
+  "license": "(MIT OR Apache-2.0)",
+  "devDependencies": {
+    "ts-loader": "^2.3.6",
+    "typescript": "^2.5.2",
+    "webpack": "^3.5.6"
+  }
+}
