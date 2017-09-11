@@ -13,9 +13,16 @@ use login::{self, LoginError};
 use user::{User, Role};
 
 // TODO: Use a configuration file
+/// Determines the LDAP server address.
 const LDAP_URL: &'static str = "ldaps://ldap.uni-osnabrueck.de";
+
+/// Determines the base directory in which LDAP should search for users.
 const LDAP_BASE: &'static str = "ou=people,dc=uni-osnabrueck,dc=de";
+
+/// Determines the LDAP distiguished name which refers to the user's common name.
 const LDAP_CN: &'static str = "cn";
+
+/// Determines the LDAP distiguished name which refers to the username.
 const LDAP_UID: &'static str = "uid";
 
 /// Authenticating users via LDAP.
