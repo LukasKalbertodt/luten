@@ -156,6 +156,7 @@ impl Page {
                 link rel="stylesheet" href="/static/main.css";
                 link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Courgette"
                 meta name="viewport" content="width=device-width, initial-scale=1.0";
+                script type="text/javascript" src="/static/main.js" {}
                 title {
                     (self.title)
                     ({
@@ -179,7 +180,10 @@ impl Page {
                     div class="u-letter-box--small" {
                         @for flash in &self.flashes {
                             div class={"c-alert " (flash.kind.css_class())} {
-                                button class="c-button c-button--close" "×"
+                                button
+                                    class="c-button c-button--close"
+                                    onclick="Luten.Util.closeFlash(this)"
+                                    "×"
                                 (flash.content)
                             }
                         }
