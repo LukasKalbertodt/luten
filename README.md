@@ -21,6 +21,9 @@ In order to build and launch Luten, you need to install a number of tools:
   --no-default-features --features "postgres"`.
 - **SASS compiler**. Using Ubuntu, you can execute `$ sudo apt install
   rubygems ruby-dev && sudo gem install sass`.
+- **Install TypeScript and other dependencies**: Install the latest nodejs
+  version from [here](https://nodejs.org/en/download/). Afterwards switch to
+  the `ts` subdirectory and execute `npm install`.
 
 After those are installed, you have to execute all database migrations. To do
 that, you first have to tell Diesel the path to your database. Create a file
