@@ -180,7 +180,10 @@ impl Page {
                     div class="u-letter-box--small" {
                         @for flash in &self.flashes {
                             div class={"c-alert " (flash.kind.css_class())} {
-                                button class="c-button c-button--close" "×"
+                                button
+                                    class="c-button c-button--close"
+                                    onclick="Luten.Util.closeFlash(this)"
+                                    "×"
                                 (flash.content)
                             }
                         }

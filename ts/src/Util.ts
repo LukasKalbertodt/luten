@@ -1,3 +1,3 @@
-export function closeFlash() {
-    console.log("Nop :P");
+export function closeFlash(receiver) {
+    receiver.parentElement.style.display = "none";
 }
