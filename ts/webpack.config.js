@@ -1,5 +1,4 @@
 module.exports = {
-  devtool: 'inline-source-map',
   entry: './src/Lib.ts',
   output: {
     filename: '../static/main.js',
@@ -12,8 +11,13 @@ module.exports = {
   },
   module: {
     loaders: [
-      // All files with a `.ts` or `.tsx` extension will be handled by `ts-loader`
-      { test: /\.tsx?$/, loader: 'ts-loader' }
+      {
+        include: ['./src'],
+
+        // All files with a `.ts` or `.tsx` extension will be handled by `ts-loader`
+        test: /\.tsx?$/,
+        loader: 'ts-loader'
+      }
     ]
   }
 }
