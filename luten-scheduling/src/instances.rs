@@ -60,9 +60,22 @@ pub fn small_instances() -> Vec<Instance> {
 }
 
 pub fn random_instance(no_of_students: u16, no_of_tutors: u16) -> Instance {
+    // TODO: add paramater to adjust whether a large, normal or small amount of
+    // slots are selected by students and tutors
 
-    fn fill_slots<R: Rng>(rng: &mut R, good_blocks: u8, tolerable_blocks: u8, good_slots: u8, tolerable_slots: u8)
-        -> SlotAssignment {
+    /// Generates a `ŚlotAssignment` where x = 4 * `good_blocks` + `good_slots`
+    /// slots have been marked as `SlotRating::Good`
+    /// and y = 4 * `tolerable_blocks` + `tolerable_slots`
+    /// slots have been marked as `SlotRating::Tolerable`
+    /// and where z = `good_blocks` + `tolerable_blocks`
+    /// blocks of 4 coherent slots appear
+    fn fill_slots<R: Rng>(
+        rng: &mut R,
+        good_blocks: u8,
+        tolerable_blocks: u8,
+        good_slots: u8,
+        tolerable_slots: u8
+    ) -> SlotAssignment {
 
         let mut map = HashMap::new();
 
@@ -112,23 +125,25 @@ pub fn random_instance(no_of_students: u16, no_of_tutors: u16) -> Instance {
 
     let mut rng = thread_rng();
 
-    let mut tutors = Vec::new();
-
-    for t in 0..no_of_tutors {
+    let tutors: Vec<_> = (0..no_of_tutors).map(|t| {
         let good_blocks = rng.gen_range(2, 4);
         let tolerable_blocks = rng.gen_range(0, 2);
         let good_slots = rng.gen_range(0, 5);
         let tolerable_slots = rng.gen_range(0, 5);
-            tutors.push(Tutor {
+
+        Tutor {
             name: t.to_string(),
             slot_assignment: fill_slots(&mut rng, good_blocks, tolerable_blocks, good_slots, tolerable_slots),
             english_testats: rng.gen_weighted_bool(3),
-        });
-    }
+        }
+    }).collect();
+
+
 
     let mut students = Vec::new();
-    let pairs = rng.gen_range(no_of_students / 10, no_of_students / 2);
 
+    // Student pairs - they have the same SlotAssignment
+    let pairs = rng.gen_range(no_of_students / 10, no_of_students / 2);
     for p in 0..pairs {
         let good_blocks = rng.gen_range(2, 4);
         let tolerable_blocks = rng.gen_range(0, 2);
@@ -151,18 +166,20 @@ pub fn random_instance(no_of_students: u16, no_of_tutors: u16) -> Instance {
         });
     }
 
-    for s in (pairs * 2)..no_of_students {
+    // 'Single' students
+    students.extend(((pairs * 2)..no_of_students).map(|s| {
         let good_blocks = rng.gen_range(2, 4);
         let tolerable_blocks = rng.gen_range(0, 2);
         let good_slots = rng.gen_range(0, 5);
         let tolerable_slots = rng.gen_range(0, 5);
-        students.push(Student {
+
+        Student {
             name: s.to_string(),
             slot_assignment: fill_slots(&mut rng, good_blocks, tolerable_blocks, good_slots, tolerable_slots),
             prefers_english: rng.gen_weighted_bool(10),
             partner: None,
-        });
-    }
+        }
+    }));
 
     Instance {
         students: students,
