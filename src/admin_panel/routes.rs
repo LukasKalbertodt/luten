@@ -13,6 +13,7 @@ use errors::*;
 use state::{AppState, CurrentAppState};
 use super::html;
 use template::Page;
+use timeslot::TimeSlot;
 use user::{AuthAdmin, Role};
 
 
@@ -103,4 +104,20 @@ pub fn change_state(
         Redirect::to("/admin_panel/state"),
         dict.flash_success_app_state_updated(),
     ))
+}
+
+
+#[get("/admin_panel/timeslots")]
+pub fn timeslots(
+    _admin: AuthAdmin,
+    locale: Locale,
+    db: State<Db>,
+) -> Result<Page> {
+    let timeslots = TimeSlot::load_all(&db)?;
+
+    Page::empty()
+        .with_title(dict::new(locale).admin_panel.timeslots_title())
+        .with_active_nav_route("/admin_panel")
+        .with_content(html::timeslots(&timeslots, locale))
+        .make_ok()
 }

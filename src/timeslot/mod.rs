@@ -1,3 +1,5 @@
+use std::fmt;
+
 use chrono::{self, NaiveTime};
 use diesel;
 use diesel::prelude::*;
@@ -54,7 +56,26 @@ impl DayOfWeek {
             Sunday => dict.sunday_short(),
         }
     }
+
+    pub fn all_names() -> &'static [&'static str] {
+        &[
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+        ]
+    }
 }
+
+impl fmt::Display for DayOfWeek {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 
 #[derive(Debug, Clone, Eq, PartialEq, Queryable)]
 pub struct TimeSlot {
@@ -90,6 +111,21 @@ impl TimeSlot {
             .get_result::<Self>(&*db.conn()?)?
             .make_ok()
     }
+
+    pub fn time(&self) -> Time {
+        Time(self.time)
+    }
+
+    pub fn day(&self) -> DayOfWeek {
+        self.day
+    }
+
+    /// Returns all timeslots form the database
+    pub fn load_all(db: &Db) -> Result<Vec<Self>> {
+        timeslots::table
+            .load(&*db.conn()?)
+            .chain_err(|| "unable to load timeslots from DB")
+    }
 }
 
 
@@ -124,5 +160,13 @@ impl Into<chrono::Weekday> for DayOfWeek {
             Saturday => Sat,
             Sunday => Sun,
         }
+    }
+}
+
+pub struct Time(NaiveTime);
+
+impl fmt::Display for Time {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.0.format("%H:%M").fmt(f)
     }
 }

@@ -107,6 +107,7 @@ pub fn start_server() {
             admin_panel::routes::index,
             admin_panel::routes::state,
             admin_panel::routes::change_state,
+            admin_panel::routes::timeslots,
 
             login::routes::login_form,
             login::routes::validate_data,

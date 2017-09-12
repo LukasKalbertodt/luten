@@ -4,6 +4,7 @@ use rocket::config::Config;
 use config;
 use dict::{self, Locale};
 use state::CurrentAppState;
+use timeslot::{DayOfWeek, TimeSlot};
 
 
 pub fn index(locale: Locale, stats: &Stats, config: &Config) -> Markup {
@@ -11,7 +12,11 @@ pub fn index(locale: Locale, stats: &Stats, config: &Config) -> Markup {
 
     html! {
         h1 (dict.title())
-        a href="/admin_panel/state" (dict.state_title())
+        ul {
+            li a href="/admin_panel/state" (dict.state_title())
+            li a href="/admin_panel/timeslots" (dict.timeslots_title())
+
+        }
 
         h2 (dict.statistics_headline())
         ul {
@@ -94,6 +99,63 @@ pub fn state(locale: Locale, app_state: &CurrentAppState) -> Markup {
                 class="c-button c-button--success"
                 type="submit"
                 value=(root_dict.save_form()) {}
+        }
+    }
+}
+
+pub fn timeslots(timeslots: &[TimeSlot], locale: Locale) -> Markup {
+    let root_dict = dict::new(locale);
+    let dict = &root_dict.admin_panel;
+
+    html! {
+        h1 (dict.timeslots_title())
+
+        table class="c-table timeslot-table" {
+            thead class="c-table__head" {
+                tr class="c-table__row c-table__row--heading" {
+                    th class="c-table__cell" "Day"
+                    th class="c-table__cell" "Time"
+                    th class="c-table__cell" {}
+                }
+            }
+
+            tbody class="c-table__body" {
+                @for timeslot in timeslots {
+                    tr class="c-table__row" {
+                        td class="c-table__cell" (timeslot.day())
+                        td class="c-table__cell" (timeslot.time())
+                        td class="c-table__cell" {
+                            form {
+                                input
+                                    type="submit"
+                                    class="c-button c-button--error"
+                                    value="Delete";
+                            }
+                        }
+                    }
+                }
+
+                tr class="c-table__row" {
+                    form action="/admin_panel/timeslots" method="post" {
+                        td class="c-table__cell" {
+                            select id="new_timeslot_day" {
+                                @for name in DayOfWeek::all_names() {
+                                    option (name)
+                                }
+                            }
+                        }
+                        td class="c-table__cell" {
+                            input type="text";
+                        }
+                        td class="c-table__cell" {
+                            input
+                                type="submit"
+                                class="c-button c-button--success"
+                                value="Add";
+                        }
+                    }
+                }
+            }
         }
     }
 }

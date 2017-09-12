@@ -54,3 +54,11 @@ unit no_state_switch_estimate {
 unit flash_success_app_state_updated {
     De => "App Status wurde erfolgreich aktualisiert.",
 }
+
+
+// ===========================================================================
+// Timeslot managing page
+// ===========================================================================
+unit timeslots_title {
+    De => "Timeslots verwalten",
+}
