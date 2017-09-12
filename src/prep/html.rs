@@ -83,15 +83,33 @@ pub fn student_overview(
                                     onchange="Luten.Util.enableField('prep-partner-field')"
                                     (dict.choose_partner())
 
-                                input
-                                    type="text"
-                                    id="prep-partner-field"
-                                    class="c-field u-letter-box--small prep-partner-field"
-                                    name="partner_id"
-                                    placeholder=(dict.id_of_partner_placeholder())
-                                    value=(pref.partner.as_ref().map(|s| s.as_str()).unwrap_or(""))
-                                    disabled?[pref.partner.is_none()]
-                                    {}
+                                div class="u-letter-box--small prep-partner-field-container" {
+                                    div class="o-field o-field--icon-left" {
+                                        div class="c-icon" {
+                                            i class={
+                                                "fa fa-fw "
+                                                @if partner.is_some() {
+                                                    "fa-check-square-o"
+                                                } @else if pref.partner.is_some() {
+                                                    "fa-exclamation-triangle"
+                                                } @else {
+                                                    "fa-user"
+                                                }
+                                            } {}
+                                        }
+
+                                        input
+                                            type="text"
+                                            id="prep-partner-field"
+                                            class="c-field prep-partner-field"
+                                            name="partner_id"
+                                            placeholder=(dict.id_of_partner_placeholder())
+                                            value=(pref.partner.as_ref().map(|s| s.as_str()).unwrap_or(""))
+                                            oninput="Luten.Prep.checkPartner(this)"
+                                            disabled?[pref.partner.is_none()]
+                                            {}
+                                    }
+                                }
                             }
                         }
                     }
