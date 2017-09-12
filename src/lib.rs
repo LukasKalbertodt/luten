@@ -102,6 +102,7 @@ pub fn start_server() {
         .mount("/", routes![
             admin_panel::routes::index,
             admin_panel::routes::state,
+            admin_panel::routes::change_state,
 
             login::routes::login_form,
             login::routes::validate_data,

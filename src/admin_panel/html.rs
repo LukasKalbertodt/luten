@@ -41,10 +41,13 @@ pub struct Stats {
 }
 
 pub fn state(locale: Locale, app_state: &CurrentAppState) -> Markup {
-    let dict = dict::new(locale).admin_panel;
+    let root_dict = dict::new(locale);
+    let dict = &root_dict.admin_panel;
 
     html! {
         h1 (dict.state_title())
+
+        h2 (dict.current_state())
 
         ul {
             li {
@@ -71,6 +74,26 @@ pub fn state(locale: Locale, app_state: &CurrentAppState) -> Markup {
                         .unwrap_or(html! { (dict.no_state_switch_estimate()) })
                 )
             }
+        }
+
+        h2 (dict.change_state())
+
+        form action="/admin_panel/state" method="post" {
+            select class="c-field" name="state" {
+                option value="preparation" "Preparation"
+                option value="running" "Running"
+                option value="frozen" "Frozen"
+            }
+
+            div class="o-form-element" {
+              label class="c-label" for="reason" (dict.state_reason())
+              input id="reason" name="reason" class="c-field";
+            }
+
+            input
+                class="c-button c-button--success"
+                type="submit"
+                value=(root_dict.save_form()) {}
         }
     }
 }

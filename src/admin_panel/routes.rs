@@ -1,13 +1,16 @@
 use std::collections::HashMap;
 
 use diesel::prelude::*;
-use rocket::config::Config;
+use option_filter::OptionFilterExt;
 use rocket::State;
+use rocket::config::Config;
+use rocket::response::{Flash, Redirect};
+use rocket::request::Form;
 
 use db::Db;
 use dict::{self, Locale};
 use errors::*;
-use state::CurrentAppState;
+use state::{AppState, CurrentAppState};
 use super::html;
 use template::Page;
 use user::{AuthAdmin, Role};
@@ -60,4 +63,44 @@ pub fn state(
         .with_active_nav_route("/admin_panel")
         .with_content(html::state(locale, &app_state))
         .make_ok()
+}
+
+#[derive(FromForm)]
+pub struct StateChange {
+    state: String,
+    reason: Option<String>,
+}
+
+#[post("/admin_panel/state", data = "<form>")]
+pub fn change_state(
+    _admin: AuthAdmin,
+    locale: Locale,
+    form: Form<StateChange>,
+    db: State<Db>,
+) -> Result<Flash<Redirect>> {
+    let dict = dict::new(locale).admin_panel;
+    let form = form.into_inner();
+
+    let state = match form.state.as_str() {
+        "preparation" => AppState::Preparation,
+        "running" => AppState::Running,
+        "frozen" => AppState::Frozen,
+        _ => {
+            // Shouldn't happen unless the user sent invalid data.
+            return Ok(Flash::error(
+                Redirect::to("/admin_panel/state"),
+                bad_request(locale),
+            ));
+        }
+    };
+
+    let reason = form.reason.filter(|r| !r.is_empty());
+
+    // TODO: allow the user to specify the date
+    CurrentAppState::set(state, reason, None, &db)?;
+
+    Ok(Flash::success(
+        Redirect::to("/admin_panel/state"),
+        dict.flash_success_app_state_updated(),
+    ))
 }
