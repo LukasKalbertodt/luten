@@ -41,7 +41,7 @@
 //! - `mod.mauzi.rs`: the dictionary definition for this module
 
 // Necessary for Rocket & Maud
-#![feature(plugin, custom_derive, proc_macro)]
+#![feature(plugin, custom_derive, proc_macro, try_trait)]
 #![plugin(rocket_codegen)]
 
 // Otherwise, `error_chain!` and `quick_error!` generate warnings :/
@@ -66,8 +66,12 @@ extern crate r2d2;
 extern crate r2d2_diesel;
 extern crate rand;
 extern crate rocket;
+extern crate rocket_contrib;
+extern crate serde;
+#[macro_use] extern crate serde_derive;
 
 
+pub mod api;
 pub mod admin_panel;
 pub mod config;
 pub mod db;
@@ -115,6 +119,9 @@ pub fn start_server() {
             special::routes::index,
 
             user::routes::settings,
+        ])
+        .mount("/api", routes![
+            api::routes::user::by_username,
         ])
         .catch(errors![
             special::catchers::unauthorized,

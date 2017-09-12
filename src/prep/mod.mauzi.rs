@@ -102,3 +102,13 @@ unit save_form {
 unit flash_success_storing_preferences {
     De => "Die Einstellungen wurden erfolgreich gespeichert.",
 }
+
+unit flash_partner_not_a_student(username: &str) {
+    De => "Der angegebene Nutzer '{username}' ist kein Student.",
+}
+
+unit flash_user_not_found {
+    De => "Der angegebene Nutzer existiert nicht in der Datenbank. Hinweis: \
+           dein Partner muss sich einmal auf dieser Website eingeloggt haben, \
+           damit du ihn/sie als gewünschten Partner angegeben kannst!"
+}
