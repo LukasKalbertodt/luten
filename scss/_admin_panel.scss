@@ -1,0 +1,20 @@
+.timeslot-table {
+    $border_color: grey;
+
+    td:last-child, th:last-child {
+        max-width: 6em;
+    }
+
+    td {
+        border-left: 1px solid $border_color;
+        border-bottom: 1px solid $border_color;
+
+        &:last-child {
+            border-right: 1px solid $border_color;
+        }
+    }
+
+    tr:hover > td {
+        background-color: #ddd;
+    }
+}
