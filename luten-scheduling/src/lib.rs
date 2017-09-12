@@ -36,7 +36,9 @@ pub fn solve(_instance: &Instance) -> Solution {
 }
 
 
-pub fn is_valid_solution(instance: &Instance, solution: &Solution) -> bool {
+pub fn is_valid_solution(instance: &Instance, solution: &Solution) -> Result<(), Vec<String>> {
+    let mut errs = Vec::new();
+
     let no_student_missing = instance.students.iter()
         .all(|s| solution.testats.iter().find(|testat| {
             match testat.2 {
@@ -44,7 +46,9 @@ pub fn is_valid_solution(instance: &Instance, solution: &Solution) -> bool {
                 Team::Full(ref s1, ref s2) => s1 == s || s2 == s,
             }
         }).is_some());
-
+    if !no_student_missing {
+        errs.push("Some students from the instance are missing in the solution.".into());
+    }
 
 
     let no_student_double = {
@@ -52,25 +56,20 @@ pub fn is_valid_solution(instance: &Instance, solution: &Solution) -> bool {
         solution.testats.iter()
             .all(|t| t.2.all_students(|s| map.insert(s.name.clone())))
     };
+    if !no_student_double {
+        errs.push("Some students occur more than once in the solution.".into());
+    }
+
 
     let tutors_without_time_turners = {
         let mut map = HashSet::new();
         solution.testats.iter().all(|t| map.insert((t.0, &t.1.name)))
     };
+    if !tutors_without_time_turners {
+        errs.push("Some tutors have more than one Testat at the same time. Unfortunately the \
+            university does not provide time turners. =(".into());
+    }
 
-    let _preferred_partners_old = instance.students.iter().all(|ref s| {
-        if let Some(ref p) = s.partner {
-            solution.testats.iter().find(|testat| {
-                if let Team::Full(ref s1, ref s2) = testat.2 {
-                    (*s1 == **s && s2.name == *p) || (s1.name == *p && *s2 == **s)
-                } else {
-                    false
-                }
-            }).is_some()
-        } else {
-            true
-        }
-    });
 
     let preferred_partners = solution.testats.iter().all(|testat| {
         testat.2.all_students(|s| {
@@ -84,12 +83,23 @@ pub fn is_valid_solution(instance: &Instance, solution: &Solution) -> bool {
             }
         })
     });
+    if !preferred_partners {
+        errs.push("Some teams were ripped apart by the algorithm.".into())
+    }
+
 
     let fitting_timeslots = solution.testats.iter().all(|testat| {
         testat.2.all_students(|s| s.slot_assignment.rating_for(testat.0).is_ok()) &&
             testat.1.slot_assignment.rating_for(testat.0).is_ok()
     });
+    if !fitting_timeslots {
+        errs.push("Some people were allocated Timeslots that are not fitting.".into())
+    }
 
 
-    no_student_missing && no_student_double && tutors_without_time_turners && preferred_partners && fitting_timeslots
+    if errs.is_empty() {
+        Ok(())
+    } else {
+        Err(errs)
+    }
 }
