@@ -98,7 +98,6 @@ pub fn set_general_settings(
         }
         "chosen" => {
             if let Some(id) = form.partner_id {
-                // TODO: validate the id exists? Somehow?
                 match User::load_by_username(&id, &db)? {
                     Some(ref u) if u.is_student() => {
                         pref.partner = Some(id);
