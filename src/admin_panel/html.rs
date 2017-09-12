@@ -108,7 +108,12 @@ pub fn timeslots(timeslots: &[TimeSlot], locale: Locale) -> Markup {
     let dict = &root_dict.admin_panel;
 
     html! {
-        h1 (dict.timeslots_title())
+        h1 {
+            (dict.timeslots_title())
+            " ("
+            (timeslots.len())
+            ")"
+        }
 
         table class="c-table timeslot-table" {
             thead class="c-table__head" {
@@ -125,10 +130,11 @@ pub fn timeslots(timeslots: &[TimeSlot], locale: Locale) -> Markup {
                         td class="c-table__cell" (timeslot.day())
                         td class="c-table__cell" (timeslot.time())
                         td class="c-table__cell" {
-                            form {
+                            form action="/admin_panel/delete_timeslot" method="post" {
+                                input type="hidden" name="id" value=(timeslot.id());
                                 input
                                     type="submit"
-                                    class="c-button c-button--error"
+                                    class="c-button c-button--error u-xsmall"
                                     value="Delete";
                             }
                         }
@@ -136,16 +142,19 @@ pub fn timeslots(timeslots: &[TimeSlot], locale: Locale) -> Markup {
                 }
 
                 tr class="c-table__row" {
-                    form action="/admin_panel/timeslots" method="post" {
+                    form action="/admin_panel/add_timeslot" method="post" {
                         td class="c-table__cell" {
-                            select id="new_timeslot_day" {
-                                @for name in DayOfWeek::all_names() {
+                            select class="c-field" name="day" {
+                                @for name in DayOfWeek::all_variant_strs() {
                                     option (name)
                                 }
                             }
                         }
                         td class="c-table__cell" {
-                            input type="text";
+                            input
+                                class="c-field"
+                                type="text"
+                                placeholder="HH:MM or HH:MM-HH:MM" name="time";
                         }
                         td class="c-table__cell" {
                             input

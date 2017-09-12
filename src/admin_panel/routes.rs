@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use diesel::prelude::*;
+use diesel::result::{Error as DieselError, DatabaseErrorKind};
 use option_filter::OptionFilterExt;
 use rocket::State;
 use rocket::config::Config;
@@ -13,7 +14,7 @@ use errors::*;
 use state::{AppState, CurrentAppState};
 use super::html;
 use template::Page;
-use timeslot::TimeSlot;
+use timeslot::{self, DayOfWeek, NewTimeSlot, TimeSlot};
 use user::{AuthAdmin, Role};
 
 
@@ -113,11 +114,98 @@ pub fn timeslots(
     locale: Locale,
     db: State<Db>,
 ) -> Result<Page> {
-    let timeslots = TimeSlot::load_all(&db)?;
+    let mut timeslots = TimeSlot::load_all(&db)?;
+    timeslots.sort();
 
     Page::empty()
         .with_title(dict::new(locale).admin_panel.timeslots_title())
         .with_active_nav_route("/admin_panel")
         .with_content(html::timeslots(&timeslots, locale))
         .make_ok()
+}
+
+#[derive(FromForm)]
+pub struct NewTimeSlotForm {
+    day: String,
+    time: String,
+}
+
+#[post("/admin_panel/add_timeslot", data = "<form>")]
+pub fn add_timeslot(
+    _admin: AuthAdmin,
+    form: Form<NewTimeSlotForm>,
+    locale: Locale,
+    db: State<Db>,
+) -> Result<Flash<Redirect>> {
+    let form = form.into_inner();
+
+    let day = match DayOfWeek::from_variant_str(&form.day) {
+        Some(day) => day,
+        None => {
+            return Ok(Flash::error(
+                Redirect::to("/admin_panel/timeslots"),
+                bad_request(locale),
+            ));
+        }
+    };
+
+    let times = match timeslot::parse_time_interval(&form.time) {
+        Ok(times) => times,
+        Err(e) => {
+            return Ok(Flash::error(
+                Redirect::to("/admin_panel/timeslots"),
+                e,
+            ));
+        }
+    };
+
+    let count = times.len();
+    let slots: Vec<_> = times.into_iter()
+        .map(|time| NewTimeSlot::new(day, time))
+        .collect();
+
+
+    match TimeSlot::create_all(&slots, &db) {
+        Ok(_) => {},
+        Err(Error(ErrorKind::Db(
+            DieselError::DatabaseError(DatabaseErrorKind::UniqueViolation, _)
+        ), _)) => {
+            return Ok(Flash::error(
+                Redirect::to("/admin_panel/timeslots"),
+                "(Some of) the given timeslots already exist in the database! \
+                    Please only add new ones!",
+            ))
+        }
+        Err(e) => bail!(e),
+    }
+
+    Ok(Flash::success(
+        Redirect::to("/admin_panel/timeslots"),
+        format!("Successfully added {} new timeslots", count),
+    ))
+}
+
+#[derive(FromForm)]
+pub struct DeleteTimeSlotForm {
+    id: i16,
+}
+
+#[post("/admin_panel/delete_timeslot", data = "<form>")]
+pub fn delete_timeslot(
+    _admin: AuthAdmin,
+    form: Form<DeleteTimeSlotForm>,
+    db: State<Db>,
+) -> Result<Flash<Redirect>> {
+    let form = form.into_inner();
+    if TimeSlot::delete(form.id, &db)? {
+        Ok(Flash::success(
+            Redirect::to("/admin_panel/timeslots"),
+            "Timeslot was successfully deleted",
+        ))
+    } else {
+        Ok(Flash::success(
+            Redirect::to("/admin_panel/timeslots"),
+            "Timeslot wasn't delete since it doesn't exist.",
+        ))
+    }
 }
