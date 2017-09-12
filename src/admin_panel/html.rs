@@ -15,7 +15,6 @@ pub fn index(locale: Locale, stats: &Stats, config: &Config) -> Markup {
         ul {
             li a href="/admin_panel/state" (dict.state_title())
             li a href="/admin_panel/timeslots" (dict.timeslots_title())
-
         }
 
         h2 (dict.statistics_headline())
@@ -154,7 +153,8 @@ pub fn timeslots(timeslots: &[TimeSlot], locale: Locale) -> Markup {
                             input
                                 class="c-field"
                                 type="text"
-                                placeholder="HH:MM or HH:MM-HH:MM" name="time";
+                                placeholder="HH:MM or HH:MM-HH:MM"
+                                name="time";
                         }
                         td class="c-table__cell" {
                             input

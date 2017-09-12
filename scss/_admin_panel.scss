@@ -1,8 +1,6 @@
 .timeslot-table {
     $border_color: grey;
 
-    border-collapse: collapse;
-
     td:last-child, th:last-child {
         max-width: 6em;
     }
@@ -14,9 +12,6 @@
         &:last-child {
             border-right: 1px solid $border_color;
         }
-    }
-
-    tr {
     }
 
     tr:hover > td {

@@ -133,6 +133,13 @@ impl TimeSlot {
             .make_ok()
     }
 
+    /// Returns all timeslots form the database.
+    pub fn load_all(db: &Db) -> Result<Vec<Self>> {
+        timeslots::table
+            .load(&*db.conn()?)
+            .chain_err(|| "unable to load timeslots from DB")
+    }
+
     /// Creates a new timeslot with the given data and stores it in the
     /// database.
     pub fn create(day: DayOfWeek, time: Time, db: &Db) -> Result<Self> {
@@ -144,6 +151,7 @@ impl TimeSlot {
             .make_ok()
     }
 
+    /// Inserts all given timeslots into the database.
     pub fn create_all(timeslots: &[NewTimeSlot], db: &Db) -> Result<()> {
         diesel::insert(timeslots)
             .into(timeslots::table)
@@ -158,6 +166,9 @@ impl TimeSlot {
             })
     }
 
+    /// Deletes the timeslot with the given id from the database. Returns
+    /// `true` if it has been deleted, `false` otherwise (which probably means
+    /// the the id wasn't found).
     pub fn delete(id: i16, db: &Db) -> Result<bool> {
         diesel::delete(timeslots::table.find(id))
             .execute(&*db.conn()?)
@@ -175,13 +186,6 @@ impl TimeSlot {
 
     pub fn day(&self) -> DayOfWeek {
         self.day
-    }
-
-    /// Returns all timeslots form the database
-    pub fn load_all(db: &Db) -> Result<Vec<Self>> {
-        timeslots::table
-            .load(&*db.conn()?)
-            .chain_err(|| "unable to load timeslots from DB")
     }
 }
 
