@@ -36,6 +36,9 @@ unit state_title {
 unit current_state {
     De => "Aktueller Status",
 }
+unit change_state {
+    De => "Status ändern",
+}
 unit state_reason {
     De => "Begründung",
 }
@@ -47,4 +50,7 @@ unit next_state_switch {
 }
 unit no_state_switch_estimate {
     De => "Nicht angegeben",
+}
+unit flash_success_app_state_updated {
+    De => "App Status wurde erfolgreich aktualisiert.",
 }

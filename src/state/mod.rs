@@ -11,6 +11,9 @@
 
 use chrono::DateTime;
 use chrono::offset::Utc;
+use db::schema::current_app_state;
+use diesel::prelude::*;
+use diesel;
 use rocket::{Outcome, State};
 use rocket::request::{self, FromRequest, Request};
 
@@ -42,9 +45,6 @@ pub struct CurrentAppState {
 impl CurrentAppState {
     /// Loads the current app state from the database.
     pub fn load(db: &Db) -> Result<Self> {
-        use db::schema::current_app_state;
-        use diesel::prelude::*;
-
         current_app_state::table
             .first::<Self>(&*db.conn()?)?
             .make_ok()
@@ -52,6 +52,23 @@ impl CurrentAppState {
 
     pub fn reason(&self) -> Option<&str> {
         self.reason.as_ref().map(AsRef::as_ref)
+    }
+
+    /// Sets the current app state to the given values.
+    pub fn set(
+        state: AppState,
+        reason: Option<String>,
+        next_state_switch: Option<DateTime<Utc>>,
+        db: &Db,
+    ) -> Result<Self> {
+        diesel::update(current_app_state::table.find(true))
+            .set((
+                current_app_state::columns::state.eq(&state),
+                current_app_state::columns::reason.eq(&reason),
+                current_app_state::columns::next_state_switch.eq(&next_state_switch),
+            ))
+            .get_result(&*db.conn()?)
+            .chain_err(|| "failed to update current app state")
     }
 }
 

@@ -136,4 +136,8 @@ mauzi! {
         De => "Ausloggen",
         En => "Logout",
     }
+
+    unit save_form {
+        De => "Speichern",
+    }
 }
