@@ -99,7 +99,23 @@ pub fn set_general_settings(
         "chosen" => {
             if let Some(id) = form.partner_id {
                 // TODO: validate the id exists? Somehow?
-                pref.partner = Some(id);
+                match User::load_by_username(&id, &db)? {
+                    Some(ref u) if u.is_student() => {
+                        pref.partner = Some(id);
+                    }
+                    Some(ref u) => {
+                        return Ok(Flash::error(
+                            Redirect::to("/prep"),
+                            dict.flash_partner_not_a_student(u.username()),
+                        ));
+                    }
+                    None => {
+                        return Ok(Flash::error(
+                            Redirect::to("/prep"),
+                            dict.flash_user_not_found(),
+                        ));
+                    }
+                }
             } else {
                 return err(bad_request(locale));
             }
