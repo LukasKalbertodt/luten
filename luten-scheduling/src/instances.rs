@@ -147,7 +147,6 @@ pub fn random_instance(no_of_students: u16, no_of_tutors: u16) -> Instance {
         let good_slots = rng.gen_range(0, 5);
         let tolerable_slots = rng.gen_range(0, 5);
         let slot_assignment = fill_slots(&mut rng, good_blocks, tolerable_blocks, good_slots, tolerable_slots);
-        let english = rng.gen_weighted_bool(10);
 
         students.push(Student {
             name: (p * 2).to_string(),

@@ -17,6 +17,15 @@ pub enum SlotRating {
     NotFitting,
 }
 
+impl SlotRating {
+    pub fn is_ok(&self) -> bool {
+        match *self {
+            SlotRating::NotFitting => false,
+            _ => true,
+        }
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct Timeslot {
     pub day: WorkDay,
