@@ -17,6 +17,7 @@ pub enum ApiResponse<T> {
     Ok(T),
     BadRequest(String),
     InternalServerError,
+    Forbidden,
 }
 
 impl<T: Serialize> ApiResponse<T> {
@@ -59,6 +60,9 @@ impl<T: Serialize> Serialize for ApiResponse<T> {
             ApiResponse::BadRequest(ref e) => {
                 s.serialize_field("err", e)?;
             }
+            ApiResponse::Forbidden => {
+                s.serialize_field("err", "Forbidden")?;
+            }
             ApiResponse::InternalServerError => {}
         }
 
@@ -72,6 +76,7 @@ impl<'r, T: Serialize> Responder<'r> for ApiResponse<T> {
             ApiResponse::Ok(_) => Status::Ok,
             ApiResponse::BadRequest(_) => Status::BadRequest,
             ApiResponse::InternalServerError => Status::InternalServerError,
+            ApiResponse::Forbidden => Status::Forbidden,
         };
 
         Json(self)

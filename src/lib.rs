@@ -68,6 +68,7 @@ extern crate rand;
 extern crate rocket;
 extern crate rocket_contrib;
 extern crate serde;
+#[macro_use] extern crate serde_derive;
 
 
 pub mod api;
