@@ -228,6 +228,16 @@ impl Into<chrono::Weekday> for DayOfWeek {
 #[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
 pub struct Time(NaiveTime);
 
+impl Time {
+    pub fn next(&self) -> Self {
+        Time(self.0 + Duration::minutes(config::TIMESLOT_LEN.into()))
+    }
+
+    pub fn prev(&self) -> Self {
+        Time(self.0 - Duration::minutes(config::TIMESLOT_LEN.into()))
+    }
+}
+
 impl fmt::Display for Time {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.0.format("%H:%M").fmt(f)
