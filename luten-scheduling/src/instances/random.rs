@@ -1,5 +1,7 @@
 use rand::{Rng, thread_rng};
 use rand::distributions::{IndependentSample, Sample};
+use rand::distributions::normal::Normal;
+use rand::distributions::range::Range;
 use std::collections::HashMap;
 
 use types::*;
@@ -10,13 +12,26 @@ pub struct RatingDistribution<T, U, V> where
     U: IndependentSample<f64>,
     V: IndependentSample<f64>,
 {
+    pub available_blocks_per_day: u16,
     // distribution used to sample overall number of slots rated as `Good` or `Tolerable`
-    pub slot_amount: T,
+    pub rated_slots: T,
     // proportion of slots rated good vs tolerable
     pub good_slot_percentage: U,
     // percentage of slots rated together as a block of four slots
     pub block_percentage: V,
-    pub available_blocks_per_day: u16,
+}
+
+impl RatingDistribution<Normal, Range<f64>, Range<f64>> {
+    pub fn default() -> Self {
+        use rand::distributions::normal::Normal;
+        use rand::distributions::range::Range;
+        Self {
+            available_blocks_per_day: 4,
+            rated_slots: Normal::new(10.0, 2.5),
+            good_slot_percentage: Range::new(0.6, 0.9),
+            block_percentage: Range::new(0.5, 0.7),
+        }
+    }
 }
 
 impl<T, U, V> Sample<SlotAssignment> for RatingDistribution<T, U, V> where
@@ -99,7 +114,7 @@ impl<T, U, V> IndependentSample<SlotAssignment> for RatingDistribution<T, U, V> 
 
         // TODO: make sure that sampled values make sense (no negative slot amounts,
         // percentages between 0 and 1)
-        let slot_no = self.slot_amount.ind_sample(rng).round() as u64;
+        let slot_no = self.rated_slots.ind_sample(rng).round() as u64;
         let good_slots = (self.good_slot_percentage.ind_sample(rng) * (slot_no as f64)).round() as u64;
         let tolerable_slots = slot_no - good_slots;
         let block_percentage_sample = self.good_slot_percentage.ind_sample(rng);
