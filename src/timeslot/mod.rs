@@ -108,7 +108,7 @@ impl NewTimeSlot {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Ord, Queryable)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, Queryable)]
 pub struct TimeSlot {
     id: i16,
     day: DayOfWeek,
