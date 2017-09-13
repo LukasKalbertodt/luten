@@ -38,6 +38,19 @@ joinable!(sessions -> users(user_id));
 
 table! {
     use diesel::types::*;
+    use db::types::TimeslotRating;
+
+    timeslot_ratings (user_id, timeslot_id) {
+        user_id -> Int8,
+        timeslot_id -> Int2,
+        rating -> TimeslotRating,
+    }
+}
+joinable!(timeslot_ratings -> users(user_id));
+joinable!(timeslot_ratings -> timeslots(timeslot_id));
+
+table! {
+    use diesel::types::*;
     use db::types::DayOfWeek;
 
     timeslots (id) {
