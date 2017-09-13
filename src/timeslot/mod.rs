@@ -288,3 +288,10 @@ pub fn parse_time_interval(s: &str) -> StdResult<Vec<Time>, String> {
         Ok(out)
     }
 }
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Rating {
+    Good,
+    Tolerable,
+    Bad,
+}
