@@ -113,8 +113,6 @@ impl<T, U, V> IndependentSample<SlotAssignment> for RatingDistribution<T, U, V> 
             }
         }
 
-        // TODO: make sure that sampled values make sense (no negative slot amounts,
-        // percentages between 0 and 1)
         let total_available_slots = self.available_blocks_per_day * 4 * 3;
         let slot_no = {
             let slot_no = self.rated_slots.ind_sample(rng).round();
@@ -133,10 +131,12 @@ impl<T, U, V> IndependentSample<SlotAssignment> for RatingDistribution<T, U, V> 
         };
         let good_blocks = ((good_slots as f64) * block_percentage_sample / 4.0).round() as u64;
         let good_single_slots = good_slots - (good_blocks * 4);
-        let tolerable_blocks = ((tolerable_slots as f64) * block_percentage_sample / 4.0).round() as u64;
+        let tolerable_blocks = ((tolerable_slots as f64) * block_percentage_sample / 4.0)
+            .round() as u64;
         let tolerable_single_slots = tolerable_slots - (tolerable_blocks * 4);
 
-        fill_slots(rng, good_blocks, tolerable_blocks, good_single_slots, tolerable_single_slots, self.available_blocks_per_day)
+        fill_slots(rng, good_blocks, tolerable_blocks, good_single_slots,
+            tolerable_single_slots, self.available_blocks_per_day)
     }
 }
 
