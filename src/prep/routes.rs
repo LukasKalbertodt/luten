@@ -141,3 +141,26 @@ pub struct GeneralStudentSettings {
     partner_id: Option<String>,
     language: String,
 }
+
+#[get("/prep/timeslots")]
+pub fn timeslots(
+    auth_user: AuthUser,
+    locale: Locale,
+    _db: State<Db>,
+    _state: PreparationState,
+) -> Result<Page> {
+    let _dict = dict::new(locale).prep;
+
+    match auth_user.role() {
+        Role::Student => {
+            Page::unimplemented().make_ok()
+        }
+        Role::Tutor => {
+            Page::unimplemented().make_ok()
+        }
+        Role::Admin => {
+            Page::unimplemented().make_ok()
+        }
+    }
+
+}
