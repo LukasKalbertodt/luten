@@ -6,6 +6,7 @@ use std::collections::HashMap;
 
 use types::*;
 use WorkDay::*;
+use util::clamp;
 
 pub struct RatingDistribution<T, U, V> where
     T: IndependentSample<f64>,
@@ -114,10 +115,22 @@ impl<T, U, V> IndependentSample<SlotAssignment> for RatingDistribution<T, U, V> 
 
         // TODO: make sure that sampled values make sense (no negative slot amounts,
         // percentages between 0 and 1)
-        let slot_no = self.rated_slots.ind_sample(rng).round() as u64;
-        let good_slots = (self.good_slot_percentage.ind_sample(rng) * (slot_no as f64)).round() as u64;
+        let total_available_slots = self.available_blocks_per_day * 4 * 3;
+        let slot_no = {
+            let slot_no = self.rated_slots.ind_sample(rng).round();
+            clamp(slot_no, 1.0, total_available_slots as f64) as u64
+        };
+
+        let good_slots = {
+            let good_slots = (self.good_slot_percentage.ind_sample(rng) * (slot_no as f64)).round();
+            clamp(good_slots, 1.0, total_available_slots as f64) as u64
+        };
         let tolerable_slots = slot_no - good_slots;
-        let block_percentage_sample = self.good_slot_percentage.ind_sample(rng);
+
+        let block_percentage_sample = {
+            let percentage = self.good_slot_percentage.ind_sample(rng);
+            clamp(percentage, 0.0, 1.0)
+        };
         let good_blocks = ((good_slots as f64) * block_percentage_sample / 4.0).round() as u64;
         let good_single_slots = good_slots - (good_blocks * 4);
         let tolerable_blocks = ((tolerable_slots as f64) * block_percentage_sample / 4.0).round() as u64;
