@@ -118,6 +118,7 @@ pub fn start_server() {
             prep::routes::overview,
             prep::routes::set_general_settings,
             prep::routes::timeslots,
+            prep::routes::update_timeslots,
 
             special::routes::static_files,
             special::routes::scss_files,

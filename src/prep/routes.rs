@@ -1,6 +1,6 @@
 use rocket::State;
 use rocket::response::{Flash, Redirect};
-use rocket::request::Form;
+use rocket::request::{Form, FormItems, FromForm};
 use option_filter::OptionFilterExt;
 
 use super::{html, StudentPreferences};
@@ -10,7 +10,7 @@ use errors::*;
 use state::PreparationState;
 use template::{NavItem, Page};
 use user::{AuthUser, Role, User};
-use timeslot::TimeSlot;
+use timeslot::{Rating, TimeSlot};
 
 
 fn nav_items(locale: Locale) -> Vec<NavItem> {
@@ -174,4 +174,59 @@ pub fn timeslots(
             Page::unimplemented().make_ok()
         }
     }
+}
+
+#[derive(Debug)]
+pub struct TimeSlotForm {
+    slots: Vec<(i64, Rating)>,
+}
+
+impl<'f> FromForm<'f> for TimeSlotForm {
+    type Error = TimeSlotFormError;
+    fn from_form(items: &mut FormItems<'f>, _: bool) -> StdResult<Self, Self::Error> {
+        let slots = items.into_iter().map(|(key, value)| {
+            if !key.starts_with("slot-") {
+                return Err(TimeSlotFormError::InvalidId);
+            }
+
+            let id = match key[5..].parse() {
+                Err(_) => return Err(TimeSlotFormError::InvalidId),
+                Ok(id) => id,
+            };
+
+            let rating = match value.as_str() {
+                "good" => Rating::Good,
+                "tolerable" => Rating::Tolerable,
+                "bad" => Rating::Bad,
+                _ => return Err(TimeSlotFormError::InvalidRating),
+            };
+
+            Ok((id, rating))
+        }).collect::<StdResult<Vec<_>, _>>()?;
+
+        Ok(Self { slots })
+    }
+}
+
+#[derive(Debug)]
+pub enum TimeSlotFormError {
+    InvalidRating,
+    InvalidId,
+}
+
+
+#[post("/prep/update_timeslots", data = "<form>")]
+fn update_timeslots(
+    _auth_user: AuthUser,
+    form: Form<TimeSlotForm>,
+    _locale: Locale,
+    _db: State<Db>,
+    _state: PreparationState,
+) -> Result<Flash<Redirect>> {
+    println!("{:#?}", form);
+
+    Ok(Flash::success(
+        Redirect::to("/prep/timeslots"),
+        "Well well",
+    ))
 }

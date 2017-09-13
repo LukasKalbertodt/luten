@@ -4,7 +4,7 @@ use maud::{html, Markup};
 use super::StudentPreferences;
 use dict::{self, Locale};
 use user::Student;
-use timeslot::{DayOfWeek, Rating, TimeSlot};
+use timeslot::{Rating, TimeSlot};
 
 
 
@@ -178,7 +178,7 @@ pub fn student_timeslots(slots: &[TimeSlot], locale: Locale) -> Markup {
 
         h1 class="c-heading" "Zeitslots"
 
-        form action="/test" method="post" {
+        form action="/prep/update_timeslots" method="post" {
             (timeslot_list(slots, locale, timeslot_rating))
 
             input
@@ -230,7 +230,7 @@ pub fn timeslot_list<F>(slots: &[TimeSlot], locale: Locale, mut slot_formatter: 
     }
 }
 
-pub fn timeslot_rating(slot: Option<TimeSlot>, rating: Rating, locale: Locale) -> Markup {
+pub fn timeslot_rating(slot: Option<TimeSlot>, rating: Rating, _locale: Locale) -> Markup {
     if let Some(slot) = slot {
         let name = format!("slot-{}", slot.id());
         let id_good = format!("slot-pref-{}-good", slot.id());
