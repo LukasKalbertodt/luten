@@ -1,7 +1,8 @@
 extern crate rand;
 
-pub mod types;
 pub mod instances;
+pub mod types;
+pub mod util;
 
 use std::collections::HashSet;
 
