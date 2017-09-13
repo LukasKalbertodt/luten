@@ -112,9 +112,46 @@ pub fn small_instance0() -> Instance {
             ];
         }
     }
-    // expected "best" solution:
-    // Monday slot 0: Tobias - Lisa
-    // Monday slot 1: Tobias - Willi, Susi
+    // expected solution:
+    // Monday 0: Tobias - Lisa
+    // Monday 1: Tobias - Willi, Susi
+}
+
+pub fn small_instance1() -> Instance {
+    instance! {
+        tutors: {
+            "T1", 1.0 => [
+                Good: Tuesday 0,
+                Tolerable: Monday 0,
+            ];
+            "T2", 1.0 => [
+                Good: Wednesday 0,
+                Tolerable: Tuesday 0,
+            ];
+        }
+        students: {
+            "S1", Some("S2") => [
+                Good: Wednesday 0,
+                Tolerable: Tuesday 0,
+            ];
+            "S2", Some("S1") => [
+                Good: Thursday 0,
+                Tolerable: Wednesday 0,
+            ];
+            "S3", None => [
+                Good: Tuesday 0,
+                Good: Wednesday 0,
+            ];
+            "S4", None => [
+                Good: Monday 0,
+                Good: Tuesday 0,
+                Good: Wednesday 0,
+            ];
+        }
+    }
+    // expected solution:
+    // Tuesday:     T1 - S3, S4
+    // Wednesday:   T2 - S1, S2
 }
 
 pub fn random_instance(no_of_students: u16, no_of_tutors: u16) -> Instance {
