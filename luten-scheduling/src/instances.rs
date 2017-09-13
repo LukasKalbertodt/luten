@@ -85,56 +85,36 @@ macro_rules! instance {
 }
 
 
-pub fn small_instances() -> Vec<Instance> {
-    let mut slots = Vec::new();
-    for i in 0..5 {
-        slots.push(Timeslot {
-            day: Monday,
-            slot_of_day: i,
-        });
+pub fn small_instance0() -> Instance {
+    instance! {
+        tutors: {
+            "Tobias", 1.0 => [
+                Good: Monday 0,
+                Tolerable: Monday 1,
+            ];
+            "Karo", 1.0 => [
+                Good: Monday 2,
+                Tolerable: Monday 3,
+            ];
+        }
+        students: {
+            "Susi", Some("Willi") => [
+                Good: Monday 1,
+            ];
+            "Willi", Some("Susi") => [
+                Good: Monday 2,
+                Good: Monday 3,
+                Tolerable: Monday 1,
+            ];
+            "Lisa", None => [
+                Good: Monday 0,
+                Good: Monday 1,
+            ];
+        }
     }
-
-    let tutor1 = Tutor {
-        name: "tobias".into(),
-        slot_assignment: SlotAssignment::new(&[slots[0]], &[slots[1]]),
-        scale_factor: 1.0,
-    };
-    let tutor2 = Tutor {
-        name: "karo".into(),
-        slot_assignment: SlotAssignment::new(&[slots[2]], &[slots[3]]),
-        scale_factor: 1.0,
-    };
-
-    let student1 = Student {
-        name: "susi".into(),
-        slot_assignment: SlotAssignment::new(&[slots[1]], &[]),
-        partner: Some("willi".into()),
-    };
-
-    let student2 = Student {
-        name: "willi".into(),
-        slot_assignment: SlotAssignment::new(&[slots[2], slots[3]], &[slots[1]]),
-        partner: Some("susi".into()),
-    };
-
-    let student3 = Student {
-        name: "lisa".into(),
-        slot_assignment: SlotAssignment::new(&[slots[0], slots[1]], &[]),
-        partner: None,
-    };
-
-    // expected best solution:
+    // expected "best" solution:
     // Monday slot 0: Tobias - Lisa
     // Monday slot 1: Tobias - Willi, Susi
-
-    let i1 = Instance {
-        students: vec![student1, student2, student3],
-        tutors: vec![tutor1, tutor2],
-    };
-
-
-
-    vec![i1]
 }
 
 pub fn random_instance(no_of_students: u16, no_of_tutors: u16) -> Instance {
