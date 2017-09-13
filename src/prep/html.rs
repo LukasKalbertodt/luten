@@ -4,6 +4,7 @@ use maud::{html, Markup};
 use super::StudentPreferences;
 use dict::{self, Locale};
 use user::Student;
+use timeslot::{DayOfWeek, Rating, TimeSlot};
 
 
 
@@ -159,6 +160,119 @@ pub fn student_overview(
                             value=(dict.save_form()) {}
                     }
                 }
+            }
+        }
+    }
+}
+
+pub fn student_timeslots(slots: &[TimeSlot], locale: Locale) -> Markup {
+    html! {
+        div class="c-card prep-status-card u-higher" {
+            div class="c-card__item c-card__item--info c-card__item--divider" {
+                "Erklärbär"
+            }
+            div class="c-card__item" {
+                "Also, hör mal zu, ich erklär dir mal wie das geht."
+            }
+        }
+
+        h1 class="c-heading" "Zeitslots"
+
+        form action="/test" method="post" {
+            (timeslot_list(slots, locale, timeslot_rating))
+
+            input
+                class="c-button c-button--success u-large c-button--block"
+                type="submit"
+                {}
+        }
+    }
+}
+
+pub fn timeslot_list<F>(slots: &[TimeSlot], locale: Locale, mut slot_formatter: F) -> Markup
+    where F: FnMut(Option<TimeSlot>, Rating, Locale) -> Markup
+{
+    use std::collections::BTreeMap;
+
+    let mut days = BTreeMap::new();
+    for slot in slots {
+        days.entry(slot.day())
+            .or_insert(Vec::new())
+            .push(Some(slot));
+    }
+
+    for v in days.values_mut().filter(|v| !v.is_empty()) {
+        v.sort();
+
+        let mut last_time = v[0].unwrap().time();
+        let mut i = 1;
+        while i < v.len() {
+            if v[i].unwrap().time().prev() != last_time {
+                v.insert(i, None);
+            }
+            last_time = last_time.next();
+
+            i += 1;
+        }
+    }
+
+    html! {
+        div class="timeslots-grid" {
+            @for (day, slots) in days {
+                div class="timeslots-grid-cell" {
+                    h3 class="heading" (day.full_name(locale))
+                    @for slot in slots {
+                        (slot_formatter(slot.cloned(), Rating::Bad, locale))
+                    }
+                }
+            }
+        }
+    }
+}
+
+pub fn timeslot_rating(slot: Option<TimeSlot>, rating: Rating, locale: Locale) -> Markup {
+    if let Some(slot) = slot {
+        let name = format!("slot-{}", slot.id());
+        let id_good = format!("slot-pref-{}-good", slot.id());
+        let id_tolerable = format!("slot-pref-{}-tolerable", slot.id());
+        let id_bad = format!("slot-pref-{}-bad", slot.id());
+
+        html! {
+            div class="c-button-group--rounded timeslots-slot" {
+                label (slot.time())
+
+                input
+                    type="radio"
+                    name=(name)
+                    id=(id_good)
+                    value="good"
+                    class="timeslots-rating"
+                    checked?[rating == Rating::Good];
+                label for=(id_good) class="c-button c-button--ghost-success" "Passt"
+
+                input
+                    type="radio"
+                    name=(name)
+                    id=(id_tolerable)
+                    value="tolerable"
+                    class="timeslots-rating"
+                    checked?[rating == Rating::Tolerable];
+                label for=(id_tolerable) class="c-button c-button--ghost-warning" "Ungern"
+
+                input
+                    type="radio"
+                    name=(name)
+                    id=(id_bad)
+                    value="bad"
+                    class="timeslots-rating"
+                    checked?[rating == Rating::Bad];
+                label for=(id_bad) class="c-button c-button--ghost-error" "Passt nicht"
+            }
+        }
+    } else {
+        html! {
+            div class="timeslots-empty-slot" {
+                i class="fa fa-ban" {}
             }
         }
     }

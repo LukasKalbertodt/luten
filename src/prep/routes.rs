@@ -10,6 +10,7 @@ use errors::*;
 use state::PreparationState;
 use template::{NavItem, Page};
 use user::{AuthUser, Role, User};
+use timeslot::TimeSlot;
 
 
 fn nav_items(locale: Locale) -> Vec<NavItem> {
@@ -146,14 +147,25 @@ pub struct GeneralStudentSettings {
 pub fn timeslots(
     auth_user: AuthUser,
     locale: Locale,
-    _db: State<Db>,
+    db: State<Db>,
     _state: PreparationState,
 ) -> Result<Page> {
     let _dict = dict::new(locale).prep;
 
+    let timeslots = {
+        let mut timeslots = TimeSlot::load_all(&db)?;
+        timeslots.sort();
+        timeslots
+    };
+
     match auth_user.role() {
         Role::Student => {
-            Page::unimplemented().make_ok()
+
+            let content = html::student_timeslots(&timeslots, locale);
+
+            Page::empty()
+                .with_content(content)
+                .make_ok()
         }
         Role::Tutor => {
             Page::unimplemented().make_ok()
@@ -162,5 +174,4 @@ pub fn timeslots(
             Page::unimplemented().make_ok()
         }
     }
-
 }
