@@ -120,6 +120,7 @@ pub fn start_server() {
             prep::routes::timeslots,
 
             special::routes::static_files,
+            special::routes::scss_files,
             special::routes::index,
 
             user::routes::settings,

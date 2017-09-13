@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
+use rocket::{Config, State};
 use rocket::response::{NamedFile, Redirect};
-use rocket::State;
 
 use db::Db;
 use errors::*;
@@ -38,4 +38,14 @@ pub fn index(auth_user: AuthUser, db: State<Db>) -> Result<StdResult<Redirect, P
 #[get("/static/<path..>")]
 pub fn static_files(path: PathBuf) -> Option<NamedFile> {
     NamedFile::open(Path::new("static/").join(path)).ok()
+}
+
+#[get("/scss/<path..>")]
+pub fn scss_files(path: PathBuf, config: State<Config>) -> Option<NamedFile> {
+    // We only return scss files if we're in development mode!
+    if config.environment.is_dev() {
+        NamedFile::open(Path::new("scss/").join(path)).ok()
+    } else {
+        None
+    }
 }
