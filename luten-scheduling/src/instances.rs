@@ -4,6 +4,87 @@ use std::collections::HashMap;
 use types::*;
 use WorkDay::*;
 
+#[macro_export]
+macro_rules! instance {
+    (
+        tutors: {
+            $(
+                $tname:expr, $scale:expr => [
+                    $( $tutor_slots:tt )*
+                ];
+            )*
+        }
+        students: {
+            $(
+                $sname:expr, $partner:expr => [
+                    $( $student_slots:tt )*
+                ];
+            )*
+        }
+    ) => {{
+        let mut tutors = Vec::new();
+
+        $(
+            {
+                let (good, tolerable): (Vec<Timeslot>, Vec<Timeslot>) = instance! {
+                    @parse_timeslots $( $tutor_slots )*
+                };
+
+                tutors.push(Tutor {
+                    name: $tname.into(),
+                    slot_assignment: SlotAssignment::new(&good, &tolerable),
+                    scale_factor: $scale,
+                });
+            }
+        )*
+
+        let mut students = Vec::new();
+
+        $(
+            {
+                let (good, tolerable): (Vec<Timeslot>, Vec<Timeslot>) = instance! {
+                    @parse_timeslots $( $student_slots )*
+                };
+
+                students.push(Student {
+                    name: $sname.into(),
+                    slot_assignment: SlotAssignment::new(&good, &tolerable),
+                    partner: $partner.map(|s: &'static str| s.to_string()),
+                });
+            }
+        )*
+
+        Instance {
+            students: students,
+            tutors: tutors,
+        }
+
+    }};
+    (
+        @parse_timeslots $( $rating:ident: $day:ident $slot:expr, )*
+    ) => {{
+        let mut good = Vec::new();
+        let mut tolerable = Vec::new();
+        $(
+            {
+                let slot = Timeslot {
+                    day: WorkDay::$day,
+                    slot_of_day: $slot,
+                };
+
+                match SlotRating::$rating {
+                    SlotRating::Good => good.push(slot),
+                    SlotRating::Tolerable => tolerable.push(slot),
+                    _ => {}
+                }
+            }
+        )*
+
+        (good, tolerable)
+    }}
+}
+
+
 pub fn small_instances() -> Vec<Instance> {
     let mut slots = Vec::new();
     for i in 0..5 {
