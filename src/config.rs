@@ -57,3 +57,7 @@ pub const SESSION_ID_LEN: usize = 16;
 /// user will be redirected to the route they initially requested. To store
 /// this route, we use a cookie. The name of that cookie is defined here.
 pub const INITIAL_REQ_COOKIE_NAME: &str = "initial_request_path";
+
+/// The length of one timeslot in minutes. For now, 60 needs to be divisible
+/// by this value!
+pub const TIMESLOT_LEN: u16 = 30;

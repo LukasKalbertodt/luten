@@ -6,6 +6,7 @@ use chrono::{self, Duration, NaiveTime};
 use diesel;
 use diesel::prelude::*;
 
+use config;
 use dict::{self, Locale};
 use db::Db;
 use db::schema::timeslots;
@@ -236,15 +237,19 @@ impl fmt::Display for Time {
 impl FromStr for Time {
     type Err = String;
 
-    /// Parses strings of the form "HH:MM".
+    /// Parses strings of the form "HH:MM" where "MM" is a multiple of
+    /// `config::TIMESLOT_LEN`.
     fn from_str(s: &str) -> StdResult<Self, Self::Err> {
         use chrono::prelude::*;
 
         let time = NaiveTime::parse_from_str(s, "%H:%M")
             .map_err(|e| e.to_string())?;
 
-        if time.minute() != 0 && time.minute() != 30 {
-            return Err("A timeslot has to be at HH:00 or HH:30!".into());
+        if time.minute() % (config::TIMESLOT_LEN as u32) != 0 {
+            return Err(format!(
+                "The minutes of a timeslot have to be a multiple of {}!",
+                config::TIMESLOT_LEN,
+            ));
         }
 
         Ok(Time(time))
@@ -267,7 +272,7 @@ pub fn parse_time_interval(s: &str) -> StdResult<Vec<Time>, String> {
         let mut out = Vec::new();
         while slot < end {
             out.push(slot);
-            slot.0 = slot.0 + Duration::minutes(30);
+            slot.0 = slot.0 + Duration::minutes(config::TIMESLOT_LEN.into());
         }
 
         Ok(out)
