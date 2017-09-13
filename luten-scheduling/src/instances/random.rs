@@ -16,6 +16,7 @@ pub struct RatingDistribution<T, U, V> where
     pub good_slot_percentage: U,
     // percentage of slots rated together as a block of four slots
     pub block_percentage: V,
+    pub available_blocks_per_day: u16,
 }
 
 impl<T, U, V> Sample<SlotAssignment> for RatingDistribution<T, U, V> where
@@ -47,6 +48,7 @@ impl<T, U, V> IndependentSample<SlotAssignment> for RatingDistribution<T, U, V> 
             tolerable_blocks: u64,
             good_slots: u64,
             tolerable_slots: u64,
+            available_blocks_per_day: u16,
         ) -> SlotAssignment {
 
             let mut map = HashMap::new();
@@ -56,9 +58,9 @@ impl<T, U, V> IndependentSample<SlotAssignment> for RatingDistribution<T, U, V> 
                     for _ in 0..no {
                         loop {
                             let slots: Vec<_> = if block {
-                                (0..5).map(|n| n * 4).collect()
+                                (0..available_blocks_per_day).map(|n| n * 4).collect()
                             } else {
-                                (0..20).collect()
+                                (0..(available_blocks_per_day * 4)).collect()
                             };
                             let slot = Timeslot {
                                 day: *(rng.choose(&[Monday, Tuesday, Wednesday]).unwrap()),
@@ -106,7 +108,7 @@ impl<T, U, V> IndependentSample<SlotAssignment> for RatingDistribution<T, U, V> 
         let tolerable_blocks = ((tolerable_slots as f64) * block_percentage_sample / 4.0).round() as u64;
         let tolerable_single_slots = tolerable_slots - (tolerable_blocks * 4);
 
-        fill_slots(rng, good_blocks, tolerable_blocks, good_single_slots, tolerable_single_slots)
+        fill_slots(rng, good_blocks, tolerable_blocks, good_single_slots, tolerable_single_slots, self.available_blocks_per_day)
     }
 }
 
