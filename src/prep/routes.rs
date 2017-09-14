@@ -3,7 +3,7 @@ use rocket::response::{Flash, Redirect};
 use rocket::request::{Form, FormItems, FromForm};
 use option_filter::OptionFilterExt;
 
-use super::{html, StudentPreferences};
+use super::{html, StudentPreferences, TimeSlotRating};
 use db::Db;
 use dict::{self, Locale};
 use errors::*;
@@ -150,20 +150,30 @@ pub fn timeslots(
     db: State<Db>,
     _state: PreparationState,
 ) -> Result<Page> {
-    let _dict = dict::new(locale).prep;
+    let dict = dict::new(locale).prep;
 
-    let timeslots = {
-        let mut timeslots = TimeSlot::load_all(&db)?;
-        timeslots.sort();
-        timeslots
+    // Load all ratings of the user. We check if the user has a rating for each
+    // existing timeslot, otherwise we create default entries.
+    // TODO: Actually, this shouldn't be necessary: one user creation, default
+    // entries are created. The following code is only useful if timeslots are
+    // added after users are created.
+    let ratings = {
+        let mut ratings = TimeSlotRating::load_all_of_user(&auth_user, &db)?;
+        if ratings.len() as u64 != TimeSlot::count(&db)? {
+            TimeSlotRating::create_defaults_for_user(&auth_user, &db)?;
+            ratings = TimeSlotRating::load_all_of_user(&auth_user, &db)?;
+        }
+        ratings
     };
 
     match auth_user.role() {
         Role::Student => {
-
-            let content = html::student_timeslots(&timeslots, locale);
+            let content = html::student_timeslots(&ratings, locale);
 
             Page::empty()
+                .with_title(dict.timeslots_title())
+                .add_nav_items(nav_items(locale))
+                .with_active_nav_route("/prep/timeslots")
                 .with_content(content)
                 .make_ok()
         }
@@ -176,15 +186,17 @@ pub fn timeslots(
     }
 }
 
+/// Stores a list of (timeslot_id, rating).
 #[derive(Debug)]
 pub struct TimeSlotForm {
-    slots: Vec<(i64, Rating)>,
+    slots: Vec<(i16, Rating)>,
 }
 
 impl<'f> FromForm<'f> for TimeSlotForm {
     type Error = TimeSlotFormError;
     fn from_form(items: &mut FormItems<'f>, _: bool) -> StdResult<Self, Self::Error> {
         let slots = items.into_iter().map(|(key, value)| {
+            // The keys come in the form `slot-34` and we want this number.
             if !key.starts_with("slot-") {
                 return Err(TimeSlotFormError::InvalidId);
             }
@@ -194,6 +206,7 @@ impl<'f> FromForm<'f> for TimeSlotForm {
                 Ok(id) => id,
             };
 
+            // The value should only be one of those three values.
             let rating = match value.as_str() {
                 "good" => Rating::Good,
                 "tolerable" => Rating::Tolerable,
@@ -217,16 +230,17 @@ pub enum TimeSlotFormError {
 
 #[post("/prep/update_timeslots", data = "<form>")]
 fn update_timeslots(
-    _auth_user: AuthUser,
+    auth_user: AuthUser,
     form: Form<TimeSlotForm>,
-    _locale: Locale,
-    _db: State<Db>,
+    locale: Locale,
+    db: State<Db>,
     _state: PreparationState,
 ) -> Result<Flash<Redirect>> {
-    println!("{:#?}", form);
+    let form = form.into_inner();
+    TimeSlotRating::update_all(&auth_user, &form.slots, &db)?;
 
     Ok(Flash::success(
         Redirect::to("/prep/timeslots"),
-        "Well well",
+        dict::new(locale).prep.flash_success_storing_timeslot_ratings(),
     ))
 }

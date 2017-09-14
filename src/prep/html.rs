@@ -165,7 +165,7 @@ pub fn student_overview(
     }
 }
 
-pub fn student_timeslots(slots: &[TimeSlot], locale: Locale) -> Markup {
+pub fn student_timeslots(slots: &[(TimeSlot, Rating)], locale: Locale) -> Markup {
     html! {
         div class="c-card prep-status-card u-higher" {
             div class="c-card__item c-card__item--info c-card__item--divider" {
@@ -189,25 +189,25 @@ pub fn student_timeslots(slots: &[TimeSlot], locale: Locale) -> Markup {
     }
 }
 
-pub fn timeslot_list<F>(slots: &[TimeSlot], locale: Locale, mut slot_formatter: F) -> Markup
-    where F: FnMut(Option<TimeSlot>, Rating, Locale) -> Markup
+pub fn timeslot_list<F, D>(slots: &[(TimeSlot, D)], locale: Locale, mut slot_formatter: F) -> Markup
+    where F: FnMut(Option<(TimeSlot, &D)>, Locale) -> Markup
 {
     use std::collections::BTreeMap;
 
     let mut days = BTreeMap::new();
-    for slot in slots {
+    for &(slot, ref data) in slots {
         days.entry(slot.day())
             .or_insert(Vec::new())
-            .push(Some(slot));
+            .push(Some((slot, data)));
     }
 
     for v in days.values_mut().filter(|v| !v.is_empty()) {
-        v.sort();
+        v.sort_by_key(|e| e.unwrap().0);
 
-        let mut last_time = v[0].unwrap().time();
+        let mut last_time = v[0].unwrap().0.time();
         let mut i = 1;
         while i < v.len() {
-            if v[i].unwrap().time().prev() != last_time {
+            if v[i].unwrap().0.time().prev() != last_time {
                 v.insert(i, None);
             }
             last_time = last_time.next();
@@ -222,7 +222,7 @@ pub fn timeslot_list<F>(slots: &[TimeSlot], locale: Locale, mut slot_formatter: 
                 div class="timeslots-grid-cell" {
                     h3 class="heading" (day.full_name(locale))
                     @for slot in slots {
-                        (slot_formatter(slot.cloned(), Rating::Bad, locale))
+                        (slot_formatter(slot, locale))
                     }
                 }
             }
@@ -230,8 +230,8 @@ pub fn timeslot_list<F>(slots: &[TimeSlot], locale: Locale, mut slot_formatter: 
     }
 }
 
-pub fn timeslot_rating(slot: Option<TimeSlot>, rating: Rating, _locale: Locale) -> Markup {
-    if let Some(slot) = slot {
+pub fn timeslot_rating(slot: Option<(TimeSlot, &Rating)>, _locale: Locale) -> Markup {
+    if let Some((slot, &rating)) = slot {
         let name = format!("slot-{}", slot.id());
         let id_good = format!("slot-pref-{}-good", slot.id());
         let id_tolerable = format!("slot-pref-{}-tolerable", slot.id());

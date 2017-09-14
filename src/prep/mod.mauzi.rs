@@ -112,3 +112,8 @@ unit flash_user_not_found {
            dein Partner muss sich einmal auf dieser Website eingeloggt haben, \
            damit du ihn/sie als gewünschten Partner angegeben kannst!"
 }
+
+
+unit flash_success_storing_timeslot_ratings {
+    De => "Die Terminpräferenzen wurden erfolgreich gespeichert.",
+}
