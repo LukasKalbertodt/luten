@@ -64,3 +64,46 @@ export function checkPartner(receiver: HTMLInputElement) {
     // Start the actual job (except if it is cancelled later).
     timeoutHandle = window.setTimeout(checkPartnerImpl, FETCH_TIMEOUT);
 }
+
+doOnDOMReady(timeslotStat);
+
+function timeslotStat() {
+    let form = document.getElementById('timeslots-form');
+    if (form) {
+        let list = form.querySelectorAll('input[type=radio]');
+        for (let i = 0; i < list.length; i++) {
+            // Register event listener which fire whenever a rating is
+            // changed.
+            list[i].addEventListener('change', updateCount);
+        }
+    }
+
+    function updateCount() {
+        console.log('called');
+        let goodCount = 0;
+        let tolerableCount = 0;
+        let badCount = 0;
+
+        let list = form.querySelectorAll('input[type=radio]');
+        for (let i = 0; i < list.length; i++) {
+            let node = <HTMLInputElement>list[i];
+            if (node.checked) {
+                switch (node.value) {
+                    case 'good':
+                        goodCount += 1;
+                        break;
+                    case 'tolerable':
+                        tolerableCount += 1;
+                        break;
+                    case 'bad':
+                        badCount += 1;
+                        break;
+                }
+            }
+        }
+
+        document.getElementById('timeslots-num-good').innerHTML = goodCount.toString();
+        document.getElementById('timeslots-num-tolerable').innerHTML = tolerableCount.toString();
+        document.getElementById('timeslots-num-bad').innerHTML = badCount.toString();
+    }
+}

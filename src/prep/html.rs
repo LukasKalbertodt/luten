@@ -227,7 +227,7 @@ pub fn student_timeslots(slots: &[(TimeSlot, Rating)], locale: Locale) -> Markup
 
         h1 class="c-heading" "Zeitslots"
 
-        form action="/prep/update_timeslots" method="post" {
+        form action="/prep/update_timeslots" method="post" id="timeslots-form" {
             (timeslot_list(slots, locale, timeslot_rating))
 
             input
