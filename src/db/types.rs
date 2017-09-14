@@ -13,7 +13,7 @@ use std::io::Write;
 
 use user::Role;
 use state::AppState as RealAppState;
-use timeslot::DayOfWeek as RealDayOfWeek;
+use timeslot::{DayOfWeek as RealDayOfWeek, Rating};
 
 /// Macro to generate boilerplate code needed to use a postgres enum types.
 ///
@@ -117,4 +117,10 @@ enum_pg_type! ("day_of_week", DayOfWeek, RealDayOfWeek; {
     Friday => b"friday",
     Saturday => b"saturday",
     Sunday => b"sunday",
+});
+
+enum_pg_type! ("timeslot_rating", TimeslotRating, Rating; {
+    Good => b"good",
+    Tolerable => b"tolerable",
+    Bad => b"bad",
 });

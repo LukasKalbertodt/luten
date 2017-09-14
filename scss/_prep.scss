@@ -11,3 +11,101 @@
     margin-left: 1.5em;
     margin-top: 0.5em;
 }
+
+.timeslots-grid {
+    display: grid;
+    grid-gap: 1.5em;
+    grid-template-columns: repeat(auto-fill, minmax(16em, 1fr));
+
+    $margin: 6px;
+
+    .timeslots-grid-cell {
+        // This is necessary to prevent a bug in Firefox
+        overflow: hidden;
+
+        input[type="radio"] {
+            display: none;
+        }
+
+        .timeslots-empty-slot {
+            height: calc(1.75em + 0.5em + 2px);
+            margin: $margin 0;
+            text-align: center;
+            color: #CF7979;
+        }
+
+        .timeslots-slot {
+            display: grid;
+            grid-template-columns: 3.5em 1fr 1fr 1fr;
+            margin: $margin 0;
+
+            input:checked + label {
+                color: white;
+
+                &.c-button--ghost-success {
+                    background-color: #4caf50;
+
+                    &:hover {
+                        background-color: #6abe6e;
+                    }
+                }
+                &.c-button--ghost-warning {
+                    background-color: #ff9800;
+
+                    &:hover {
+                        background-color: #ffab2e;
+                    }
+                }
+                &.c-button--ghost-error {
+                    background-color: #f44336;
+
+                    &:hover {
+                        background-color: #f66c62;
+                    }
+                }
+            }
+
+            label {
+                border-radius: 0;
+
+                // The box containing the name
+                &:first-of-type {
+                    line-height: 1;
+                    border-top-left-radius: 4px;
+                    border-bottom-left-radius: 4px;
+
+                    border: 1px solid #7E7E7E;
+                    background-color: #F6F6F6;
+
+                    font-weight: 700;
+                    padding: .5em .3em;
+                    font-family: inherit;
+                    font-size: 1em;
+                    text-align: right;
+                }
+                &:last-of-type {
+                    border-top-right-radius: 4px;
+                    border-bottom-right-radius: 4px;
+                }
+
+                &:not(:first-of-type) {
+                    line-height: 1;
+                    border-left-width: 0;
+                    font-size: 1.5em;
+                    padding: 0.25em;
+                }
+            }
+        }
+    }
+}
+
+.timeslots-submit {
+    display: block;
+    width: 100%;
+    max-width: 25em;
+    margin: 2em auto;
+}
+
+.timeslots-card {
+    margin: 1em 0;
+}

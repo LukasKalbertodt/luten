@@ -33,6 +33,24 @@ lazy_static! {
     ];
 }
 
+/// The minimum number of timeslots a student has to rate as "good" before
+/// their rating is accepted.
+pub const MIN_GOOD_SLOTS_STUDENT: u64 = 2;
+
+/// The minimum number of timeslots a student has to rate as "good" or
+/// "tolerable" before their rating is accepted.
+pub const MIN_OK_SLOTS_STUDENT: u64 = 5;
+
+/// The minimum number of timeslots a tutor has to rate as "good" before  their
+/// rating is accepted. This number needs to be multiplied with the job
+/// multiplier of the tutor!
+pub const MIN_GOOD_SLOTS_TUTOR: u64 = 11;
+
+/// The minimum number of timeslots a tutor has to rate as "good" or
+/// "tolerable" before  their rating is accepted. This number needs to be
+/// multiplied with the job multiplier of the tutor!
+pub const MIN_OK_SLOTS_TUTOR: u64 = 14;
+
 
 
 // ===========================================================================
@@ -57,3 +75,7 @@ pub const SESSION_ID_LEN: usize = 16;
 /// user will be redirected to the route they initially requested. To store
 /// this route, we use a cookie. The name of that cookie is defined here.
 pub const INITIAL_REQ_COOKIE_NAME: &str = "initial_request_path";
+
+/// The length of one timeslot in minutes. For now, 60 needs to be divisible
+/// by this value!
+pub const TIMESLOT_LEN: u16 = 30;

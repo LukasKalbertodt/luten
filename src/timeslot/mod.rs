@@ -6,6 +6,7 @@ use chrono::{self, Duration, NaiveTime};
 use diesel;
 use diesel::prelude::*;
 
+use config;
 use dict::{self, Locale};
 use db::Db;
 use db::schema::timeslots;
@@ -107,7 +108,7 @@ impl NewTimeSlot {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Ord, Queryable)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, Queryable)]
 pub struct TimeSlot {
     id: i16,
     day: DayOfWeek,
@@ -164,6 +165,15 @@ impl TimeSlot {
                     Ok(())
                 }
             })
+    }
+
+    /// Counts the number of timeslots in the database.
+    pub fn count(db: &Db) -> Result<u64> {
+        timeslots::table
+            .count()
+            .get_result::<i64>(&*db.conn()?)
+            .chain_err(|| "failed to count number of timeslots in DB")
+            .map(|count| count as u64)
     }
 
     /// Deletes the timeslot with the given id from the database. Returns
@@ -227,6 +237,16 @@ impl Into<chrono::Weekday> for DayOfWeek {
 #[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
 pub struct Time(NaiveTime);
 
+impl Time {
+    pub fn next(&self) -> Self {
+        Time(self.0 + Duration::minutes(config::TIMESLOT_LEN.into()))
+    }
+
+    pub fn prev(&self) -> Self {
+        Time(self.0 - Duration::minutes(config::TIMESLOT_LEN.into()))
+    }
+}
+
 impl fmt::Display for Time {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.0.format("%H:%M").fmt(f)
@@ -236,15 +256,19 @@ impl fmt::Display for Time {
 impl FromStr for Time {
     type Err = String;
 
-    /// Parses strings of the form "HH:MM".
+    /// Parses strings of the form "HH:MM" where "MM" is a multiple of
+    /// `config::TIMESLOT_LEN`.
     fn from_str(s: &str) -> StdResult<Self, Self::Err> {
         use chrono::prelude::*;
 
         let time = NaiveTime::parse_from_str(s, "%H:%M")
             .map_err(|e| e.to_string())?;
 
-        if time.minute() != 0 && time.minute() != 30 {
-            return Err("A timeslot has to be at HH:00 or HH:30!".into());
+        if time.minute() % (config::TIMESLOT_LEN as u32) != 0 {
+            return Err(format!(
+                "The minutes of a timeslot have to be a multiple of {}!",
+                config::TIMESLOT_LEN,
+            ));
         }
 
         Ok(Time(time))
@@ -267,9 +291,16 @@ pub fn parse_time_interval(s: &str) -> StdResult<Vec<Time>, String> {
         let mut out = Vec::new();
         while slot < end {
             out.push(slot);
-            slot.0 = slot.0 + Duration::minutes(30);
+            slot.0 = slot.0 + Duration::minutes(config::TIMESLOT_LEN.into());
         }
 
         Ok(out)
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Rating {
+    Good,
+    Tolerable,
+    Bad,
 }
