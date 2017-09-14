@@ -102,8 +102,12 @@ function timeslotStat() {
             }
         }
 
+        let progress = document.getElementById('timeslots-progress');
+        progress.dataset.numGood = goodCount.toString();
+        progress.dataset.numTolerable = tolerableCount.toString();
+        progress.dataset.numBad = badCount.toString();
+
         document.getElementById('timeslots-num-good').innerHTML = goodCount.toString();
-        document.getElementById('timeslots-num-tolerable').innerHTML = tolerableCount.toString();
-        document.getElementById('timeslots-num-bad').innerHTML = badCount.toString();
+        document.getElementById('timeslots-num-ok').innerHTML = (goodCount + tolerableCount).toString();
     }
 }

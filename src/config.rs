@@ -33,6 +33,14 @@ lazy_static! {
     ];
 }
 
+/// The minimum number of timeslots a student has to rate as "good" before his
+/// rating is accepted.
+pub const MIN_GOOD_SLOTS_STUDENT: u64 = 2;
+
+/// The minimum number of timeslots a student has to rate as "good" or
+/// "tolerable" before his rating is accepted.
+pub const MIN_OK_SLOTS_STUDENT: u64 = 5;
+
 
 
 // ===========================================================================

@@ -2,6 +2,7 @@ use maud::{html, Markup};
 
 
 use super::StudentPreferences;
+use config;
 use dict::{self, Locale};
 use user::Student;
 use timeslot::{Rating, TimeSlot};
@@ -183,46 +184,57 @@ pub fn student_timeslots(slots: &[(TimeSlot, Rating)], locale: Locale) -> Markup
     }
 
     html! {
-        div class="c-card prep-status-card u-higher" {
-            div class="c-card__item c-card__item--info c-card__item--divider" {
-                "Erklärbär"
+        div class="o-grid o-grid--small-full o-grid--medium-full o-grid--large-fit" {
+            div class="o-grid__cell o-grid__cell--width-66" {
+                div class="c-card timeslots-card" {
+                    div class="c-card__item c-card__item--info c-card__item--divider" {
+                        "Erklärbär"
+                    }
+                    div class="c-card__item" {
+                        "Also, hör mal zu, ich erklär dir mal wie das geht."
+                    }
+                }
             }
-            div class="c-card__item" {
-                "Also, hör mal zu, ich erklär dir mal wie das geht."
-            }
-        }
 
-        div class="c-card prep-status-card u-higher" {
-            div class="c-card__item c-card__item--info c-card__item--divider" {
-                "Fortschritt"
-            }
-            div
-                class="c-card__item"
-            {
-                ul {
-                    li {
-                        b {
-                            "Anzahl '"
-                            (dict.timeslot_rating_good())
-                            "': "
-                        }
-                        span id="timeslots-num-good" (num_good)
+            div class="o-grid__cell o-grid__cell--width-33" {
+                div class="c-card timeslots-card" {
+                    div class="c-card__item c-card__item--info c-card__item--divider" {
+                        "Fortschritt"
                     }
-                    li {
-                        b {
-                            "Anzahl '"
-                            (dict.timeslot_rating_tolerable())
-                            "': "
+                    div class="c-card__item" {
+                        ul {
+                            li {
+                                b id="timeslots-num-good" (num_good)
+                                "x "
+                                i class={"fa " (SYMBOL_GOOD)} {}
+                                " (min. "
+                                (config::MIN_GOOD_SLOTS_STUDENT)
+                                ")"
+                            }
+                            li {
+                                b id="timeslots-num-ok" ((num_tolerable + num_good))
+                                "x ["
+                                i class={"fa " (SYMBOL_GOOD)} {}
+                                " + "
+                                i class={"fa " (SYMBOL_TOLERABLE)} {}
+                                "] (min. "
+                                (config::MIN_OK_SLOTS_STUDENT)
+                                ")"
+                            }
                         }
-                        span id="timeslots-num-tolerable" (num_tolerable)
-                    }
-                    li style="display: none;" {
-                        b {
-                            "Anzahl '"
-                            (dict.timeslot_rating_bad())
-                            "': "
+
+                        div
+                            id="timeslots-progress"
+                            class="c-progress"
+                            data-num-good=(num_good)
+                            data-num-tolerable=(num_tolerable)
+                            data-num-bad=(num_bad)
+                        {
+                            div
+                                class="c-progress__bar"
+                                style="width:10%;"
+                                {}
                         }
-                        span id="timeslots-num-bad" (num_bad)
                     }
                 }
             }
