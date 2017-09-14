@@ -106,13 +106,13 @@ pub fn set_general_settings(
                     Some(ref u) => {
                         return Ok(Flash::error(
                             Redirect::to("/prep"),
-                            dict.flash_partner_not_a_student(u.username()),
+                            dict.flash_err_partner_not_a_student(u.username()),
                         ));
                     }
                     None => {
                         return Ok(Flash::error(
                             Redirect::to("/prep"),
-                            dict.flash_user_not_found(),
+                            dict.flash_err_user_not_found(),
                         ));
                     }
                 }

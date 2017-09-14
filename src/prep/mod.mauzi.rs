@@ -103,14 +103,31 @@ unit flash_success_storing_preferences {
     De => "Die Einstellungen wurden erfolgreich gespeichert.",
 }
 
-unit flash_partner_not_a_student(username: &str) {
+unit flash_err_partner_not_a_student(username: &str) {
     De => "Der angegebene Nutzer '{username}' ist kein Student.",
 }
 
-unit flash_user_not_found {
+unit flash_err_user_not_found {
     De => "Der angegebene Nutzer existiert nicht in der Datenbank. Hinweis: \
            dein Partner muss sich einmal auf dieser Website eingeloggt haben, \
            damit du ihn/sie als gewünschten Partner angegeben kannst!"
+}
+
+// ===========================================================================
+// Timeslot ratings
+// ===========================================================================
+unit timeslot_rating_good {
+    De => "Passt",
+}
+unit timeslot_rating_tolerable {
+    De => "Ungern",
+}
+unit timeslot_rating_bad {
+    De => "Passt nicht",
+}
+
+unit save_timeslot_ratings {
+    De => "Zeitslots speichern"
 }
 
 

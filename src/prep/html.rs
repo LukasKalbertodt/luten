@@ -166,6 +166,8 @@ pub fn student_overview(
 }
 
 pub fn student_timeslots(slots: &[(TimeSlot, Rating)], locale: Locale) -> Markup {
+    let dict = dict::new(locale).prep;
+
     html! {
         div class="c-card prep-status-card u-higher" {
             div class="c-card__item c-card__item--info c-card__item--divider" {
@@ -182,7 +184,8 @@ pub fn student_timeslots(slots: &[(TimeSlot, Rating)], locale: Locale) -> Markup
             (timeslot_list(slots, locale, timeslot_rating))
 
             input
-                class="c-button c-button--success u-large c-button--block"
+                class="c-button c-button--success u-large timeslots-submit"
+                value=(dict.save_timeslot_ratings())
                 type="submit"
                 {}
         }
@@ -230,8 +233,10 @@ pub fn timeslot_list<F, D>(slots: &[(TimeSlot, D)], locale: Locale, mut slot_for
     }
 }
 
-pub fn timeslot_rating(slot: Option<(TimeSlot, &Rating)>, _locale: Locale) -> Markup {
+pub fn timeslot_rating(slot: Option<(TimeSlot, &Rating)>, locale: Locale) -> Markup {
     if let Some((slot, &rating)) = slot {
+        let dict = dict::new(locale).prep;
+
         let name = format!("slot-{}", slot.id());
         let id_good = format!("slot-pref-{}-good", slot.id());
         let id_tolerable = format!("slot-pref-{}-tolerable", slot.id());
@@ -248,7 +253,10 @@ pub fn timeslot_rating(slot: Option<(TimeSlot, &Rating)>, _locale: Locale) -> Ma
                     value="good"
                     class="timeslots-rating"
                     checked?[rating == Rating::Good];
-                label for=(id_good) class="c-button c-button--ghost-success" "Passt"
+                label
+                    for=(id_good)
+                    class="c-button c-button--ghost-success"
+                    (dict.timeslot_rating_good())
 
                 input
                     type="radio"
@@ -257,7 +265,10 @@ pub fn timeslot_rating(slot: Option<(TimeSlot, &Rating)>, _locale: Locale) -> Ma
                     value="tolerable"
                     class="timeslots-rating"
                     checked?[rating == Rating::Tolerable];
-                label for=(id_tolerable) class="c-button c-button--ghost-warning" "Ungern"
+                label
+                    for=(id_tolerable)
+                    class="c-button c-button--ghost-warning"
+                    (dict.timeslot_rating_tolerable())
 
                 input
                     type="radio"
@@ -266,7 +277,10 @@ pub fn timeslot_rating(slot: Option<(TimeSlot, &Rating)>, _locale: Locale) -> Ma
                     value="bad"
                     class="timeslots-rating"
                     checked?[rating == Rating::Bad];
-                label for=(id_bad) class="c-button c-button--ghost-error" "Passt nicht"
+                label
+                    for=(id_bad)
+                    class="c-button c-button--ghost-error"
+                    (dict.timeslot_rating_bad())
             }
         }
     } else {
