@@ -24,5 +24,3 @@ create table timeslot_ratings (
 
     primary key (user_id, timeslot_id)
 );
-
-
