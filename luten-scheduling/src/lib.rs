@@ -8,44 +8,6 @@ use std::collections::HashSet;
 
 use types::*;
 
-#[derive(Clone, PartialEq, Eq, Debug)]
-pub enum Team {
-    Single(Student),
-    Full(Student, Student),
-}
-
-impl Team {
-    fn all_students<F>(&self, mut f: F) -> bool where
-        F: FnMut(&Student) -> bool,
-    {
-        match *self {
-            Team::Single(ref s) => f(s),
-            Team::Full(ref s1, ref s2) => f(s1) && f(s2),
-        }
-    }
-
-    fn contains(&self, s: &Student) -> bool {
-        match *self {
-            Team::Single(ref s1) => s1 == s,
-            Team::Full(ref s1, ref s2) => s1 == s || s2 == s,
-        }
-    }
-}
-
-#[derive(Clone, PartialEq, Debug)]
-pub struct Testat {
-    slot: Timeslot,
-    tutor: Tutor,
-    team: Team,
-}
-
-#[derive(Clone, PartialEq, Debug)]
-pub struct Solution {
-    testats: Vec<Testat>,
-}
-
-
-
 pub fn solve(_instance: &Instance) -> Solution {
     unimplemented!()
 }

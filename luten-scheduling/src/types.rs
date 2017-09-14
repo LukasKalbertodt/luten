@@ -77,3 +77,39 @@ pub struct Instance {
     pub students: Vec<Student>,
     pub tutors: Vec<Tutor>,
 }
+
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub enum Team {
+    Single(Student),
+    Full(Student, Student),
+}
+
+impl Team {
+    pub fn all_students<F>(&self, mut f: F) -> bool where
+        F: FnMut(&Student) -> bool,
+    {
+        match *self {
+            Team::Single(ref s) => f(s),
+            Team::Full(ref s1, ref s2) => f(s1) && f(s2),
+        }
+    }
+
+    pub fn contains(&self, s: &Student) -> bool {
+        match *self {
+            Team::Single(ref s1) => s1 == s,
+            Team::Full(ref s1, ref s2) => s1 == s || s2 == s,
+        }
+    }
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub struct Testat {
+    pub slot: Timeslot,
+    pub tutor: Tutor,
+    pub team: Team,
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub struct Solution {
+    pub testats: Vec<Testat>,
+}
