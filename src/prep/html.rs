@@ -168,6 +168,17 @@ pub fn student_overview(
 pub fn student_timeslots(slots: &[(TimeSlot, Rating)], locale: Locale) -> Markup {
     let dict = dict::new(locale).prep;
 
+    let mut num_good = 0;
+    let mut num_tolerable = 0;
+    let mut num_bad = 0;
+    for &(_, rating) in slots {
+        match rating {
+            Rating::Good => num_good += 1,
+            Rating::Tolerable => num_tolerable += 1,
+            Rating::Bad => num_bad += 1,
+        }
+    }
+
     html! {
         div class="c-card prep-status-card u-higher" {
             div class="c-card__item c-card__item--info c-card__item--divider" {
@@ -175,6 +186,42 @@ pub fn student_timeslots(slots: &[(TimeSlot, Rating)], locale: Locale) -> Markup
             }
             div class="c-card__item" {
                 "Also, hör mal zu, ich erklär dir mal wie das geht."
+            }
+        }
+
+        div class="c-card prep-status-card u-higher" {
+            div class="c-card__item c-card__item--info c-card__item--divider" {
+                "Fortschritt"
+            }
+            div
+                class="c-card__item"
+            {
+                ul {
+                    li {
+                        b {
+                            "Anzahl '"
+                            (dict.timeslot_rating_good())
+                            "': "
+                        }
+                        span id="timeslots-num-good" (num_good)
+                    }
+                    li {
+                        b {
+                            "Anzahl '"
+                            (dict.timeslot_rating_tolerable())
+                            "': "
+                        }
+                        span id="timeslots-num-tolerable" (num_tolerable)
+                    }
+                    li style="display: none;" {
+                        b {
+                            "Anzahl '"
+                            (dict.timeslot_rating_bad())
+                            "': "
+                        }
+                        span id="timeslots-num-bad" (num_bad)
+                    }
+                }
             }
         }
 
