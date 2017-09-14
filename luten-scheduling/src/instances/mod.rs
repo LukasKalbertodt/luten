@@ -24,13 +24,9 @@ macro_rules! instance {
 
         $(
             {
-                let (good, tolerable): (Vec<Timeslot>, Vec<Timeslot>) = instance! {
-                    @parse_timeslots $( $tutor_slots )*
-                };
-
                 tutors.push(Tutor {
                     name: $tname.into(),
-                    slot_assignment: SlotAssignment::new(&good, &tolerable),
+                    slot_assignment: instance!( @parse_timeslots $( $tutor_slots )* ),
                     scale_factor: $scale,
                 });
             }
@@ -40,13 +36,9 @@ macro_rules! instance {
 
         $(
             {
-                let (good, tolerable): (Vec<Timeslot>, Vec<Timeslot>) = instance! {
-                    @parse_timeslots $( $student_slots )*
-                };
-
                 students.push(Student {
                     name: $sname.into(),
-                    slot_assignment: SlotAssignment::new(&good, &tolerable),
+                    slot_assignment: instance!( @parse_timeslots $( $student_slots )* ),
                     partner: $partner.map(|s: &'static str| s.to_string()),
                 });
             }
@@ -78,7 +70,7 @@ macro_rules! instance {
             }
         )*
 
-        (good, tolerable)
+        SlotAssignment::new(&good, &tolerable)
     }}
 }
 
