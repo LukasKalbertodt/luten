@@ -10,9 +10,10 @@ pub mod routes;
 
 
 use db::Db;
-use db::schema::prep_student_preferences;
+use db::schema::{prep_student_preferences, timeslots, timeslot_ratings};
 use errors::*;
-use user::Student;
+use timeslot::{Rating, TimeSlot};
+use user::{Student, User};
 
 
 /// Preferences by a student, set by the student during the preparation state.
@@ -82,5 +83,84 @@ impl StudentPreferences {
                 }
             })
             .chain_err(|| "failed to update student prep preferences")
+    }
+}
+
+#[derive(Debug, Clone, Copy, Identifiable, Insertable, Queryable)]
+#[table_name = "timeslot_ratings"]
+#[primary_key(user_id, timeslot_id)]
+pub struct TimeSlotRating {
+    user_id: i64,
+    timeslot_id: i16,
+    rating: Rating,
+}
+
+impl TimeSlotRating {
+    /// Loads a specific rating of a given user and a given timeslot.
+    pub fn load(user: &User, timeslot_id: i16, db: &Db) -> Result<Option<(TimeSlot, Rating)>> {
+        timeslot_ratings::table.find((user.id(), timeslot_id))
+            .inner_join(timeslots::table)
+            .get_result::<(Self, TimeSlot)>(&*db.conn()?)
+            .optional()
+            .chain_err(|| "failed to load timeslot rating from DB")
+            .map(|opt| opt.map(|(r, slot)| (slot, r.rating)))
+    }
+
+    /// Loads all ratings of the given user.
+    pub fn load_all_of_user(user: &User, db: &Db) -> Result<Vec<(TimeSlot, Rating)>> {
+        timeslot_ratings::table
+            .filter(timeslot_ratings::columns::user_id.eq(user.id()))
+            .inner_join(timeslots::table)
+            .get_results::<(Self, TimeSlot)>(&*db.conn()?)
+            .map(|res| {
+                res.into_iter()
+                    .map(|(r, slot)| (slot, r.rating))
+                    .collect()
+            })
+            .chain_err(|| "failed to load timeslot ratings for a user from DB")
+    }
+
+    /// Inserts a "Bad" rating for all existing timeslots for which the given
+    /// user has no rating yet. Returns `true` if at least one rating was
+    /// inserted, `false` otherwise.
+    pub fn create_defaults_for_user(user: &User, db: &Db) -> Result<bool> {
+        // First, find all timeslots for which the given user has no rating...
+        let new_ratings: Vec<_> = timeslots::table
+            .left_join(timeslot_ratings::table)
+            .filter(timeslot_ratings::columns::rating.is_null())
+            .select(timeslots::columns::id)
+            // ... next, create a list of new ratings from the list of timeslot
+            // ids.
+            .load::<i16>(&*db.conn()?)?
+            .into_iter()
+            .map(|timeslot_id| {
+                TimeSlotRating {
+                    user_id: user.id(),
+                    timeslot_id,
+                    rating: Rating::Bad,
+                }
+            })
+            .collect();
+
+        // Insert this list into the database.
+        diesel::insert(&new_ratings)
+            .into(timeslot_ratings::table)
+            .execute(&*db.conn()?)
+            .map(|insert_count| insert_count > 0)
+            .chain_err(|| "failed to insert timeslot ratings into DB")
+    }
+
+    /// Updates all given timeslots with the given ratings.
+    pub fn update_all(user: &User, ratings: &[(i16, Rating)], db: &Db) -> Result<()> {
+        // Yeah, we execute one query per time slot here... Maybe we should
+        // change this.
+        let conn = &*db.conn()?;
+        for &(slot_id, rating) in ratings {
+            diesel::update(timeslot_ratings::table.find((user.id(), slot_id)))
+                .set(timeslot_ratings::columns::rating.eq(rating))
+                .execute(conn)?;
+        }
+
+        Ok(())
     }
 }
