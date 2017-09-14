@@ -4,6 +4,7 @@ use rocket::request::{Form, FormItems, FromForm};
 use option_filter::OptionFilterExt;
 
 use super::{html, StudentPreferences, TimeSlotRating};
+use config;
 use db::Db;
 use dict::{self, Locale};
 use errors::*;
@@ -167,8 +168,28 @@ pub fn timeslots(
     };
 
     match auth_user.role() {
-        Role::Student => {
-            let content = html::student_timeslots(&ratings, locale);
+        Role::Student | Role::Tutor => {
+            let (explanation, min_good, min_ok) = match auth_user.role() {
+                Role::Student => (
+                    dict.timeslots_student_explanation(),
+                    config::MIN_GOOD_SLOTS_STUDENT,
+                    config::MIN_OK_SLOTS_STUDENT,
+                ),
+                Role::Tutor => (
+                    dict.timeslots_tutor_explanation(),
+                    config::MIN_GOOD_SLOTS_TUTOR,
+                    config::MIN_OK_SLOTS_TUTOR,
+                ),
+                _ => unreachable!(),
+            };
+
+            let content = html::timeslots(
+                &explanation,
+                min_good,
+                min_ok,
+                &ratings,
+                locale,
+            );
 
             Page::empty()
                 .with_title(dict.timeslots_title())
@@ -176,9 +197,6 @@ pub fn timeslots(
                 .with_active_nav_route("/prep/timeslots")
                 .with_content(content)
                 .make_ok()
-        }
-        Role::Tutor => {
-            Page::unimplemented().make_ok()
         }
         Role::Admin => {
             Page::unimplemented().make_ok()

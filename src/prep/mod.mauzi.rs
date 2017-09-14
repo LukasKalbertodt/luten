@@ -119,8 +119,11 @@ unit flash_err_user_not_found {
 unit save_timeslot_ratings {
     De => "Zeitslots speichern"
 }
-unit timeslots_explanation {
+unit timeslots_student_explanation {
     De => "Also, hör mal zu, ich erklär dir mal wie das geht.",
+}
+unit timeslots_tutor_explanation {
+    De => "Hallo Tutor",
 }
 unit progress_title {
     De => "Fortschritt",

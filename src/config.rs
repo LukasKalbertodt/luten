@@ -33,13 +33,23 @@ lazy_static! {
     ];
 }
 
-/// The minimum number of timeslots a student has to rate as "good" before his
-/// rating is accepted.
+/// The minimum number of timeslots a student has to rate as "good" before
+/// their rating is accepted.
 pub const MIN_GOOD_SLOTS_STUDENT: u64 = 2;
 
 /// The minimum number of timeslots a student has to rate as "good" or
-/// "tolerable" before his rating is accepted.
+/// "tolerable" before their rating is accepted.
 pub const MIN_OK_SLOTS_STUDENT: u64 = 5;
+
+/// The minimum number of timeslots a tutor has to rate as "good" before  their
+/// rating is accepted. This number needs to be multiplied with the job
+/// multiplier of the tutor!
+pub const MIN_GOOD_SLOTS_TUTOR: u64 = 11;
+
+/// The minimum number of timeslots a tutor has to rate as "good" or
+/// "tolerable" before  their rating is accepted. This number needs to be
+/// multiplied with the job multiplier of the tutor!
+pub const MIN_OK_SLOTS_TUTOR: u64 = 14;
 
 
 

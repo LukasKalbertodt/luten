@@ -2,7 +2,6 @@ use maud::{html, Markup};
 
 
 use super::StudentPreferences;
-use config;
 use dict::{self, Locale};
 use user::Student;
 use timeslot::{Rating, TimeSlot};
@@ -169,7 +168,13 @@ pub fn student_overview(
     }
 }
 
-pub fn student_timeslots(slots: &[(TimeSlot, Rating)], locale: Locale) -> Markup {
+pub fn timeslots(
+    explanation: &str,
+    min_good: u64,
+    min_ok: u64,
+    slots: &[(TimeSlot, Rating)],
+    locale: Locale,
+) -> Markup {
     let dict = dict::new(locale).prep;
 
     let mut num_good = 0;
@@ -190,9 +195,7 @@ pub fn student_timeslots(slots: &[(TimeSlot, Rating)], locale: Locale) -> Markup
                     div class="c-card__item c-card__item--info c-card__item--divider" {
                         (dict.hints_title())
                     }
-                    div class="c-card__item" {
-                        (dict.timeslots_explanation())
-                    }
+                    div class="c-card__item" (explanation)
                 }
             }
 
@@ -208,7 +211,7 @@ pub fn student_timeslots(slots: &[(TimeSlot, Rating)], locale: Locale) -> Markup
                                 "x "
                                 i class={"fa " (SYMBOL_GOOD)} {}
                                 " ("
-                                (dict.at_least(config::MIN_GOOD_SLOTS_STUDENT))
+                                (dict.at_least(min_good))
                                 ")"
                             }
                             li {
@@ -218,7 +221,7 @@ pub fn student_timeslots(slots: &[(TimeSlot, Rating)], locale: Locale) -> Markup
                                 " + "
                                 i class={"fa " (SYMBOL_TOLERABLE)} {}
                                 "] ("
-                                (dict.at_least(config::MIN_OK_SLOTS_STUDENT))
+                                (dict.at_least(min_ok))
                                 ")"
                             }
                         }
