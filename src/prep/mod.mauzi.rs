@@ -116,18 +116,21 @@ unit flash_err_user_not_found {
 // ===========================================================================
 // Timeslot ratings
 // ===========================================================================
-unit timeslot_rating_good {
-    De => "Passt",
-}
-unit timeslot_rating_tolerable {
-    De => "Ungern",
-}
-unit timeslot_rating_bad {
-    De => "Passt nicht",
-}
-
 unit save_timeslot_ratings {
     De => "Zeitslots speichern"
+}
+unit timeslots_explanation {
+    De => "Also, hör mal zu, ich erklär dir mal wie das geht.",
+}
+unit progress_title {
+    De => "Fortschritt",
+}
+unit timeslots_headline {
+    De => "Zeitslots",
+}
+
+unit at_least(n: u64) {
+    _ => "min. {n}",
 }
 
 

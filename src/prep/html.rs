@@ -188,10 +188,10 @@ pub fn student_timeslots(slots: &[(TimeSlot, Rating)], locale: Locale) -> Markup
             div class="o-grid__cell o-grid__cell--width-66" {
                 div class="c-card timeslots-card" {
                     div class="c-card__item c-card__item--info c-card__item--divider" {
-                        "Erklärbär"
+                        (dict.hints_title())
                     }
                     div class="c-card__item" {
-                        "Also, hör mal zu, ich erklär dir mal wie das geht."
+                        (dict.timeslots_explanation())
                     }
                 }
             }
@@ -199,7 +199,7 @@ pub fn student_timeslots(slots: &[(TimeSlot, Rating)], locale: Locale) -> Markup
             div class="o-grid__cell o-grid__cell--width-33" {
                 div class="c-card timeslots-card" {
                     div class="c-card__item c-card__item--info c-card__item--divider" {
-                        "Fortschritt"
+                        (dict.progress_title())
                     }
                     div class="c-card__item" {
                         ul {
@@ -207,8 +207,8 @@ pub fn student_timeslots(slots: &[(TimeSlot, Rating)], locale: Locale) -> Markup
                                 b id="timeslots-num-good" (num_good)
                                 "x "
                                 i class={"fa " (SYMBOL_GOOD)} {}
-                                " (min. "
-                                (config::MIN_GOOD_SLOTS_STUDENT)
+                                " ("
+                                (dict.at_least(config::MIN_GOOD_SLOTS_STUDENT))
                                 ")"
                             }
                             li {
@@ -217,8 +217,8 @@ pub fn student_timeslots(slots: &[(TimeSlot, Rating)], locale: Locale) -> Markup
                                 i class={"fa " (SYMBOL_GOOD)} {}
                                 " + "
                                 i class={"fa " (SYMBOL_TOLERABLE)} {}
-                                "] (min. "
-                                (config::MIN_OK_SLOTS_STUDENT)
+                                "] ("
+                                (dict.at_least(config::MIN_OK_SLOTS_STUDENT))
                                 ")"
                             }
                         }
@@ -240,7 +240,7 @@ pub fn student_timeslots(slots: &[(TimeSlot, Rating)], locale: Locale) -> Markup
             }
         }
 
-        h1 class="c-heading" "Zeitslots"
+        h1 class="c-heading" (dict.timeslots_headline())
 
         form action="/prep/update_timeslots" method="post" id="timeslots-form" {
             (timeslot_list(slots, locale, timeslot_rating))
