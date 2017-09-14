@@ -255,7 +255,7 @@ pub fn student_timeslots(slots: &[(TimeSlot, Rating)], locale: Locale) -> Markup
 }
 
 pub fn timeslot_list<F, D>(slots: &[(TimeSlot, D)], locale: Locale, mut slot_formatter: F) -> Markup
-    where F: FnMut(Option<(TimeSlot, &D)>, Locale) -> Markup
+    where F: FnMut(Option<(TimeSlot, &D)>) -> Markup
 {
     use std::collections::BTreeMap;
 
@@ -287,7 +287,7 @@ pub fn timeslot_list<F, D>(slots: &[(TimeSlot, D)], locale: Locale, mut slot_for
                 div class="timeslots-grid-cell" {
                     h3 class="heading" (day.full_name(locale))
                     @for slot in slots {
-                        (slot_formatter(slot, locale))
+                        (slot_formatter(slot))
                     }
                 }
             }
@@ -295,10 +295,8 @@ pub fn timeslot_list<F, D>(slots: &[(TimeSlot, D)], locale: Locale, mut slot_for
     }
 }
 
-pub fn timeslot_rating(slot: Option<(TimeSlot, &Rating)>, locale: Locale) -> Markup {
+pub fn timeslot_rating(slot: Option<(TimeSlot, &Rating)>) -> Markup {
     if let Some((slot, &rating)) = slot {
-        let dict = dict::new(locale).prep;
-
         let name = format!("slot-{}", slot.id());
         let id_good = format!("slot-pref-{}-good", slot.id());
         let id_tolerable = format!("slot-pref-{}-tolerable", slot.id());
