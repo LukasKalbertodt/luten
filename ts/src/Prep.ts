@@ -1,3 +1,5 @@
+import { doOnDOMReady } from './Internal'
+
 const FETCH_TIMEOUT = 500;
 
 let timeoutHandle: number;
