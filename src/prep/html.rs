@@ -6,6 +6,9 @@ use dict::{self, Locale};
 use user::Student;
 use timeslot::{Rating, TimeSlot};
 
+const SYMBOL_GOOD: &str = "fa-thumbs-up";
+const SYMBOL_TOLERABLE: &str = "fa-meh-o";
+const SYMBOL_BAD: &str = "fa-thumbs-down";
 
 
 pub fn student_overview(
@@ -302,8 +305,8 @@ pub fn timeslot_rating(slot: Option<(TimeSlot, &Rating)>, locale: Locale) -> Mar
                     checked?[rating == Rating::Good];
                 label
                     for=(id_good)
-                    class="c-button c-button--ghost-success"
-                    (dict.timeslot_rating_good())
+                    class={"c-button c-button--ghost-success fa " (SYMBOL_GOOD)}
+                    {}
 
                 input
                     type="radio"
@@ -314,8 +317,8 @@ pub fn timeslot_rating(slot: Option<(TimeSlot, &Rating)>, locale: Locale) -> Mar
                     checked?[rating == Rating::Tolerable];
                 label
                     for=(id_tolerable)
-                    class="c-button c-button--ghost-warning"
-                    (dict.timeslot_rating_tolerable())
+                    class={"c-button c-button--ghost-warning fa " (SYMBOL_TOLERABLE)}
+                    {}
 
                 input
                     type="radio"
@@ -326,8 +329,8 @@ pub fn timeslot_rating(slot: Option<(TimeSlot, &Rating)>, locale: Locale) -> Mar
                     checked?[rating == Rating::Bad];
                 label
                     for=(id_bad)
-                    class="c-button c-button--ghost-error"
-                    (dict.timeslot_rating_bad())
+                    class={"c-button c-button--ghost-error fa " (SYMBOL_BAD)}
+                    {}
             }
         }
     } else {
