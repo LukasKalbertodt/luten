@@ -167,6 +167,15 @@ impl TimeSlot {
             })
     }
 
+    /// Counts the number of timeslots in the database.
+    pub fn count(db: &Db) -> Result<u64> {
+        timeslots::table
+            .count()
+            .get_result::<i64>(&*db.conn()?)
+            .chain_err(|| "failed to count number of timeslots in DB")
+            .map(|count| count as u64)
+    }
+
     /// Deletes the timeslot with the given id from the database. Returns
     /// `true` if it has been deleted, `false` otherwise (which probably means
     /// the the id wasn't found).
