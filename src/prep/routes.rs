@@ -11,7 +11,7 @@ use errors::*;
 use state::PreparationState;
 use template::{NavItem, Page};
 use user::{AuthUser, Role, User};
-use timeslot::{Rating, TimeSlot};
+use timeslot::Rating;
 
 
 fn nav_items(locale: Locale) -> Vec<NavItem> {
@@ -153,19 +153,8 @@ pub fn timeslots(
 ) -> Result<Page> {
     let dict = dict::new(locale).prep;
 
-    // Load all ratings of the user. We check if the user has a rating for each
-    // existing timeslot, otherwise we create default entries.
-    // TODO: Actually, this shouldn't be necessary: one user creation, default
-    // entries are created. The following code is only useful if timeslots are
-    // added after users are created.
-    let ratings = {
-        let mut ratings = TimeSlotRating::load_all_of_user(&auth_user, &db)?;
-        if ratings.len() as u64 != TimeSlot::count(&db)? {
-            TimeSlotRating::create_defaults_for_user(&auth_user, &db)?;
-            ratings = TimeSlotRating::load_all_of_user(&auth_user, &db)?;
-        }
-        ratings
-    };
+    // Load all ratings of the user.
+    let ratings = TimeSlotRating::load_all_of_user(&auth_user, &db)?;
 
     match auth_user.role() {
         Role::Student | Role::Tutor => {
