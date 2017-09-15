@@ -179,6 +179,7 @@ pub fn tutor_admin_overview(
     locale: Locale,
     is_tutor: bool,
     stats: TutorAdminStats,
+    tutors: &[(String, Option<String>, i64, i64)],
 ) -> Markup {
     let dict = dict::new(locale).prep;
 
@@ -212,6 +213,27 @@ pub fn tutor_admin_overview(
             li {
                 "Durchschnittliche Anzahl von Termin pro Student, die als 'Gut' markiert wurden: "
                 b (stats.avg_good_rating_per_student)
+            }
+        }
+
+        h2 "Tutoren"
+
+        table class="c-table" {
+            thead class="c-table__head" {
+                tr class="c-table__row c-table__row--heading" {
+                    th class="c-table__cell" "Name"
+                    th class="c-table__cell" "Anzahl 'Gut'"
+                    th class="c-table__cell" "Anzahl 'Ok'"
+                }
+            }
+            tbody class="c-table__body" {
+                @for &(ref username, ref name, num_good, num_ok) in tutors {
+                    tr class="c-table__row" {
+                        td class="c-table__cell" (name.as_ref().unwrap_or(username))
+                        td class="c-table__cell" (num_good)
+                        td class="c-table__cell" (num_ok)
+                    }
+                }
             }
         }
     }

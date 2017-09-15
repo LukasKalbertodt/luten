@@ -57,13 +57,12 @@ pub fn overview(
 
         // ===== Tutor or admin ===============================================
         Role::Tutor | Role::Admin => {
+            use diesel::prelude::*;
+            use diesel::expression::sql;
+            use db::schema::{timeslot_ratings, users};
+
+            let conn = &*db.conn()?;
             let stats = {
-                use diesel::prelude::*;
-                use diesel::expression::sql;
-                use db::schema::{timeslot_ratings, users};
-
-                let conn = &*db.conn()?;
-
                 let num_students = users::table
                     .filter(sql("role = 'student'"))
                     .count()
@@ -106,10 +105,23 @@ pub fn overview(
                 }
             };
 
+            let tutors = users::table
+                .inner_join(timeslot_ratings::table)
+                .filter(sql("role = 'tutor'"))
+                .group_by(users::columns::id)
+                .select(sql("
+                    username,
+                    name,
+                    sum(case when rating='good' then 1 else 0 end) as num_good,
+                    sum(case when rating<>'bad' then 1 else 0 end) as num_ok
+                "))
+                .load::<(String, Option<String>, i64, i64)>(conn)?;
+
             let content = html::tutor_admin_overview(
                 locale,
                 auth_user.is_tutor(),
                 stats,
+                &tutors,
             );
 
             Page::empty()
