@@ -75,11 +75,34 @@ pub fn overview(
                     .select(sql("count(distinct user_id) as count"))
                     .get_result::<i64>(conn)?;
 
+
+                let avg_good_rating_per_student = sql("
+                    select cast(avg(count) as float) from (
+                        select count(*) as count, user_id
+                        from timeslot_ratings
+                        inner join users
+                            on users.id = user_id
+                        where rating = 'good' and role = 'student'
+                        group by user_id
+                    ) as counts
+                ").get_result::<f64>(conn)?;
+
+                let avg_ok_rating_per_student = sql("
+                    select cast(avg(count) as float) from (
+                        select count(*) as count, user_id
+                        from timeslot_ratings
+                        inner join users
+                            on users.id = user_id
+                        where rating <> 'bad' and role = 'student'
+                        group by user_id
+                    ) as counts
+                ").get_result::<f64>(conn)?;
+
                 html::TutorAdminStats {
                     num_students: num_students as u64,
                     num_students_with_slots: num_students_with_slots as u64,
-                    avg_ok_rating_per_student: 0.0,
-                    avg_good_rating_per_student: 0.0,
+                    avg_good_rating_per_student,
+                    avg_ok_rating_per_student,
                 }
             };
 
