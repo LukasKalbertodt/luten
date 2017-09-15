@@ -37,6 +37,14 @@ unit explanation_for_students {
            Partner-Präferenzen angeben.",
 }
 
+unit explanation_for_tutors -> Markup {
+    De => { html! {
+        "Hallo, bitte "
+        a href="/prep/timeslots" "hier"
+        " Termine eintragen!"
+    }},
+}
+
 unit student_status(timeslot_status: Markup, partner: Markup, lang: Markup) -> Markup {
     De => { html! {
         b "Dein Status:"

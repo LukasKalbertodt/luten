@@ -168,6 +168,55 @@ pub fn student_overview(
     }
 }
 
+pub struct TutorAdminStats {
+    pub num_students: u64,
+    pub num_students_with_slots: u64,
+    pub avg_ok_rating_per_student: f64,
+    pub avg_good_rating_per_student: f64,
+}
+
+pub fn tutor_admin_overview(
+    locale: Locale,
+    is_tutor: bool,
+    stats: TutorAdminStats,
+) -> Markup {
+    let dict = dict::new(locale).prep;
+
+    html! {
+        @if is_tutor {
+            div class="c-card prep-status-card u-higher" {
+                div class="c-card__item c-card__item--info c-card__item--divider" {
+                    (dict.explanation_box_title())
+                }
+                div class="c-card__item" {
+                    p (dict.explanation_for_tutors())
+                }
+            }
+        }
+
+        h1 (dict.overview_title())
+
+        ul {
+            li {
+                "Angemeldete Studenten: "
+                b (stats.num_students)
+            }
+            li {
+                "Anzahl Studenten mit eingetragenen Terminen: "
+                b (stats.num_students_with_slots)
+            }
+            li {
+                "Durchschnittliche Anzahl von Termin pro Student, die als 'OK' markiert wurden: "
+                b (stats.avg_ok_rating_per_student)
+            }
+            li {
+                "Durchschnittliche Anzahl von Termin pro Student, die als 'Gut' markiert wurden: "
+                b (stats.avg_good_rating_per_student)
+            }
+        }
+    }
+}
+
 pub fn timeslots(
     explanation: &str,
     min_good: u64,

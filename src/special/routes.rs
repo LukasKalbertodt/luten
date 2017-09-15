@@ -21,7 +21,7 @@ pub fn index(auth_user: AuthUser, db: State<Db>) -> Result<StdResult<Redirect, P
     // Redirect to the correct route depending on user role and app state.
     match (auth_user.role(), app_state.state) {
         // Preparation state
-        (Role::Student, AppState::Preparation) => Ok(Redirect::to("/prep")),
+        (_, AppState::Preparation) => Ok(Redirect::to("/prep")),
 
         // Frozen state: admins are redirected to the admin panel, all others
         // see a empty page with a flash bubble talking about the state.

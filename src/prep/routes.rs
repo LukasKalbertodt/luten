@@ -55,14 +55,45 @@ pub fn overview(
                 ))
         }
 
-        // ===== Tutor ========================================================
-        Role::Tutor => {
-            Page::unimplemented()
-        }
+        // ===== Tutor or admin ===============================================
+        Role::Tutor | Role::Admin => {
+            let stats = {
+                use diesel::prelude::*;
+                use diesel::expression::sql;
+                use db::schema::{timeslot_ratings, users};
 
-        // ===== Admin ========================================================
-        Role::Admin => {
-            Page::unimplemented()
+                let conn = &*db.conn()?;
+
+                let num_students = users::table
+                    .filter(sql("role = 'student'"))
+                    .count()
+                    .get_result::<i64>(conn)?;
+
+                let num_students_with_slots = users::table
+                    .inner_join(timeslot_ratings::table)
+                    .filter(sql("rating <> 'bad' AND role = 'student'"))
+                    .select(sql("count(distinct user_id) as count"))
+                    .get_result::<i64>(conn)?;
+
+                html::TutorAdminStats {
+                    num_students: num_students as u64,
+                    num_students_with_slots: num_students_with_slots as u64,
+                    avg_ok_rating_per_student: 0.0,
+                    avg_good_rating_per_student: 0.0,
+                }
+            };
+
+            let content = html::tutor_admin_overview(
+                locale,
+                auth_user.is_tutor(),
+                stats,
+            );
+
+            Page::empty()
+                .with_title(dict.overview_title())
+                .add_nav_items(nav_items(locale))
+                .with_active_nav_route("/prep")
+                .with_content(content)
         }
     }.make_ok()
 }
