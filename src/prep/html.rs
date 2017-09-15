@@ -168,6 +168,77 @@ pub fn student_overview(
     }
 }
 
+pub struct TutorAdminStats {
+    pub num_students: u64,
+    pub num_students_with_slots: u64,
+    pub avg_ok_rating_per_student: f64,
+    pub avg_good_rating_per_student: f64,
+}
+
+pub fn tutor_admin_overview(
+    locale: Locale,
+    is_tutor: bool,
+    stats: TutorAdminStats,
+    tutors: &[(String, Option<String>, i64, i64)],
+) -> Markup {
+    let dict = dict::new(locale).prep;
+
+    html! {
+        @if is_tutor {
+            div class="c-card prep-status-card u-higher" {
+                div class="c-card__item c-card__item--info c-card__item--divider" {
+                    (dict.explanation_box_title())
+                }
+                div class="c-card__item" {
+                    p (dict.explanation_for_tutors())
+                }
+            }
+        }
+
+        h1 (dict.overview_title())
+
+        ul {
+            li {
+                "Angemeldete Studenten: "
+                b (stats.num_students)
+            }
+            li {
+                "Anzahl Studenten mit eingetragenen Terminen: "
+                b (stats.num_students_with_slots)
+            }
+            li {
+                "Durchschnittliche Anzahl von Termin pro Student, die als 'OK' markiert wurden: "
+                b (stats.avg_ok_rating_per_student)
+            }
+            li {
+                "Durchschnittliche Anzahl von Termin pro Student, die als 'Gut' markiert wurden: "
+                b (stats.avg_good_rating_per_student)
+            }
+        }
+
+        h2 "Tutoren"
+
+        table class="c-table" {
+            thead class="c-table__head" {
+                tr class="c-table__row c-table__row--heading" {
+                    th class="c-table__cell" "Name"
+                    th class="c-table__cell" "Anzahl 'Gut'"
+                    th class="c-table__cell" "Anzahl 'Ok'"
+                }
+            }
+            tbody class="c-table__body" {
+                @for &(ref username, ref name, num_good, num_ok) in tutors {
+                    tr class="c-table__row" {
+                        td class="c-table__cell" (name.as_ref().unwrap_or(username))
+                        td class="c-table__cell" (num_good)
+                        td class="c-table__cell" (num_ok)
+                    }
+                }
+            }
+        }
+    }
+}
+
 pub fn timeslots(
     explanation: &str,
     min_good: u64,

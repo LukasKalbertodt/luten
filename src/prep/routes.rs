@@ -11,7 +11,7 @@ use errors::*;
 use state::PreparationState;
 use template::{NavItem, Page};
 use user::{AuthUser, Role, User};
-use timeslot::{Rating, TimeSlot};
+use timeslot::Rating;
 
 
 fn nav_items(locale: Locale) -> Vec<NavItem> {
@@ -55,14 +55,80 @@ pub fn overview(
                 ))
         }
 
-        // ===== Tutor ========================================================
-        Role::Tutor => {
-            Page::unimplemented()
-        }
+        // ===== Tutor or admin ===============================================
+        Role::Tutor | Role::Admin => {
+            use diesel::prelude::*;
+            use diesel::expression::sql;
+            use db::schema::{timeslot_ratings, users};
 
-        // ===== Admin ========================================================
-        Role::Admin => {
-            Page::unimplemented()
+            let conn = &*db.conn()?;
+            let stats = {
+                let num_students = users::table
+                    .filter(sql("role = 'student'"))
+                    .count()
+                    .get_result::<i64>(conn)?;
+
+                let num_students_with_slots = users::table
+                    .inner_join(timeslot_ratings::table)
+                    .filter(sql("rating <> 'bad' AND role = 'student'"))
+                    .select(sql("count(distinct user_id) as count"))
+                    .get_result::<i64>(conn)?;
+
+
+                let avg_good_rating_per_student = sql("
+                    select cast(avg(count) as float) from (
+                        select count(*) as count, user_id
+                        from timeslot_ratings
+                        inner join users
+                            on users.id = user_id
+                        where rating = 'good' and role = 'student'
+                        group by user_id
+                    ) as counts
+                ").get_result::<f64>(conn)?;
+
+                let avg_ok_rating_per_student = sql("
+                    select cast(avg(count) as float) from (
+                        select count(*) as count, user_id
+                        from timeslot_ratings
+                        inner join users
+                            on users.id = user_id
+                        where rating <> 'bad' and role = 'student'
+                        group by user_id
+                    ) as counts
+                ").get_result::<f64>(conn)?;
+
+                html::TutorAdminStats {
+                    num_students: num_students as u64,
+                    num_students_with_slots: num_students_with_slots as u64,
+                    avg_good_rating_per_student,
+                    avg_ok_rating_per_student,
+                }
+            };
+
+            let tutors = users::table
+                .inner_join(timeslot_ratings::table)
+                .filter(sql("role = 'tutor'"))
+                .group_by(users::columns::id)
+                .select(sql("
+                    username,
+                    name,
+                    sum(case when rating='good' then 1 else 0 end) as num_good,
+                    sum(case when rating<>'bad' then 1 else 0 end) as num_ok
+                "))
+                .load::<(String, Option<String>, i64, i64)>(conn)?;
+
+            let content = html::tutor_admin_overview(
+                locale,
+                auth_user.is_tutor(),
+                stats,
+                &tutors,
+            );
+
+            Page::empty()
+                .with_title(dict.overview_title())
+                .add_nav_items(nav_items(locale))
+                .with_active_nav_route("/prep")
+                .with_content(content)
         }
     }.make_ok()
 }
@@ -153,19 +219,8 @@ pub fn timeslots(
 ) -> Result<Page> {
     let dict = dict::new(locale).prep;
 
-    // Load all ratings of the user. We check if the user has a rating for each
-    // existing timeslot, otherwise we create default entries.
-    // TODO: Actually, this shouldn't be necessary: one user creation, default
-    // entries are created. The following code is only useful if timeslots are
-    // added after users are created.
-    let ratings = {
-        let mut ratings = TimeSlotRating::load_all_of_user(&auth_user, &db)?;
-        if ratings.len() as u64 != TimeSlot::count(&db)? {
-            TimeSlotRating::create_defaults_for_user(&auth_user, &db)?;
-            ratings = TimeSlotRating::load_all_of_user(&auth_user, &db)?;
-        }
-        ratings
-    };
+    // Load all ratings of the user.
+    let ratings = TimeSlotRating::load_all_of_user(&auth_user, &db)?;
 
     match auth_user.role() {
         Role::Student | Role::Tutor => {

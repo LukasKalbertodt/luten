@@ -108,41 +108,54 @@ impl TimeSlotRating {
 
     /// Loads all ratings of the given user.
     pub fn load_all_of_user(user: &User, db: &Db) -> Result<Vec<(TimeSlot, Rating)>> {
-        timeslot_ratings::table
+        let ratings: Vec<_> = timeslot_ratings::table
             .filter(timeslot_ratings::columns::user_id.eq(user.id()))
             .inner_join(timeslots::table)
-            .get_results::<(Self, TimeSlot)>(&*db.conn()?)
-            .map(|res| {
-                res.into_iter()
-                    .map(|(r, slot)| (slot, r.rating))
-                    .collect()
-            })
-            .chain_err(|| "failed to load timeslot ratings for a user from DB")
+            .get_results::<(Self, TimeSlot)>(&*db.conn()?)?
+            .into_iter()
+            .map(|(r, slot)| (slot, r.rating))
+            .collect();
+
+        //  We make sure the user has a rating for each existing timeslot: if
+        //  there are ratings missing, we create default entries. Actually,
+        //  this shouldn't be necessary: one user creation, default entries are
+        //  created. The following code is only useful if timeslots are added
+        //  after users are created.
+        if ratings.len() as u64 != TimeSlot::count(&db)? {
+            Self::create_defaults_for_user(&user, &db)?;
+            TimeSlotRating::load_all_of_user(&user, &db)
+        } else {
+            Ok(ratings)
+        }
     }
 
     /// Inserts a "Bad" rating for all existing timeslots for which the given
     /// user has no rating yet. Returns `true` if at least one rating was
     /// inserted, `false` otherwise.
     pub fn create_defaults_for_user(user: &User, db: &Db) -> Result<bool> {
-        // First, find all timeslots for which the given user has no rating...
-        let new_ratings: Vec<_> = timeslots::table
-            .left_join(timeslot_ratings::table)
-            .filter(timeslot_ratings::columns::rating.is_null())
-            .select(timeslots::columns::id)
-            // ... next, create a list of new ratings from the list of timeslot
-            // ids.
-            .load::<i16>(&*db.conn()?)?
-            .into_iter()
-            .map(|timeslot_id| {
+        // First, find all timeslots for which the given user has no rating by
+        // finding all timeslots and the slots for which the user has a
+        // rating...
+        let all_timeslots = TimeSlot::load_all(db)?;
+        let my_ratings = timeslot_ratings::table
+            .filter(timeslot_ratings::columns::user_id.eq(user.id()))
+            .select(timeslot_ratings::columns::timeslot_id)
+            .get_results::<i16>(&*db.conn()?)?;
+
+        // ... and then filter out those timeslots for which the user already
+        // has a rating (basically a naive set complement).
+        let new_ratings: Vec<_> = all_timeslots.into_iter()
+            .filter(|slot| !my_ratings.contains(&slot.id()))
+            .map(|slot| {
                 TimeSlotRating {
                     user_id: user.id(),
-                    timeslot_id,
+                    timeslot_id: slot.id(),
                     rating: Rating::Bad,
                 }
             })
             .collect();
 
-        // Insert this list into the database.
+        // Insert the list of new ratings into the database.
         diesel::insert(&new_ratings)
             .into(timeslot_ratings::table)
             .execute(&*db.conn()?)
